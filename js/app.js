@@ -1,4 +1,4 @@
-const APP_VERSION = 'v22-session-load-mobile-fix';
+const APP_VERSION = 'v23-initial-payments-load-fix';
 const SUPABASE_URL = 'https://qjicwqpjxsqynoudwylk.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_rl7m3zQsatLJL2Lb3yHPOg_nnCr712U';
 const PAYMENTS_TABLE = 'payments';
@@ -20,6 +20,8 @@ let payments = [];
 let activeFilter = 'all';
 let authMode = 'login';
 let initialLoadDone = false;
+let paymentsLoadTimer = null;
+let lastLoadedUserId = null;
 
 const els = {
   authScreen: document.querySelector('#authScreen'),
@@ -178,47 +180,60 @@ function bindEvents() {
 async function initAuth() {
   validateSupabaseConfig();
 
-  supabaseClient.auth.onAuthStateChange(async (event, session) => {
+  supabaseClient.auth.onAuthStateChange((event, session) => {
+    console.info(`ANCHR ${APP_VERSION}: auth event`, event, session?.user?.id || 'sin usuario');
     currentUser = session?.user || null;
     updateAuthUI();
 
     if (currentUser) {
-      await loadPayments('auth-change');
-      initialLoadDone = true;
+      schedulePaymentsLoad(`auth-${event}`, event === 'INITIAL_SESSION' ? 80 : 0);
     } else {
       initialLoadDone = false;
+      lastLoadedUserId = null;
       payments = [];
       render();
     }
   });
 
   await restoreSessionAndLoad('init');
-  setTimeout(() => restoreSessionAndLoad('boot-retry-300'), 300);
-  setTimeout(() => restoreSessionAndLoad('boot-retry-1200'), 1200);
+  schedulePaymentsLoad('boot-250', 250);
+  schedulePaymentsLoad('boot-1000', 1000);
+  schedulePaymentsLoad('boot-2500', 2500);
 
-  window.addEventListener('pageshow', () => restoreSessionAndLoad('pageshow'));
-  window.addEventListener('focus', () => restoreSessionAndLoad('focus'));
+  window.addEventListener('pageshow', () => schedulePaymentsLoad('pageshow', 0));
+  window.addEventListener('focus', () => schedulePaymentsLoad('focus', 0));
   document.addEventListener('visibilitychange', () => {
-    if (!document.hidden) restoreSessionAndLoad('visible');
+    if (!document.hidden) schedulePaymentsLoad('visible', 0);
   });
+}
+
+function schedulePaymentsLoad(source = 'scheduled', delay = 0) {
+  clearTimeout(paymentsLoadTimer);
+  paymentsLoadTimer = setTimeout(async () => {
+    await restoreSessionAndLoad(source);
+  }, delay);
 }
 
 async function restoreSessionAndLoad(source = 'manual') {
   try {
-    const { data: sessionData } = await supabaseClient.auth.getSession();
+    const { data: sessionData, error: sessionError } = await supabaseClient.auth.getSession();
+    if (sessionError) console.warn('No se pudo leer la sesión:', sessionError);
+
     currentUser = sessionData.session?.user || null;
 
     if (!currentUser) {
-      const { data: userData } = await supabaseClient.auth.getUser();
+      const { data: userData, error: userError } = await supabaseClient.auth.getUser();
+      if (userError) console.warn('No se pudo leer el usuario:', userError);
       currentUser = userData.user || null;
     }
 
     updateAuthUI();
 
     if (currentUser) {
-      console.info(`ANCHR ${APP_VERSION}: cargando pagos (${source})`);
+      console.info(`ANCHR ${APP_VERSION}: cargando pagos (${source})`, currentUser.id);
       await loadPayments(source);
       initialLoadDone = true;
+      lastLoadedUserId = currentUser.id;
     }
   } catch (error) {
     console.error('No se pudo restaurar la sesión:', error);
@@ -383,7 +398,7 @@ async function loadPayments(source = 'manual') {
   }
 
   payments = (data || []).map(fromDb);
-  console.info(`ANCHR ${APP_VERSION}: pagos cargados`, payments.length);
+  console.info(`ANCHR ${APP_VERSION}: pagos cargados (${source})`, payments.length, payments.map(item => item.name));
   render();
 }
 
