@@ -676,40 +676,58 @@ async function deletePayment(id) {
 
 function toggleMenu(event, id) {
   event?.stopPropagation?.();
+  const trigger = event?.currentTarget;
   const currentMenu = document.querySelector(`#menu-${id}`);
-  if (!currentMenu) return;
+  if (!currentMenu || !trigger) return;
 
   const willOpen = currentMenu.classList.contains('hidden');
+
   document.querySelectorAll('.row-menu').forEach(menu => {
     menu.classList.add('hidden');
-    menu.classList.remove('open-up');
+    menu.classList.remove('open-up', 'floating-row-menu');
     menu.removeAttribute('style');
   });
 
   if (!willOpen) return;
 
-  currentMenu.classList.remove('hidden');
-  currentMenu.style.position = 'fixed';
-  currentMenu.style.right = 'auto';
-  currentMenu.style.bottom = 'auto';
-  currentMenu.style.zIndex = '30000';
+  // Move the menu to <body> before positioning it. This prevents the table,
+  // row, and scroll containers from clipping it or creating horizontal scroll.
+  if (currentMenu.parentElement !== document.body) {
+    document.body.appendChild(currentMenu);
+  }
 
-  const buttonRect = event.currentTarget.getBoundingClientRect();
+  currentMenu.classList.add('floating-row-menu');
+  currentMenu.classList.remove('hidden');
+  currentMenu.style.visibility = 'hidden';
+  currentMenu.style.left = '0px';
+  currentMenu.style.top = '0px';
+
+  const buttonRect = trigger.getBoundingClientRect();
   const menuRect = currentMenu.getBoundingClientRect();
-  const margin = 10;
-  const preferredLeft = buttonRect.left + (buttonRect.width / 2) - (menuRect.width / 2);
-  const left = Math.min(window.innerWidth - menuRect.width - margin, Math.max(margin, preferredLeft));
+  const margin = 12;
+
+  const preferredLeft = buttonRect.right - menuRect.width;
+  const left = Math.min(
+    window.innerWidth - menuRect.width - margin,
+    Math.max(margin, preferredLeft)
+  );
 
   const spaceBelow = window.innerHeight - buttonRect.bottom;
   const spaceAbove = buttonRect.top;
   let top = buttonRect.bottom + 8;
+
   if (spaceBelow < menuRect.height + margin && spaceAbove > spaceBelow) {
     top = buttonRect.top - menuRect.height - 8;
   }
-  top = Math.min(window.innerHeight - menuRect.height - margin, Math.max(margin, top));
 
-  currentMenu.style.left = `${left}px`;
-  currentMenu.style.top = `${top}px`;
+  top = Math.min(
+    window.innerHeight - menuRect.height - margin,
+    Math.max(margin, top)
+  );
+
+  currentMenu.style.left = `${Math.round(left)}px`;
+  currentMenu.style.top = `${Math.round(top)}px`;
+  currentMenu.style.visibility = 'visible';
 }
 
 function openModal(payment = null) {
