@@ -1,3 +1,4 @@
+console.log('ANCHR v31-root-index-fix');
 const APP_VERSION = 'v29-layer-picker-icon-fix';
 const SUPABASE_URL = 'https://qjicwqpjxsqynoudwylk.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_rl7m3zQsatLJL2Lb3yHPOg_nnCr712U';

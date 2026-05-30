@@ -977,3 +977,37 @@ body.is-authenticated #mobileTabbar:not(.hidden) { display: grid !important; }
   }
   body.modal-open #mobileTabbar { display: none !important; }
 }
+
+/* v30 floating edit menu: rendered in body to avoid table clipping and horizontal scroll */
+.floating-row-menu {
+  position: fixed !important;
+  right: auto !important;
+  bottom: auto !important;
+  width: 142px;
+  max-width: calc(100vw - 24px);
+  z-index: 2147483000 !important;
+  transform: none !important;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+.floating-row-menu button {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.table-wrap,
+.payments-card,
+.app-main,
+.content {
+  overflow-x: hidden;
+}
+@media (max-width: 760px) {
+  .floating-row-menu {
+    width: 144px;
+    border-radius: 14px;
+  }
+  .floating-row-menu button {
+    min-height: 42px;
+    font-size: 13px;
+  }
+}

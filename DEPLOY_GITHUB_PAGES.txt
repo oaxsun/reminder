@@ -1,0 +1,1 @@
+Sube TODO el contenido de esta carpeta a la raiz del repo o selecciona /docs si decides moverlo. El archivo index.html debe quedar en la raiz, no dentro de database.
