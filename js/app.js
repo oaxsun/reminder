@@ -1,4 +1,4 @@
-const APP_VERSION = 'v21-initial-load-fix';
+const APP_VERSION = 'v22-session-load-mobile-fix';
 const SUPABASE_URL = 'https://qjicwqpjxsqynoudwylk.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_rl7m3zQsatLJL2Lb3yHPOg_nnCr712U';
 const PAYMENTS_TABLE = 'payments';
@@ -6,7 +6,14 @@ const PAYMENT_HISTORY_TABLE = 'payment_history';
 console.info(`ANCHR ${APP_VERSION} conectado a ${SUPABASE_URL}`);
 
 const today = new Date();
-const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+  auth: {
+    persistSession: true,
+    autoRefreshToken: true,
+    detectSessionInUrl: true,
+    storage: window.localStorage
+  }
+});
 
 let currentUser = null;
 let payments = [];
@@ -23,6 +30,7 @@ const els = {
   authPassword: document.querySelector('#authPassword'),
   authConfirmPassword: document.querySelector('#authConfirmPassword'),
   confirmPasswordField: document.querySelector('#confirmPasswordField'),
+  rememberMe: document.querySelector('#rememberMe'),
   authSubmit: document.querySelector('#authSubmit'),
   authMessage: document.querySelector('#authMessage'),
   toggleAuthMode: document.querySelector('#toggleAuthMode'),
@@ -72,8 +80,10 @@ const els = {
   toast: document.querySelector('#toast')
 };
 
-bindEvents();
-initAuth();
+document.addEventListener('DOMContentLoaded', () => {
+  bindEvents();
+  initAuth();
+});
 function bindEvents() {
   document.querySelector('#openModalBtn').addEventListener('click', () => openModal());
   els.logoutBtn.addEventListener('click', logout);
@@ -167,14 +177,13 @@ function bindEvents() {
 
 async function initAuth() {
   validateSupabaseConfig();
-  await restoreSessionAndLoad('init');
 
   supabaseClient.auth.onAuthStateChange(async (event, session) => {
     currentUser = session?.user || null;
     updateAuthUI();
 
     if (currentUser) {
-      await loadPayments();
+      await loadPayments('auth-change');
       initialLoadDone = true;
     } else {
       initialLoadDone = false;
@@ -183,7 +192,12 @@ async function initAuth() {
     }
   });
 
+  await restoreSessionAndLoad('init');
+  setTimeout(() => restoreSessionAndLoad('boot-retry-300'), 300);
+  setTimeout(() => restoreSessionAndLoad('boot-retry-1200'), 1200);
+
   window.addEventListener('pageshow', () => restoreSessionAndLoad('pageshow'));
+  window.addEventListener('focus', () => restoreSessionAndLoad('focus'));
   document.addEventListener('visibilitychange', () => {
     if (!document.hidden) restoreSessionAndLoad('visible');
   });
@@ -201,9 +215,9 @@ async function restoreSessionAndLoad(source = 'manual') {
 
     updateAuthUI();
 
-    if (currentUser && (!initialLoadDone || payments.length === 0)) {
+    if (currentUser) {
       console.info(`ANCHR ${APP_VERSION}: cargando pagos (${source})`);
-      await loadPayments();
+      await loadPayments(source);
       initialLoadDone = true;
     }
   } catch (error) {
@@ -223,6 +237,7 @@ function updateAuthUI() {
   els.appShell.classList.toggle('hidden', !loggedIn);
   els.sidebar.classList.toggle('hidden', !loggedIn);
   els.mobileTabbar.classList.toggle('hidden', !loggedIn);
+  document.body.classList.toggle('is-authenticated', loggedIn);
 
   if (currentUser) {
     const email = currentUser.email || 'usuario';
@@ -266,6 +281,8 @@ async function handleAuthSubmit(event) {
   els.authSubmit.disabled = true;
   els.authSubmit.textContent = authMode === 'register' ? 'Creando cuenta...' : 'Entrando...';
 
+  const remember = els.rememberMe ? els.rememberMe.checked : true;
+  localStorage.setItem('anchr_remember_session', remember ? '1' : '0');
   const payload = { email, password };
   const response = authMode === 'register'
     ? await supabaseClient.auth.signUp(payload)
@@ -344,12 +361,14 @@ function toDb(payment) {
   };
 }
 
-async function loadPayments() {
+async function loadPayments(source = 'manual') {
   if (!currentUser) {
     payments = [];
     render();
     return;
   }
+
+  console.info(`ANCHR ${APP_VERSION}: consultando pagos (${source})`, currentUser?.id);
 
   const { data, error } = await supabaseClient
     .from(PAYMENTS_TABLE)
@@ -364,6 +383,7 @@ async function loadPayments() {
   }
 
   payments = (data || []).map(fromDb);
+  console.info(`ANCHR ${APP_VERSION}: pagos cargados`, payments.length);
   render();
 }
 

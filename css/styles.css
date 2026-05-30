@@ -911,3 +911,26 @@ tbody tr:hover { background: #fbfcfe; }
     z-index: 120;
   }
 }
+
+/* v22 session/mobile fixes */
+.remember-row {
+  display: flex !important;
+  align-items: center;
+  gap: 8px;
+  margin: -2px 0 2px;
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 650;
+}
+.remember-row input {
+  width: 14px !important;
+  height: 14px !important;
+  min-height: 14px !important;
+  accent-color: #2f6fec;
+}
+body.is-authenticated #mobileTabbar:not(.hidden) { display: grid !important; }
+@media (max-width: 760px) {
+  body.is-authenticated { padding-bottom: calc(74px + env(safe-area-inset-bottom)); }
+  body.is-authenticated #mobileTabbar { display: grid !important; }
+  .mobile-tabbar { transform: translateZ(0); }
+}

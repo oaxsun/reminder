@@ -18,6 +18,8 @@
       <form id="authForm" class="auth-form">
         <label>Correo<input id="authEmail" type="email" required placeholder="tu@email.com" autocomplete="email" /></label>
         <label>Contraseña<input id="authPassword" type="password" required placeholder="••••••••" autocomplete="current-password" /></label>
+        <label id="confirmPasswordField" class="hidden">Verificar contraseña<input id="authConfirmPassword" type="password" placeholder="••••••••" autocomplete="new-password" /></label>
+        <label class="remember-row"><input id="rememberMe" type="checkbox" checked /> <span>Mantener sesión iniciada</span></label>
         <button class="primary-btn auth-submit" type="submit" id="authSubmit">Iniciar sesión</button>
       </form>
       <button class="google-btn" id="googleLoginBtn" type="button">Continuar con Google</button>
@@ -179,6 +181,6 @@
 
   <div class="toast hidden" id="toast">Pago registrado</div>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="js/app.js?v=21-initial-load-fix"></script>
+  <script src="js/app.js?v=22-session-load-mobile-fix"></script>
 </body>
 </html>
