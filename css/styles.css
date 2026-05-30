@@ -934,3 +934,46 @@ body.is-authenticated #mobileTabbar:not(.hidden) { display: grid !important; }
   body.is-authenticated #mobileTabbar { display: grid !important; }
   .mobile-tabbar { transform: translateZ(0); }
 }
+
+
+/* v29 layer and mobile modal fixes */
+.row-menu {
+  z-index: 30000 !important;
+  pointer-events: auto;
+}
+.menu-wrap, .edit-cell { position: relative; z-index: 5; }
+.modal { z-index: 20000; }
+.icon-picker-popover { z-index: 30000 !important; }
+@media (max-width: 760px) {
+  .modal { z-index: 20000; }
+  .modal-backdrop { z-index: 0; }
+  .modal-card {
+    z-index: 1;
+    max-height: calc(100dvh - 18px - env(safe-area-inset-top));
+    padding-bottom: calc(86px + env(safe-area-inset-bottom));
+  }
+  .modal-actions {
+    bottom: calc(-86px - env(safe-area-inset-bottom));
+    z-index: 6;
+    padding-bottom: calc(14px + env(safe-area-inset-bottom));
+  }
+  .row-menu {
+    width: 142px;
+    max-width: calc(100vw - 20px);
+    z-index: 30000 !important;
+  }
+  .row-menu button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 38px;
+  }
+  .icon-picker-popover {
+    z-index: 30001 !important;
+    max-height: min(76dvh, 560px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding-bottom: calc(28px + env(safe-area-inset-bottom));
+  }
+  body.modal-open #mobileTabbar { display: none !important; }
+}

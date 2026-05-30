@@ -1,4 +1,4 @@
-const APP_VERSION = 'v28-icons-auth-nav-fix';
+const APP_VERSION = 'v29-layer-picker-icon-fix';
 const SUPABASE_URL = 'https://qjicwqpjxsqynoudwylk.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_rl7m3zQsatLJL2Lb3yHPOg_nnCr712U';
 const PAYMENTS_TABLE = 'payments';
@@ -688,30 +688,33 @@ function toggleMenu(event, id) {
   if (!willOpen) return;
 
   currentMenu.classList.remove('hidden');
-  const buttonRect = event.currentTarget.getBoundingClientRect();
-  const menuRect = currentMenu.getBoundingClientRect();
-  const margin = 12;
-  const left = Math.min(
-    window.innerWidth - menuRect.width - margin,
-    Math.max(margin, buttonRect.right - menuRect.width)
-  );
-  const spaceBelow = window.innerHeight - buttonRect.bottom;
-  const openUp = spaceBelow < menuRect.height + margin && buttonRect.top > menuRect.height + margin;
-  const top = openUp ? buttonRect.top - menuRect.height - 8 : buttonRect.bottom + 8;
-
-  const safeTop = Math.min(
-    window.innerHeight - menuRect.height - margin,
-    Math.max(margin, top)
-  );
   currentMenu.style.position = 'fixed';
   currentMenu.style.right = 'auto';
+  currentMenu.style.bottom = 'auto';
+  currentMenu.style.zIndex = '30000';
+
+  const buttonRect = event.currentTarget.getBoundingClientRect();
+  const menuRect = currentMenu.getBoundingClientRect();
+  const margin = 10;
+  const preferredLeft = buttonRect.left + (buttonRect.width / 2) - (menuRect.width / 2);
+  const left = Math.min(window.innerWidth - menuRect.width - margin, Math.max(margin, preferredLeft));
+
+  const spaceBelow = window.innerHeight - buttonRect.bottom;
+  const spaceAbove = buttonRect.top;
+  let top = buttonRect.bottom + 8;
+  if (spaceBelow < menuRect.height + margin && spaceAbove > spaceBelow) {
+    top = buttonRect.top - menuRect.height - 8;
+  }
+  top = Math.min(window.innerHeight - menuRect.height - margin, Math.max(margin, top));
+
   currentMenu.style.left = `${left}px`;
-  currentMenu.style.top = `${safeTop}px`;
+  currentMenu.style.top = `${top}px`;
 }
 
 function openModal(payment = null) {
   document.querySelectorAll('.row-menu').forEach(menu => { menu.classList.add('hidden'); menu.removeAttribute('style'); });
   els.modal.classList.remove('hidden');
+  document.body.classList.add('modal-open');
   els.modalTitle.textContent = payment ? 'Editar pago' : 'Nuevo pago';
   els.paymentId.value = payment?.id || '';
   els.paymentName.value = payment?.name || '';
@@ -729,6 +732,7 @@ function openModal(payment = null) {
 
 function closeModal() {
   els.modal.classList.add('hidden');
+  document.body.classList.remove('modal-open');
   els.form.reset();
   syncAmountField();
 }
@@ -820,12 +824,12 @@ function getIconSvg(icon) {
     heart: '<svg viewBox="0 0 24 24"><path d="M12 21s-8-4.7-8-11a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 20 10c0 6.3-8 11-8 11Z"/></svg>',
     bank: '<svg viewBox="0 0 24 24"><path d="M4 18h16M6 18V9M10 18V9M14 18V9M18 18V9M3 9l9-5 9 5H3Z"/></svg>',
     phone: '<svg viewBox="0 0 24 24"><path d="M8 3h8a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2ZM10 18h4"/></svg>',
-    gas: '<svg viewBox="0 0 24 24"><path d="M9 3h6M10 3v3h4V3M8 7h8a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2ZM9 11h6M9 15h6"/></svg>',
-    car: '<svg viewBox="0 0 24 24"><path d="M5 16h14M7 16l1.5-5h7L17 16M6 19h.01M18 19h.01M4 16v3h16v-3l-2-5a3 3 0 0 0-3-2H9a3 3 0 0 0-3 2l-2 5Z"/></svg>',
+    gas: '<svg viewBox="0 0 24 24"><path d="M12 3s5 4.6 5 9a5 5 0 0 1-10 0c0-2.1 1.2-3.8 2.7-5.4C10.2 9 12 10 12 12.5c1.5-1 2.4-2.7 2.4-4.4C14.4 5.9 12 3 12 3Z"/></svg>',
+    car: '<svg viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7ZM12 3v5.5M12 15.5V21M3 12h5.5M15.5 12H21"/></svg>',
     cart: '<svg viewBox="0 0 24 24"><path d="M4 5h2l2 11h10l2-8H7M10 20h.01M18 20h.01"/></svg>',
     health: '<svg viewBox="0 0 24 24"><path d="M12 21s-7-4.5-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 11c0 5.5-7 10-7 10ZM12 9v6M9 12h6"/></svg>',
     education: '<svg viewBox="0 0 24 24"><path d="m3 8 9-4 9 4-9 4-9-4ZM6 10v5c0 2 3 4 6 4s6-2 6-4v-5"/></svg>',
-    game: '<svg viewBox="0 0 24 24"><path d="M8 14h.01M11 14h.01M9.5 12.5v3M15 13h.01M17 15h.01M7 9h10a5 5 0 0 1 4 8l-1 1a2 2 0 0 1-3-1l-.5-1h-9l-.5 1a2 2 0 0 1-3 1l-1-1a5 5 0 0 1 4-8Z"/></svg>',
+    game: '<svg viewBox="0 0 24 24"><path d="M4 6h16a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2ZM10 9v6l5-3-5-3Z"/></svg>',
     sparkle: '<svg viewBox="0 0 24 24"><path d="m12 3 1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8L12 3ZM19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8L19 15Z"/></svg>'
   };
   return icons[icon] || icons.sparkle;
