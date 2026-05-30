@@ -1,5 +1,5 @@
-const SUPABASE_URL = 'PEGA_AQUI_TU_SUPABASE_URL';
-const SUPABASE_ANON_KEY = 'PEGA_AQUI_TU_SUPABASE_ANON_KEY';
+const SUPABASE_URL = 'https://hgteuswezxhxtjhwwnkg.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_0FQaBGI448upKh7w_7Q81w_CRyxLid5';
 
 const today = new Date();
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
