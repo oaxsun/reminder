@@ -1,5 +1,5 @@
-const SUPABASE_URL = 'https://hgteuswezxhxtjhwwnkg.supabase.co';
-const SUPABASE_ANON_KEY = 'sb_publishable_0FQaBGI448upKh7w_7Q81w_CRyxLid5';
+const SUPABASE_URL = 'https://qjicwqpjxsqynoudwylk.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_rl7m3zQsatLJL2Lb3yHPOg_nnCr712U';
 
 const today = new Date();
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -16,6 +16,8 @@ const els = {
   authCopy: document.querySelector('#authCopy'),
   authEmail: document.querySelector('#authEmail'),
   authPassword: document.querySelector('#authPassword'),
+  authConfirmPassword: document.querySelector('#authConfirmPassword'),
+  confirmPasswordField: document.querySelector('#confirmPasswordField'),
   authSubmit: document.querySelector('#authSubmit'),
   authMessage: document.querySelector('#authMessage'),
   toggleAuthMode: document.querySelector('#toggleAuthMode'),
@@ -190,9 +192,13 @@ function toggleAuthMode() {
   authMode = authMode === 'login' ? 'register' : 'login';
   const isRegister = authMode === 'register';
   els.authTitle.textContent = isRegister ? 'Crear cuenta' : 'Iniciar sesión';
-  els.authCopy.textContent = isRegister ? 'Crea tu cuenta para guardar tus pagos en Supabase.' : 'Entra para sincronizar tus pagos en todos tus dispositivos.';
+  els.authCopy.textContent = isRegister ? 'Guarda tus pagos y consúltalos desde cualquier dispositivo.' : 'Entra para sincronizar tus pagos en todos tus dispositivos.';
   els.authSubmit.textContent = isRegister ? 'Crear cuenta' : 'Iniciar sesión';
   els.toggleAuthMode.textContent = isRegister ? 'Ya tengo cuenta' : 'Crear cuenta nueva';
+  els.confirmPasswordField.classList.toggle('hidden', !isRegister);
+  els.authConfirmPassword.required = isRegister;
+  els.authConfirmPassword.value = '';
+  els.authPassword.setAttribute('autocomplete', isRegister ? 'new-password' : 'current-password');
   els.authMessage.textContent = '';
 }
 
@@ -201,10 +207,29 @@ async function handleAuthSubmit(event) {
   els.authMessage.textContent = '';
   const email = els.authEmail.value.trim();
   const password = els.authPassword.value;
+
+  if (authMode === 'register') {
+    const confirmPassword = els.authConfirmPassword.value;
+    if (password !== confirmPassword) {
+      els.authMessage.textContent = 'Las contraseñas no coinciden.';
+      return;
+    }
+    if (password.length < 6) {
+      els.authMessage.textContent = 'La contraseña debe tener al menos 6 caracteres.';
+      return;
+    }
+  }
+
+  els.authSubmit.disabled = true;
+  els.authSubmit.textContent = authMode === 'register' ? 'Creando cuenta...' : 'Entrando...';
+
   const payload = { email, password };
   const response = authMode === 'register'
     ? await supabaseClient.auth.signUp(payload)
     : await supabaseClient.auth.signInWithPassword(payload);
+
+  els.authSubmit.disabled = false;
+  els.authSubmit.textContent = authMode === 'register' ? 'Crear cuenta' : 'Iniciar sesión';
 
   if (response.error) {
     els.authMessage.textContent = response.error.message;
