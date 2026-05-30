@@ -1,5 +1,5 @@
-console.log('ANCHR v31-root-index-fix');
-const APP_VERSION = 'v29-layer-picker-icon-fix';
+console.log('ANCHR v33-calendar-nav');
+const APP_VERSION = 'v33-calendar-nav';
 const SUPABASE_URL = 'https://qjicwqpjxsqynoudwylk.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_rl7m3zQsatLJL2Lb3yHPOg_nnCr712U';
 const PAYMENTS_TABLE = 'payments';
@@ -19,6 +19,9 @@ const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_
 let currentUser = null;
 let payments = [];
 let activeFilter = 'all';
+let activeView = 'dashboard';
+let calendarCursor = new Date(today.getFullYear(), today.getMonth(), 1);
+let selectedCalendarDate = toInputDate(today);
 let authMode = 'login';
 let initialLoadDone = false;
 let paymentsLoadTimer = null;
@@ -41,6 +44,24 @@ const els = {
   appShell: document.querySelector('#appShell'),
   sidebar: document.querySelector('#sidebar'),
   mobileTabbar: document.querySelector('#mobileTabbar'),
+  topbarTitle: document.querySelector('.topbar h2'),
+  topbarCopy: document.querySelector('.topbar p'),
+  dashboardView: document.querySelector('#dashboardView'),
+  calendarView: document.querySelector('#calendarView'),
+  historyView: document.querySelector('#historyView'),
+  moreView: document.querySelector('#moreView'),
+  desktopNav: document.querySelector('#desktopNav'),
+  calendarNewPaymentBtn: document.querySelector('#calendarNewPaymentBtn'),
+  calendarTodayBtn: document.querySelector('#calendarTodayBtn'),
+  prevMonthBtn: document.querySelector('#prevMonthBtn'),
+  nextMonthBtn: document.querySelector('#nextMonthBtn'),
+  calendarMonthLabel: document.querySelector('#calendarMonthLabel'),
+  calendarGrid: document.querySelector('#calendarGrid'),
+  nextPaymentCard: document.querySelector('#nextPaymentCard'),
+  selectedDayTitle: document.querySelector('#selectedDayTitle'),
+  selectedDayCount: document.querySelector('#selectedDayCount'),
+  selectedDayPayments: document.querySelector('#selectedDayPayments'),
+  upcomingPayments: document.querySelector('#upcomingPayments'),
   logoutBtn: document.querySelector('#logoutBtn'),
   userAvatar: document.querySelector('#userAvatar'),
   userName: document.querySelector('#userName'),
@@ -89,7 +110,15 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 function bindEvents() {
   document.querySelector('#openModalBtn').addEventListener('click', () => openModal());
+  els.calendarNewPaymentBtn?.addEventListener('click', () => openModal());
+  els.calendarTodayBtn?.addEventListener('click', () => { calendarCursor = new Date(today.getFullYear(), today.getMonth(), 1); selectedCalendarDate = toInputDate(today); renderCalendar(); });
+  els.prevMonthBtn?.addEventListener('click', () => { calendarCursor = new Date(calendarCursor.getFullYear(), calendarCursor.getMonth() - 1, 1); selectedCalendarDate = toInputDate(new Date(calendarCursor.getFullYear(), calendarCursor.getMonth(), 1)); renderCalendar(); });
+  els.nextMonthBtn?.addEventListener('click', () => { calendarCursor = new Date(calendarCursor.getFullYear(), calendarCursor.getMonth() + 1, 1); selectedCalendarDate = toInputDate(new Date(calendarCursor.getFullYear(), calendarCursor.getMonth(), 1)); renderCalendar(); });
   els.logoutBtn.addEventListener('click', logout);
+  document.querySelector('#moreLogoutBtn')?.addEventListener('click', logout);
+  document.querySelectorAll('[data-view]').forEach(button => {
+    button.addEventListener('click', () => setActiveView(button.dataset.view));
+  });
   els.toggleAuthMode.addEventListener('click', toggleAuthMode);
   els.googleLoginBtn.addEventListener('click', loginWithGoogle);
   els.authForm.addEventListener('submit', handleAuthSubmit);
@@ -484,7 +513,33 @@ function render() {
   els.table.innerHTML = visible.map(rowTemplate).join('');
   els.empty.classList.toggle('hidden', payments.length > 0);
   renderSummary(enriched);
+  if (activeView === 'calendar') renderCalendar();
 }
+
+function setActiveView(view) {
+  activeView = view || 'dashboard';
+  const titles = {
+    dashboard: ['Dashboard', 'Hola, aquí tienes el resumen de tus pagos.'],
+    calendar: ['Calendario', 'Visualiza tus pagos y fechas de vencimiento.'],
+    history: ['Historial', 'Consulta tus pagos registrados.'],
+    more: ['Más', 'Configuración y opciones de ANCHR.']
+  };
+  const [title, copy] = titles[activeView] || titles.dashboard;
+  if (els.topbarTitle) els.topbarTitle.textContent = title;
+  if (els.topbarCopy) els.topbarCopy.textContent = copy;
+
+  ['dashboard', 'calendar', 'history', 'more'].forEach(name => {
+    const screen = els[`${name}View`];
+    screen?.classList.toggle('hidden', name !== activeView);
+  });
+
+  document.querySelectorAll('[data-view]').forEach(button => {
+    button.classList.toggle('active', button.dataset.view === activeView);
+  });
+
+  if (activeView === 'calendar') renderCalendar();
+}
+
 
 function sortPayments(a, b) {
   const group = payment => {
@@ -506,6 +561,121 @@ function sortPayments(a, b) {
   const dueDiff = a.dueDate - b.dueDate;
   if (dueDiff !== 0) return dueDiff;
   return a.name.localeCompare(b.name, 'es');
+}
+
+
+function getEnrichedPayments() {
+  return payments.map(payment => ({
+    ...normalizePayment(payment),
+    isPaid: isPaid(payment),
+    isOverdue: isOverdue(payment),
+    dueDate: getDueDate(payment)
+  })).sort(sortPayments);
+}
+
+function renderCalendar() {
+  if (!els.calendarGrid) return;
+  const items = getEnrichedPayments();
+  const pendingItems = items.filter(item => !item.isPaid);
+  const upcoming = pendingItems
+    .filter(item => item.dueDate >= startOfToday())
+    .sort((a, b) => a.dueDate - b.dueDate);
+  const next = upcoming[0] || pendingItems.sort((a, b) => a.dueDate - b.dueDate)[0] || null;
+  renderNextPayment(next);
+  renderCalendarGrid(items);
+  renderSelectedDay(items);
+  renderUpcomingPayments(upcoming.length ? upcoming : pendingItems);
+}
+
+function renderNextPayment(payment) {
+  if (!els.nextPaymentCard) return;
+  if (!payment) {
+    els.nextPaymentCard.innerHTML = `<div><span class="eyebrow">Próximo pago</span><h3>No hay pagos pendientes</h3><p>Agrega un pago para verlo en tu calendario.</p></div>`;
+    return;
+  }
+  const dueInfo = getDueInfo(payment);
+  els.nextPaymentCard.innerHTML = `
+    <div class="next-payment-icon ${payment.iconColor || getDefaultColor(payment.category)}">${getIconSvg(payment.icon || getDefaultIcon(payment.category))}</div>
+    <div class="next-payment-main"><span class="eyebrow">Próximo pago</span><h3>${escapeHtml(payment.name)}</h3><p>${escapeHtml(payment.category)}</p></div>
+    <div class="next-payment-date"><span>Vence</span><strong>${dueInfo.label}</strong><p>${formatDate(payment.dueDate)}</p></div>`;
+}
+
+function renderCalendarGrid(items) {
+  const year = calendarCursor.getFullYear();
+  const month = calendarCursor.getMonth();
+  const label = calendarCursor.toLocaleDateString('es-MX', { month: 'long', year: 'numeric' });
+  if (els.calendarMonthLabel) els.calendarMonthLabel.textContent = label.charAt(0).toUpperCase() + label.slice(1);
+  const first = new Date(year, month, 1);
+  const firstDay = (first.getDay() + 6) % 7;
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const prevDays = new Date(year, month, 0).getDate();
+  const weeks = [];
+  const dayNames = ['L', 'M', 'M', 'J', 'V', 'S', 'D'];
+  dayNames.forEach(day => weeks.push(`<div class="calendar-weekday">${day}</div>`));
+  for (let i = 0; i < 42; i++) {
+    const offset = i - firstDay + 1;
+    const date = new Date(year, month, offset);
+    const inMonth = offset >= 1 && offset <= daysInMonth;
+    const labelDay = inMonth ? offset : (offset < 1 ? prevDays + offset : offset - daysInMonth);
+    const key = toInputDate(date);
+    const dayItems = items.filter(item => toInputDate(item.dueDate) === key);
+    const isSelected = key === selectedCalendarDate;
+    const isToday = key === toInputDate(today);
+    const dots = dayItems.slice(0, 3).map(item => `<span class="calendar-dot ${item.iconColor || getDefaultColor(item.category)}">${getIconSvg(item.icon || getDefaultIcon(item.category))}</span>`).join('');
+    weeks.push(`<button type="button" class="calendar-day ${inMonth ? '' : 'muted'} ${isSelected ? 'selected' : ''} ${isToday ? 'today' : ''}" data-date="${key}"><span>${labelDay}</span><div>${dots}</div></button>`);
+  }
+  els.calendarGrid.innerHTML = weeks.join('');
+  els.calendarGrid.querySelectorAll('[data-date]').forEach(button => {
+    button.addEventListener('click', () => { selectedCalendarDate = button.dataset.date; renderCalendar(); });
+  });
+}
+
+function renderSelectedDay(items) {
+  const selected = inputDate(selectedCalendarDate);
+  const dayItems = items.filter(item => toInputDate(item.dueDate) === selectedCalendarDate);
+  if (els.selectedDayTitle) els.selectedDayTitle.textContent = `Pagos del ${selected.getDate()} de ${selected.toLocaleDateString('es-MX', { month: 'long' })}`;
+  if (els.selectedDayCount) els.selectedDayCount.textContent = String(dayItems.length);
+  if (!els.selectedDayPayments) return;
+  if (!dayItems.length) {
+    els.selectedDayPayments.innerHTML = `<p class="empty-copy">No hay pagos para este día.</p>`;
+    return;
+  }
+  els.selectedDayPayments.innerHTML = dayItems.map(calendarPaymentCard).join('');
+}
+
+function renderUpcomingPayments(items) {
+  if (!els.upcomingPayments) return;
+  const list = items.slice(0, 8);
+  if (!list.length) {
+    els.upcomingPayments.innerHTML = `<p class="empty-copy">No hay próximos pagos.</p>`;
+    return;
+  }
+  els.upcomingPayments.innerHTML = list.map(payment => {
+    const dueInfo = getDueInfo(payment);
+    const statusClass = payment.isPaid ? 'paid' : (payment.isOverdue ? 'overdue' : 'pending');
+    const statusLabel = payment.isPaid ? 'Pagado' : (payment.isOverdue ? 'Vencido' : 'Pendiente');
+    return `<div class="upcoming-item">
+      <div class="pay-cell"><div class="service-icon ${payment.iconColor || getDefaultColor(payment.category)}">${getIconSvg(payment.icon || getDefaultIcon(payment.category))}</div><div><div class="payment-name">${escapeHtml(payment.name)}</div><div class="subtext">${escapeHtml(payment.category)}</div></div></div>
+      <div class="upcoming-date"><strong>${formatShortDate(payment.dueDate)}</strong><em class="due-label ${dueInfo.className}">${dueInfo.label}</em></div>
+      <span class="badge ${statusClass}"><span class="status-dot"></span>${statusLabel}</span>
+      <strong class="upcoming-amount">${payment.amountType === 'variable' ? 'Variable' : money(payment.amount)}</strong>
+    </div>`;
+  }).join('');
+}
+
+function calendarPaymentCard(payment) {
+  const statusClass = payment.isPaid ? 'paid' : (payment.isOverdue ? 'overdue' : 'pending');
+  const statusLabel = payment.isPaid ? 'Pagado' : (payment.isOverdue ? 'Vencido' : 'Pendiente');
+  return `<article class="calendar-payment-card">
+    <div class="pay-cell"><div class="service-icon ${payment.iconColor || getDefaultColor(payment.category)}">${getIconSvg(payment.icon || getDefaultIcon(payment.category))}</div><div><div class="payment-name">${escapeHtml(payment.name)}</div><div class="subtext">${escapeHtml(payment.category)}</div></div></div>
+    <span class="badge ${statusClass}"><span class="status-dot"></span>${statusLabel}</span>
+    <p>${payment.amountType === 'variable' ? 'Monto variable' : money(payment.amount)}</p>
+    <button type="button" class="secondary-btn" onclick="editPayment('${payment.id}')">Ver detalles</button>
+  </article>`;
+}
+
+function formatShortDate(date) {
+  return date.toLocaleDateString('es-MX', { day: 'numeric', month: 'short' });
 }
 
 function renderSummary(items) {
