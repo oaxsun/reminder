@@ -1,4 +1,4 @@
-const APP_VERSION = 'v25-real-initial-load-fix';
+const APP_VERSION = 'v26-direct-rest-initial-load';
 const SUPABASE_URL = 'https://qjicwqpjxsqynoudwylk.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_rl7m3zQsatLJL2Lb3yHPOg_nnCr712U';
 const PAYMENTS_TABLE = 'payments';
@@ -390,28 +390,57 @@ function toDb(payment) {
 }
 
 async function loadPayments(source = 'manual') {
-  if (!currentUser) {
-    payments = [];
+  try {
+    const { data: sessionData, error: sessionError } = await supabaseClient.auth.getSession();
+    if (sessionError) console.warn('ANCHR sesión no disponible antes de cargar pagos:', sessionError);
+
+    const session = sessionData?.session || null;
+    const user = session?.user || currentUser || null;
+
+    if (!user || !session?.access_token) {
+      payments = [];
+      render();
+      console.info(`ANCHR ${APP_VERSION}: no hay sesión válida para cargar pagos (${source})`);
+      return;
+    }
+
+    currentUser = user;
+    updateAuthUI();
+    console.info(`ANCHR ${APP_VERSION}: consultando pagos REST (${source})`, currentUser.id);
+
+    const url = `${SUPABASE_URL}/rest/v1/${PAYMENTS_TABLE}?select=*&user_id=eq.${encodeURIComponent(currentUser.id)}&order=created_at.asc`;
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        apikey: SUPABASE_ANON_KEY,
+        Authorization: `Bearer ${session.access_token}`,
+        Accept: 'application/json'
+      },
+      cache: 'no-store'
+    });
+
+    const text = await response.text();
+    let data = [];
+    try {
+      data = text ? JSON.parse(text) : [];
+    } catch (parseError) {
+      console.error('ANCHR respuesta no JSON al cargar pagos:', text);
+      throw parseError;
+    }
+
+    if (!response.ok) {
+      console.error('ANCHR error REST cargando pagos:', response.status, data);
+      showToast(data?.message || 'No se pudieron cargar los pagos');
+      return;
+    }
+
+    payments = Array.isArray(data) ? data.map(fromDb) : [];
+    console.info(`ANCHR ${APP_VERSION}: pagos cargados REST (${source})`, payments.length, payments.map(item => item.name));
     render();
-    return;
-  }
-
-  console.info(`ANCHR ${APP_VERSION}: consultando pagos (${source})`, currentUser?.id);
-
-  const { data, error } = await supabaseClient
-    .from(PAYMENTS_TABLE)
-    .select('*')
-    .order('created_at', { ascending: true });
-
-  if (error) {
-    showToast('No se pudieron cargar los pagos');
+  } catch (error) {
     console.error('Error cargando pagos:', error);
-    return;
+    showToast('No se pudieron cargar los pagos');
   }
-
-  payments = (data || []).map(fromDb);
-  console.info(`ANCHR ${APP_VERSION}: pagos cargados (${source})`, payments.length, payments.map(item => item.name));
-  render();
 }
 
 async function savePayment(payment) {
