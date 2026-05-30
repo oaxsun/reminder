@@ -588,8 +588,14 @@ function toggleMenu(event, id) {
   const openUp = spaceBelow < menuRect.height + margin && buttonRect.top > menuRect.height + margin;
   const top = openUp ? buttonRect.top - menuRect.height - 8 : buttonRect.bottom + 8;
 
+  const safeTop = Math.min(
+    window.innerHeight - menuRect.height - margin,
+    Math.max(margin, top)
+  );
+  currentMenu.style.position = 'fixed';
+  currentMenu.style.right = 'auto';
   currentMenu.style.left = `${left}px`;
-  currentMenu.style.top = `${Math.max(margin, top)}px`;
+  currentMenu.style.top = `${safeTop}px`;
 }
 
 function openModal(payment = null) {
