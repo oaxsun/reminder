@@ -19,3 +19,8 @@ Si sigues viendo otra URL de Supabase, GitHub Pages o el navegador estan cargand
 - Corrige labels móviles por columna.
 - Evita overflow horizontal del menú de edición en móvil.
 - Restaura tabbar móvil visible.
+
+
+## v21
+- Corrige carga inicial de pagos al iniciar sesión o refrescar la app.
+- Fuerza recarga segura desde Supabase en pageshow/visibilitychange.

@@ -1,4 +1,4 @@
-const APP_VERSION = 'v19-payment-type';
+const APP_VERSION = 'v21-initial-load-fix';
 const SUPABASE_URL = 'https://qjicwqpjxsqynoudwylk.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_rl7m3zQsatLJL2Lb3yHPOg_nnCr712U';
 const PAYMENTS_TABLE = 'payments';
@@ -12,6 +12,7 @@ let currentUser = null;
 let payments = [];
 let activeFilter = 'all';
 let authMode = 'login';
+let initialLoadDone = false;
 
 const els = {
   authScreen: document.querySelector('#authScreen'),
@@ -166,21 +167,48 @@ function bindEvents() {
 
 async function initAuth() {
   validateSupabaseConfig();
-  const { data } = await supabaseClient.auth.getSession();
-  currentUser = data.session?.user || null;
-  updateAuthUI();
-  if (currentUser) await loadPayments();
+  await restoreSessionAndLoad('init');
 
-  supabaseClient.auth.onAuthStateChange(async (_event, session) => {
+  supabaseClient.auth.onAuthStateChange(async (event, session) => {
     currentUser = session?.user || null;
     updateAuthUI();
+
     if (currentUser) {
       await loadPayments();
+      initialLoadDone = true;
     } else {
+      initialLoadDone = false;
       payments = [];
       render();
     }
   });
+
+  window.addEventListener('pageshow', () => restoreSessionAndLoad('pageshow'));
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) restoreSessionAndLoad('visible');
+  });
+}
+
+async function restoreSessionAndLoad(source = 'manual') {
+  try {
+    const { data: sessionData } = await supabaseClient.auth.getSession();
+    currentUser = sessionData.session?.user || null;
+
+    if (!currentUser) {
+      const { data: userData } = await supabaseClient.auth.getUser();
+      currentUser = userData.user || null;
+    }
+
+    updateAuthUI();
+
+    if (currentUser && (!initialLoadDone || payments.length === 0)) {
+      console.info(`ANCHR ${APP_VERSION}: cargando pagos (${source})`);
+      await loadPayments();
+      initialLoadDone = true;
+    }
+  } catch (error) {
+    console.error('No se pudo restaurar la sesión:', error);
+  }
 }
 
 function validateSupabaseConfig() {
@@ -317,15 +345,21 @@ function toDb(payment) {
 }
 
 async function loadPayments() {
-  if (!currentUser) return;
+  if (!currentUser) {
+    payments = [];
+    render();
+    return;
+  }
+
   const { data, error } = await supabaseClient
     .from(PAYMENTS_TABLE)
-    .select('*, payment_history(*)')
+    .select('*')
+    .eq('user_id', currentUser.id)
     .order('created_at', { ascending: true });
 
   if (error) {
     showToast('No se pudieron cargar los pagos');
-    console.error(error);
+    console.error('Error cargando pagos:', error);
     return;
   }
 
