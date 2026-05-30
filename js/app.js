@@ -1,5 +1,5 @@
-console.log('ANCHR v33-calendar-nav');
-const APP_VERSION = 'v33-calendar-nav';
+console.log('ANCHR v34-calendar-polish');
+const APP_VERSION = 'v34-calendar-polish';
 const SUPABASE_URL = 'https://qjicwqpjxsqynoudwylk.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_rl7m3zQsatLJL2Lb3yHPOg_nnCr712U';
 const PAYMENTS_TABLE = 'payments';
