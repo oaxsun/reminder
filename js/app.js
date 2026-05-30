@@ -1,4 +1,4 @@
-const APP_VERSION = 'v26-direct-rest-initial-load';
+const APP_VERSION = 'v27-sidebar-null-initial-load-fix';
 const SUPABASE_URL = 'https://qjicwqpjxsqynoudwylk.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_rl7m3zQsatLJL2Lb3yHPOg_nnCr712U';
 const PAYMENTS_TABLE = 'payments';
@@ -261,16 +261,16 @@ function validateSupabaseConfig() {
 
 function updateAuthUI() {
   const loggedIn = Boolean(currentUser);
-  els.authScreen.classList.toggle('hidden', loggedIn);
-  els.appShell.classList.toggle('hidden', !loggedIn);
-  els.sidebar.classList.toggle('hidden', !loggedIn);
-  els.mobileTabbar.classList.toggle('hidden', !loggedIn);
+  els.authScreen?.classList.toggle('hidden', loggedIn);
+  els.appShell?.classList.toggle('hidden', !loggedIn);
+  els.sidebar?.classList.toggle('hidden', !loggedIn);
+  els.mobileTabbar?.classList.toggle('hidden', !loggedIn);
   document.body.classList.toggle('is-authenticated', loggedIn);
 
   if (currentUser) {
     const email = currentUser.email || 'usuario';
-    els.userName.textContent = email.split('@')[0];
-    els.userAvatar.textContent = email.charAt(0).toUpperCase();
+    if (els.userName) els.userName.textContent = email.split('@')[0];
+    if (els.userAvatar) els.userAvatar.textContent = email.charAt(0).toUpperCase();
   }
 }
 
@@ -390,6 +390,7 @@ function toDb(payment) {
 }
 
 async function loadPayments(source = 'manual') {
+  console.info(`ANCHR ${APP_VERSION}: loadPayments iniciado (${source})`);
   try {
     const { data: sessionData, error: sessionError } = await supabaseClient.auth.getSession();
     if (sessionError) console.warn('ANCHR sesión no disponible antes de cargar pagos:', sessionError);
