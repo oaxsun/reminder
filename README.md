@@ -24,3 +24,7 @@ Si sigues viendo otra URL de Supabase, GitHub Pages o el navegador estan cargand
 ## v21
 - Corrige carga inicial de pagos al iniciar sesión o refrescar la app.
 - Fuerza recarga segura desde Supabase en pageshow/visibilitychange.
+
+
+## v24
+Corrige la carga inicial con restauración de sesión y reintentos controlados.
