@@ -1,20 +1,15 @@
 # ANCHR / Reminder
 
-Primera version conectada al proyecto Supabase `reminder`.
+Version v18 conectada al proyecto Supabase `reminder`.
 
-## Configuracion incluida
+Supabase URL:
+https://qjicwqpjxsqynoudwylk.supabase.co
 
-- Supabase URL: `https://qjicwqpjxsqynoudwylk.supabase.co`
-- Publishable key configurada en `js/app.js`
-- Login y registro con email/password
-- Registro con confirmacion de contrasena
-- La navegacion de la app se oculta cuando no hay sesion
+Tablas usadas:
+- payments
+- payment_history
 
-## Base de datos
+Despues de subir a GitHub Pages, abre DevTools > Console y confirma que aparezca:
+ANCHR v18-reminder conectado a https://qjicwqpjxsqynoudwylk.supabase.co
 
-Ejecuta en Supabase SQL Editor:
-
-1. `database/schema.sql`
-2. `database/policies.sql`
-
-Despues prueba crear una cuenta y agregar un pago.
+Si sigues viendo otra URL de Supabase, GitHub Pages o el navegador estan cargando una version vieja. Haz hard refresh o espera a que termine el deploy.

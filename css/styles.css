@@ -185,6 +185,7 @@ select:focus, input:focus { border-color: #99c7ff; box-shadow: 0 0 0 3px rgba(22
 .secondary-btn:hover, .ghost-btn:hover { background: var(--surface-2); }
 .ghost-btn { color: var(--muted); padding: 7px 10px; font-size: 22px; line-height: 1; }
 
+.mobile-list-head { display: none; }
 .table-wrap { flex: 1 1 auto; min-height: 0; overflow: auto; position: relative; }
 table { width: 100%; border-collapse: separate; border-spacing: 0; min-width: 980px; }
 thead th {
@@ -443,6 +444,7 @@ tbody tr:hover { background: #fbfcfe; }
   background-position: right 12px center;
   background-size: 14px;
 }
+.mobile-list-head { display: none; }
 .table-wrap { overflow-x: hidden; }
 .row-menu {
   position: fixed;
@@ -522,6 +524,7 @@ tbody tr:hover { background: #fbfcfe; }
   }
 
   html, body { height: 100%; overflow: hidden; }
+  input, select, textarea { font-size: 16px; }
   body { background: #fff; }
   .sidebar { display: none; }
 
@@ -612,11 +615,11 @@ tbody tr:hover { background: #fbfcfe; }
   }
   .filters .primary-btn span { font-size: 22px; line-height: 1; }
 
-  .table-wrap {
+  .mobile-list-head { display: none; }
+.table-wrap {
     overflow-y: auto;
     overflow-x: hidden;
     padding-right: 2px;
-    border-top: 1px solid var(--line);
     -webkit-overflow-scrolling: touch;
   }
   table, tbody { display: block; width: 100%; min-width: 0; }
@@ -759,6 +762,9 @@ tbody tr:hover { background: #fbfcfe; }
     padding-top: 12px;
     padding-bottom: env(safe-area-inset-bottom);
   }
+  .modal-card input,
+  .modal-card select { font-size: 16px; }
+
   .modal-actions .primary-btn,
   .modal-actions .secondary-btn,
   .danger-btn {

@@ -1,5 +1,9 @@
+const APP_VERSION = 'v19-payment-type';
 const SUPABASE_URL = 'https://qjicwqpjxsqynoudwylk.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_rl7m3zQsatLJL2Lb3yHPOg_nnCr712U';
+const PAYMENTS_TABLE = 'payments';
+const PAYMENT_HISTORY_TABLE = 'payment_history';
+console.info(`ANCHR ${APP_VERSION} conectado a ${SUPABASE_URL}`);
 
 const today = new Date();
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -55,6 +59,7 @@ const els = {
   deletePaymentBtn: document.querySelector('#deletePaymentBtn'),
   paymentAmountType: document.querySelector('#paymentAmountType'),
   paymentAmount: document.querySelector('#paymentAmount'),
+  paymentAmountField: document.querySelector('#paymentAmountField'),
   paymentDueDay: document.querySelector('#paymentDueDay'),
   paymentLastPaid: document.querySelector('#paymentLastPaid'),
   statusFilter: document.querySelector('#statusFilter'),
@@ -104,6 +109,15 @@ function bindEvents() {
     render();
   });
 
+  els.paymentCategory.addEventListener('change', () => {
+    setSelectedIcon(getDefaultIcon(els.paymentCategory.value));
+    setSelectedColor(getDefaultColor(els.paymentCategory.value));
+    els.paymentAmountType.value = getDefaultAmountType(els.paymentCategory.value);
+    syncAmountField();
+  });
+
+  els.paymentAmountType.addEventListener('change', syncAmountField);
+
   document.addEventListener('click', event => {
     if (!event.target.closest('.menu-wrap')) {
       document.querySelectorAll('.row-menu').forEach(menu => {
@@ -129,7 +143,7 @@ function bindEvents() {
       icon: els.paymentIcon.value,
       iconColor: els.paymentIconColor.value,
       amountType: els.paymentAmountType.value,
-      amount: Number(els.paymentAmount.value),
+      amount: els.paymentAmountType.value === 'fixed' ? Number(els.paymentAmount.value || 0) : 0,
       dueDay: Number(els.paymentDueDay.value),
       lastPaid: els.paymentLastPaid.value,
       lastPaidAmount: existing?.lastPaidAmount || null,
@@ -137,7 +151,8 @@ function bindEvents() {
       history: existing?.history || []
     };
 
-    await savePayment(payment, Boolean(existing));
+    const saved = await savePayment(payment, Boolean(existing));
+    if (!saved) return;
     closeModal();
     await loadPayments();
   });
@@ -255,7 +270,7 @@ async function logout() {
 
 function normalizePayment(payment) {
   return {
-    amountType: 'fixed',
+    amountType: 'variable',
     lastPaidAmount: null,
     history: [],
     icon: getDefaultIcon(payment.category),
@@ -302,8 +317,9 @@ function toDb(payment) {
 }
 
 async function loadPayments() {
+  if (!currentUser) return;
   const { data, error } = await supabaseClient
-    .from('payments')
+    .from(PAYMENTS_TABLE)
     .select('*, payment_history(*)')
     .order('created_at', { ascending: true });
 
@@ -318,17 +334,24 @@ async function loadPayments() {
 }
 
 async function savePayment(payment) {
+  if (!currentUser) {
+    showToast('Inicia sesión para guardar');
+    return false;
+  }
+
   const { error } = await supabaseClient
-    .from('payments')
+    .from(PAYMENTS_TABLE)
     .upsert(toDb(payment), { onConflict: 'id' });
 
   if (error) {
-    showToast('No se pudo guardar');
-    console.error(error);
-    return;
+    const message = error.message || 'No se pudo guardar';
+    showToast(message);
+    console.error('Error guardando pago:', error);
+    return false;
   }
 
   showToast('Pago guardado');
+  return true;
 }
 
 function render() {
@@ -394,7 +417,8 @@ function rowTemplate(payment) {
   const dueInfo = getDueInfo(payment);
   const statusClass = payment.isPaid ? 'paid' : (payment.isOverdue ? 'overdue' : 'pending');
   const statusLabel = payment.isPaid ? 'Pagado' : (payment.isOverdue ? 'Vencido' : 'Pendiente');
-  const amountLabel = payment.amountType === 'variable' ? 'Estimado' : 'Fijo';
+  const amountLabel = payment.amountType === 'variable' ? 'Al pagar' : 'Fijo';
+  const amountCell = payment.amountType === 'variable' ? 'Variable' : money(payment.amount);
   const icon = getIconSvg(payment.icon || getDefaultIcon(payment.category));
 
   return `
@@ -406,7 +430,7 @@ function rowTemplate(payment) {
         </div>
       </td>
       <td>${frequencyLabel}</td>
-      <td>${money(payment.amount)}<span class="amount-type">${amountLabel}</span></td>
+      <td>${amountCell}<span class="amount-type">${amountLabel}</span></td>
       <td><div>Día ${payment.dueDay}</div><em class="due-label ${dueInfo.className}">${dueInfo.label}</em></td>
       <td>${payment.lastPaid ? formatDate(inputDate(payment.lastPaid)) : 'Sin registro'}</td>
       <td><button class="badge ${statusClass}" onclick="togglePaid('${payment.id}')" title="Cambiar estado"><span class="status-dot"></span>${statusLabel}</button></td>
@@ -448,7 +472,7 @@ async function registerPayment(id, amount) {
   const updated = { ...payment, lastPaid: paidDate, lastPaidAmount: amount, paidPeriod: period };
 
   const { error: updateError } = await supabaseClient
-    .from('payments')
+    .from(PAYMENTS_TABLE)
     .update(toDb(updated))
     .eq('id', id);
 
@@ -459,7 +483,7 @@ async function registerPayment(id, amount) {
   }
 
   const { error: historyError } = await supabaseClient
-    .from('payment_history')
+    .from(PAYMENT_HISTORY_TABLE)
     .insert({ user_id: currentUser.id, payment_id: id, amount, period, paid_at: paidDate });
 
   if (historyError) console.error(historyError);
@@ -532,7 +556,7 @@ async function deletePayment(id) {
   const payment = payments.find(item => item.id === id);
   if (!payment) return;
   if (!confirm(`¿Eliminar ${payment.name}?`)) return;
-  const { error } = await supabaseClient.from('payments').delete().eq('id', id);
+  const { error } = await supabaseClient.from(PAYMENTS_TABLE).delete().eq('id', id);
   if (error) { showToast('No se pudo eliminar'); console.error(error); return; }
   closeModal();
   await loadPayments();
@@ -578,8 +602,9 @@ function openModal(payment = null) {
   els.paymentFrequency.value = payment?.frequency || 'monthly';
   setSelectedIcon(payment?.icon || getDefaultIcon(payment?.category || 'Tarjeta'));
   setSelectedColor(payment?.iconColor || getDefaultColor(payment?.category || 'Tarjeta'));
-  els.paymentAmountType.value = payment?.amountType || 'fixed';
+  els.paymentAmountType.value = payment?.amountType || getDefaultAmountType(els.paymentCategory.value);
   els.paymentAmount.value = payment?.amount || '';
+  syncAmountField();
   els.paymentDueDay.value = payment?.dueDay || '';
   els.paymentLastPaid.value = payment?.lastPaid || '';
   els.deletePaymentBtn.classList.toggle('hidden', !payment);
@@ -588,6 +613,20 @@ function openModal(payment = null) {
 function closeModal() {
   els.modal.classList.add('hidden');
   els.form.reset();
+  syncAmountField();
+}
+
+
+function getDefaultAmountType(category) {
+  return ['Suscripción', 'Renta', 'Seguro', 'Préstamo'].includes(category) ? 'fixed' : 'variable';
+}
+
+function syncAmountField() {
+  const isFixed = els.paymentAmountType.value === 'fixed';
+  if (!els.paymentAmountField) return;
+  els.paymentAmountField.classList.toggle('hidden', !isFixed);
+  els.paymentAmount.required = isFixed;
+  if (!isFixed) els.paymentAmount.value = '';
 }
 
 function getDisplayPaidAmount(payment) {

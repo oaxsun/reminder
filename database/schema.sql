@@ -7,7 +7,7 @@ create table if not exists public.payments (
   name text not null,
   category text not null,
   frequency text not null check (frequency in ('monthly', 'bimonthly', 'quarterly', 'yearly')),
-  amount_type text not null default 'fixed' check (amount_type in ('fixed', 'variable')),
+  amount_type text not null default 'variable' check (amount_type in ('fixed', 'variable')),
   amount numeric(12,2) not null default 0,
   due_day int not null check (due_day between 1 and 31),
   icon text not null default 'credit-card',

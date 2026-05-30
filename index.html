@@ -2,8 +2,8 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ANCHR · Reminder</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>ANCHR · Dashboard</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -18,7 +18,6 @@
       <form id="authForm" class="auth-form">
         <label>Correo<input id="authEmail" type="email" required placeholder="tu@email.com" autocomplete="email" /></label>
         <label>Contraseña<input id="authPassword" type="password" required placeholder="••••••••" autocomplete="current-password" /></label>
-        <label class="confirm-password-field hidden" id="confirmPasswordField">Verificar contraseña<input id="authConfirmPassword" type="password" placeholder="••••••••" autocomplete="new-password" /></label>
         <button class="primary-btn auth-submit" type="submit" id="authSubmit">Iniciar sesión</button>
       </form>
       <button class="google-btn" id="googleLoginBtn" type="button">Continuar con Google</button>
@@ -26,7 +25,7 @@
       <p class="auth-message" id="authMessage"></p>
     </div>
   </section>
-  <aside class="sidebar hidden" id="sidebar">
+  <aside class="sidebar">
     <div>
       <div class="brand">
         <div class="brand-mark" aria-hidden="true">
@@ -78,6 +77,7 @@
         </div>
       </div>
       <div class="table-wrap">
+        <div class="mobile-list-head" aria-hidden="true"><span>Pago</span><span>Fecha</span><span>Estado</span><span></span></div>
         <table>
           <thead>
             <tr>
@@ -155,8 +155,8 @@
         </label>
       </div>
       <div class="form-grid">
-        <label>Tipo de monto<select id="paymentAmountType"><option value="fixed">Fijo</option><option value="variable">Variable</option></select></label>
-        <label>Monto estimado<input id="paymentAmount" type="number" min="0" step="0.01" required placeholder="0.00" /></label>
+        <label>Tipo de monto<select id="paymentAmountType"><option value="variable">Variable</option><option value="fixed">Fijo</option></select></label>
+        <label id="paymentAmountField" class="hidden">Monto fijo<input id="paymentAmount" type="number" min="0" step="0.01" placeholder="0.00" /></label>
       </div>
       <div class="form-grid">
         <label>Día límite de pago<input id="paymentDueDay" type="number" min="1" max="31" required placeholder="15" /></label>
@@ -179,6 +179,6 @@
 
   <div class="toast hidden" id="toast">Pago registrado</div>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="js/app.js"></script>
+  <script src="js/app.js?v=19-payment-type"></script>
 </body>
 </html>
