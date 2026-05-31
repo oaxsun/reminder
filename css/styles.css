@@ -1750,3 +1750,140 @@ body.is-calendar .upcoming-amount { font-size: 12px; }
   body.is-calendar .calendar-dot { flex-basis: 13px; padding: 2.5px; border-radius: 6px; }
   body.is-calendar .upcoming-item { grid-template-columns: minmax(0, 1fr) 58px 78px; gap: 6px; }
 }
+
+/* v37 calendar spacing repair */
+body.is-calendar #calendarView {
+  gap: 18px !important;
+  padding-bottom: 28px !important;
+}
+body.is-calendar .calendar-layout {
+  align-items: start !important;
+  gap: 18px !important;
+  margin-bottom: 6px !important;
+}
+body.is-calendar .calendar-card {
+  min-height: 370px !important;
+  height: auto !important;
+  overflow: visible !important;
+  padding: 16px !important;
+}
+body.is-calendar .calendar-grid {
+  display: grid !important;
+  grid-template-columns: repeat(7, minmax(0, 1fr)) !important;
+  grid-auto-rows: auto !important;
+  gap: 5px !important;
+  align-items: stretch !important;
+}
+body.is-calendar .calendar-day {
+  min-height: 43px !important;
+  height: 43px !important;
+  padding: 5px 3px !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 4px !important;
+  overflow: hidden !important;
+}
+body.is-calendar .calendar-day > span {
+  line-height: 1 !important;
+  display: block !important;
+}
+body.is-calendar .calendar-day > div {
+  width: 100% !important;
+  min-height: 17px !important;
+  height: 17px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 2px !important;
+  flex-wrap: nowrap !important;
+  overflow: hidden !important;
+}
+body.is-calendar .calendar-dot {
+  width: 16px !important;
+  height: 16px !important;
+  min-width: 16px !important;
+  flex: 0 0 16px !important;
+  padding: 3px !important;
+  border-radius: 6px !important;
+  display: inline-grid !important;
+  place-items: center !important;
+}
+body.is-calendar .calendar-dot svg {
+  width: 13px !important;
+  height: 13px !important;
+  display: block !important;
+}
+body.is-calendar .day-payments-card {
+  min-height: 370px !important;
+  height: auto !important;
+  overflow: hidden !important;
+}
+body.is-calendar .calendar-upcoming-panel {
+  position: relative !important;
+  z-index: 1 !important;
+  margin-top: 0 !important;
+  overflow: hidden !important;
+}
+body.is-calendar .upcoming-list {
+  padding: 0 18px 4px !important;
+}
+body.is-calendar .upcoming-item {
+  min-height: 58px !important;
+  grid-template-columns: minmax(0,1fr) 96px 92px 76px !important;
+  gap: 12px !important;
+  padding: 12px 0 !important;
+}
+
+@media (max-width: 760px) {
+  body.is-calendar #calendarView {
+    gap: 14px !important;
+    padding-bottom: 18px !important;
+  }
+  body.is-calendar .calendar-layout {
+    gap: 14px !important;
+  }
+  body.is-calendar .calendar-card {
+    min-height: 318px !important;
+    padding: 12px !important;
+  }
+  body.is-calendar .calendar-grid {
+    gap: 3px !important;
+  }
+  body.is-calendar .calendar-day {
+    min-height: 37px !important;
+    height: 37px !important;
+    border-radius: 9px !important;
+    padding: 4px 1px !important;
+    font-size: 11px !important;
+    gap: 3px !important;
+  }
+  body.is-calendar .calendar-day > div {
+    height: 13px !important;
+    min-height: 13px !important;
+    gap: 1px !important;
+  }
+  body.is-calendar .calendar-dot {
+    width: 13px !important;
+    height: 13px !important;
+    min-width: 13px !important;
+    flex-basis: 13px !important;
+    padding: 2px !important;
+    border-radius: 5px !important;
+  }
+  body.is-calendar .calendar-dot svg {
+    width: 10px !important;
+    height: 10px !important;
+  }
+  body.is-calendar .day-payments-card {
+    min-height: 0 !important;
+  }
+  body.is-calendar .calendar-upcoming-panel {
+    margin-top: 0 !important;
+  }
+  body.is-calendar .upcoming-item {
+    min-height: 56px !important;
+    grid-template-columns: minmax(0, 1fr) 58px 78px !important;
+    gap: 8px !important;
+    padding: 12px 0 !important;
+  }
+}
