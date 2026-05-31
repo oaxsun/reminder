@@ -1598,3 +1598,155 @@ body.is-calendar .calendar-payment-card .service-icon {
   }
   body.is-calendar .upcoming-item .upcoming-amount { display: none; }
 }
+
+/* v36 calendar compact layout + expanded icon colors */
+.color-picker {
+  grid-template-columns: repeat(7, 24px);
+  gap: 10px;
+}
+.color-dot.cyan, .service-icon.cyan, .calendar-dot.cyan, .next-payment-icon.cyan { background: #ecfeff; color: #0891b2; border-color: #bae6fd; }
+.color-dot.emerald, .service-icon.emerald, .calendar-dot.emerald, .next-payment-icon.emerald { background: #ecfdf5; color: #059669; border-color: #bbf7d0; }
+.color-dot.lime, .service-icon.lime, .calendar-dot.lime, .next-payment-icon.lime { background: #f7fee7; color: #65a30d; border-color: #d9f99d; }
+.color-dot.yellow, .service-icon.yellow, .calendar-dot.yellow, .next-payment-icon.yellow { background: #fefce8; color: #ca8a04; border-color: #fef08a; }
+.color-dot.coral, .service-icon.coral, .calendar-dot.coral, .next-payment-icon.coral { background: #fff1f2; color: #f43f5e; border-color: #fecdd3; }
+.color-dot.pink, .service-icon.pink, .calendar-dot.pink, .next-payment-icon.pink { background: #fdf2f8; color: #db2777; border-color: #fbcfe8; }
+.color-dot.indigo, .service-icon.indigo, .calendar-dot.indigo, .next-payment-icon.indigo { background: #eef2ff; color: #4f46e5; border-color: #c7d2fe; }
+.color-dot.brown, .service-icon.brown, .calendar-dot.brown, .next-payment-icon.brown { background: #fef3c7; color: #92400e; border-color: #fde68a; }
+.color-dot.blue { background: var(--blue); }
+.color-dot.green { background: var(--green); }
+.color-dot.orange { background: var(--orange); }
+.color-dot.red { background: var(--red); }
+.color-dot.purple { background: #7c3aed; }
+.color-dot.slate { background: #64748b; }
+
+body.is-calendar .app { gap: 10px; }
+body.is-calendar #calendarView { gap: 10px; }
+body.is-calendar .calendar-toolbar { min-height: 32px; }
+body.is-calendar .calendar-actions .secondary-btn,
+body.is-calendar .calendar-actions .primary-btn {
+  min-height: 32px;
+  padding: 6px 11px;
+  font-size: 12px;
+}
+body.is-calendar .next-payment-card {
+  min-height: 88px;
+  padding: 14px 16px;
+  grid-template-columns: 48px minmax(0, 1fr) auto;
+  gap: 12px;
+  border-radius: 15px;
+}
+body.is-calendar .next-payment-card::before {
+  width: 56px;
+  height: 56px;
+  inset: 16px auto auto 16px;
+}
+body.is-calendar .next-payment-icon,
+body.is-calendar .next-payment-icon svg {
+  width: 40px !important;
+  height: 40px !important;
+  max-width: 40px;
+  max-height: 40px;
+}
+body.is-calendar .next-payment-icon { padding: 11px; }
+body.is-calendar .eyebrow { font-size: 11px; }
+body.is-calendar .next-payment-main h3 { font-size: 18px; margin: 3px 0; }
+body.is-calendar .next-payment-main p { font-size: 12px; }
+body.is-calendar .next-payment-date { min-width: 104px; }
+body.is-calendar .next-payment-date strong { font-size: 18px; }
+body.is-calendar .next-payment-date p { font-size: 12px; }
+body.is-calendar .calendar-layout {
+  grid-template-columns: minmax(0, 1.18fr) minmax(260px, .82fr);
+  gap: 12px;
+}
+body.is-calendar .calendar-card { padding: 14px; border-radius: 15px; }
+body.is-calendar .calendar-month-head { margin-bottom: 8px; }
+body.is-calendar .calendar-month-head h3 { font-size: 16px; }
+body.is-calendar .ghost-nav { width: 30px; height: 30px; border-radius: 9px; }
+body.is-calendar .calendar-grid { gap: 4px; }
+body.is-calendar .calendar-weekday { padding: 4px 0; font-size: 10px; }
+body.is-calendar .calendar-day {
+  min-height: 42px;
+  border-radius: 11px;
+  padding: 5px 3px;
+  gap: 3px;
+  font-size: 12px;
+  justify-content: start;
+}
+body.is-calendar .calendar-day > div {
+  width: 100%;
+  min-height: 17px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  flex-wrap: nowrap;
+  overflow: hidden;
+}
+body.is-calendar .calendar-dot,
+body.is-calendar .calendar-dot svg {
+  width: 16px !important;
+  height: 16px !important;
+  max-width: 16px;
+  max-height: 16px;
+}
+body.is-calendar .calendar-dot {
+  display: grid;
+  place-items: center;
+  flex: 0 0 16px;
+  padding: 3px;
+  margin: 0;
+  border-radius: 7px;
+}
+body.is-calendar .day-payments-card { padding: 13px; border-radius: 15px; }
+body.is-calendar .day-payments-head { margin-bottom: 8px; }
+body.is-calendar .day-payments-head h3 { font-size: 15px; }
+body.is-calendar .day-payments-list { gap: 8px; }
+body.is-calendar .calendar-payment-card { padding: 10px; border-radius: 12px; gap: 8px; }
+body.is-calendar .calendar-payment-card .badge { min-width: 82px; height: 26px; font-size: 10px; }
+body.is-calendar .calendar-payment-card p { font-size: 11px; margin: 0; }
+body.is-calendar .calendar-payment-card .secondary-btn { min-height: 30px; padding: 6px 10px; font-size: 11px; }
+body.is-calendar .calendar-upcoming-panel { border-radius: 15px; }
+body.is-calendar .calendar-upcoming-panel .panel-header { padding: 13px 16px; }
+body.is-calendar .calendar-upcoming-panel .panel-header h3 { font-size: 17px; }
+body.is-calendar .upcoming-list { padding: 0 16px; }
+body.is-calendar .upcoming-item {
+  grid-template-columns: minmax(0,1fr) 96px 92px 76px;
+  gap: 10px;
+  padding: 10px 0;
+}
+body.is-calendar .upcoming-item .service-icon,
+body.is-calendar .calendar-payment-card .service-icon { width: 34px; height: 34px; border-radius: 11px; padding: 8px; }
+body.is-calendar .upcoming-date strong { font-size: 12px; }
+body.is-calendar .upcoming-date .due-label { font-size: 10px; }
+body.is-calendar .upcoming-amount { font-size: 12px; }
+
+@media (max-width: 760px) {
+  .color-picker { grid-template-columns: repeat(7, 24px); gap: 9px; }
+  body.is-calendar .app { gap: 10px; }
+  body.is-calendar #calendarView { gap: 10px; }
+  body.is-calendar .next-payment-card {
+    grid-template-columns: 38px minmax(0, 1fr) 72px;
+    min-height: 78px;
+    padding: 11px;
+    gap: 8px;
+  }
+  body.is-calendar .next-payment-icon,
+  body.is-calendar .next-payment-icon svg { width: 32px !important; height: 32px !important; }
+  body.is-calendar .next-payment-icon { padding: 8px; }
+  body.is-calendar .next-payment-main h3 { font-size: 15px; }
+  body.is-calendar .next-payment-date { min-width: 68px; }
+  body.is-calendar .next-payment-date strong { font-size: 13px; }
+  body.is-calendar .calendar-card { padding: 11px; }
+  body.is-calendar .calendar-grid { gap: 2px; }
+  body.is-calendar .calendar-day {
+    min-height: 38px;
+    border-radius: 9px;
+    padding: 4px 1px;
+    font-size: 11px;
+  }
+  body.is-calendar .calendar-day > div { min-height: 14px; gap: 1px; }
+  body.is-calendar .calendar-dot,
+  body.is-calendar .calendar-dot svg { width: 13px !important; height: 13px !important; }
+  body.is-calendar .calendar-dot { flex-basis: 13px; padding: 2.5px; border-radius: 6px; }
+  body.is-calendar .upcoming-item { grid-template-columns: minmax(0, 1fr) 58px 78px; gap: 6px; }
+}

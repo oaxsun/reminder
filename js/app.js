@@ -1,5 +1,5 @@
-console.log('ANCHR v35-calendar-ux-fix');
-const APP_VERSION = 'v35-calendar-ux-fix';
+console.log('ANCHR v36-calendar-compact-colors');
+const APP_VERSION = 'v36-calendar-compact-colors';
 const SUPABASE_URL = 'https://qjicwqpjxsqynoudwylk.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_rl7m3zQsatLJL2Lb3yHPOg_nnCr712U';
 const PAYMENTS_TABLE = 'payments';
