@@ -1,5 +1,5 @@
-console.log('Korah v1.6.0-history-logo-update');
-const APP_VERSION = 'v1.6.0-history-logo-update';
+console.log('Korah v1.7.0-history-primary-fix');
+const APP_VERSION = 'v1.7.0-history-primary-fix';
 const SUPABASE_URL = 'https://qjicwqpjxsqynoudwylk.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_rl7m3zQsatLJL2Lb3yHPOg_nnCr712U';
 const PAYMENTS_TABLE = 'payments';
@@ -167,6 +167,11 @@ function bindEvents() {
   });
 
   els.paymentAmountType.addEventListener('change', syncAmountField);
+
+  els.historyMonthSelect?.addEventListener('change', event => {
+    selectedHistoryMonth = event.target.value;
+    renderHistory();
+  });
 
   document.addEventListener('click', event => {
     if (!event.target.closest('.history-more')) {
@@ -649,18 +654,24 @@ function renderHistory() {
 
 function syncHistoryMonthSelector(rows) {
   if (!els.historyMonthSelect) return;
-  const monthKeys = Array.from(new Set(rows.map(item => toMonthKey(inputDate(item.paid_at)))));
+  const paymentMonths = Array.from(new Set(rows.map(item => toMonthKey(inputDate(item.paid_at))))).sort().reverse();
   const currentKey = toMonthKey(today);
-  if (!monthKeys.includes(currentKey)) monthKeys.unshift(currentKey);
-  monthKeys.sort().reverse();
+  const monthKeys = paymentMonths.includes(currentKey) ? paymentMonths : [currentKey, ...paymentMonths];
 
-  if (!monthKeys.includes(selectedHistoryMonth)) selectedHistoryMonth = monthKeys[0] || currentKey;
+  const previous = selectedHistoryMonth || els.historyMonthSelect.value;
+  const hasRowsForSelected = rows.some(item => toMonthKey(inputDate(item.paid_at)) === previous);
 
-  const previous = els.historyMonthSelect.value;
+  if (!monthKeys.includes(previous)) {
+    selectedHistoryMonth = paymentMonths[0] || currentKey;
+  } else if (previous === currentKey && !hasRowsForSelected && paymentMonths.length) {
+    selectedHistoryMonth = paymentMonths[0];
+  } else {
+    selectedHistoryMonth = previous;
+  }
+
   const options = monthKeys.map(key => `<option value="${key}">${escapeHtml(formatMonthKey(key))}</option>`).join('');
   if (els.historyMonthSelect.innerHTML !== options) els.historyMonthSelect.innerHTML = options;
-  els.historyMonthSelect.value = monthKeys.includes(previous) ? previous : selectedHistoryMonth;
-  selectedHistoryMonth = els.historyMonthSelect.value || selectedHistoryMonth;
+  els.historyMonthSelect.value = selectedHistoryMonth;
 }
 
 function toMonthKey(date) {

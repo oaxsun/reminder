@@ -2371,3 +2371,26 @@ body.is-calendar .upcoming-item {
     top: 38px;
   }
 }
+
+
+/* v1.7 Primary buttons + history restore */
+.primary-btn,
+.auth-submit,
+#openModalBtn,
+#calendarNewPaymentBtn {
+  background: linear-gradient(135deg, var(--purple), var(--purple-2)) !important;
+  color: #fff !important;
+  border-color: transparent !important;
+}
+.primary-btn:hover,
+.auth-submit:hover,
+#openModalBtn:hover,
+#calendarNewPaymentBtn:hover {
+  background: linear-gradient(135deg, #5b21b6, #7c3aed) !important;
+  filter: none !important;
+}
+.primary-btn:focus-visible,
+.auth-submit:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, .18);
+}
