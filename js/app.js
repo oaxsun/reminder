@@ -1,5 +1,5 @@
-console.log('Korah v2.3.0-reports-premium');
-const APP_VERSION = 'v2.3.0-reports-premium';
+console.log('Korah v2.5.0-free-reports-premium-locks');
+const APP_VERSION = 'v2.5.0-free-reports-premium-locks';
 const SUPABASE_URL = 'https://qjicwqpjxsqynoudwylk.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_rl7m3zQsatLJL2Lb3yHPOg_nnCr712U';
 const PAYMENTS_TABLE = 'payments';
@@ -7,6 +7,9 @@ const PAYMENT_HISTORY_TABLE = 'payment_history';
 console.info(`Korah ${APP_VERSION} conectado a ${SUPABASE_URL}`);
 
 const today = new Date();
+const IS_PREMIUM = false;
+const CURRENT_MONTH_KEY = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
+const PREVIOUS_MONTH_KEY = getRelativeMonthKey(CURRENT_MONTH_KEY, -1);
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
   auth: {
     persistSession: true,
@@ -63,6 +66,7 @@ const els = {
   reportsView: document.querySelector('#reportsView'),
   premiumView: document.querySelector('#premiumView'),
   reportMonthSelect: document.querySelector('#reportMonthSelect'),
+  reportMonthDisplay: document.querySelector('#reportMonthDisplay'),
   compareMonthA: document.querySelector('#compareMonthA'),
   compareMonthB: document.querySelector('#compareMonthB'),
   reportTotalMonth: document.querySelector('#reportTotalMonth'),
@@ -188,13 +192,25 @@ function bindEvents() {
   });
 
   els.reportMonthSelect?.addEventListener('change', event => {
+    if (!IS_PREMIUM && event.target.value !== CURRENT_MONTH_KEY) {
+      event.target.value = CURRENT_MONTH_KEY;
+      selectedReportMonth = CURRENT_MONTH_KEY;
+      showToast('Seleccionar otros meses está disponible en Premium');
+      return;
+    }
     selectedReportMonth = event.target.value;
     renderReports();
   });
-  els.compareMonthA?.addEventListener('change', event => { compareMonthA = event.target.value; renderReports(); });
-  els.compareMonthB?.addEventListener('change', event => { compareMonthB = event.target.value; renderReports(); });
-  els.exportPdfBtn?.addEventListener('click', () => { setActiveView('premium'); showToast('Exportar PDF está disponible en Premium'); });
-  els.exportExcelBtn?.addEventListener('click', () => { setActiveView('premium'); showToast('Exportar Excel está disponible en Premium'); });
+  els.compareMonthA?.addEventListener('change', event => {
+    if (!IS_PREMIUM) { event.target.value = CURRENT_MONTH_KEY; showToast('Comparativas personalizadas están disponibles en Premium'); return; }
+    compareMonthA = event.target.value; renderReports();
+  });
+  els.compareMonthB?.addEventListener('change', event => {
+    if (!IS_PREMIUM) { event.target.value = PREVIOUS_MONTH_KEY; showToast('Comparativas personalizadas están disponibles en Premium'); return; }
+    compareMonthB = event.target.value; renderReports();
+  });
+  els.exportPdfBtn?.addEventListener('click', () => { showToast('Exportar PDF está disponible en Premium'); setActiveView('premium'); });
+  els.exportExcelBtn?.addEventListener('click', () => { showToast('Exportar Excel está disponible en Premium'); setActiveView('premium'); });
 
   els.paymentCategory.addEventListener('change', () => {
     setSelectedIcon(getDefaultIcon(els.paymentCategory.value));
@@ -651,6 +667,12 @@ function getHistoryMonthKey(value) {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
 }
 
+function getRelativeMonthKey(monthKey, offset) {
+  const [year, month] = String(monthKey).split('-').map(Number);
+  const date = new Date(year || today.getFullYear(), (month || today.getMonth() + 1) - 1 + offset, 1);
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+}
+
 function formatHistoryMonth(key) {
   const [year, month] = String(key).split('-').map(Number);
   if (!year || !month) return 'Este mes';
@@ -796,17 +818,31 @@ function getAvailableReportMonths(rows) {
 
 function syncReportSelectors(rows) {
   const keys = getAvailableReportMonths(rows);
-  if (!selectedReportMonth || !keys.includes(selectedReportMonth)) selectedReportMonth = keys[0];
-  if (!compareMonthA || !keys.includes(compareMonthA)) compareMonthA = selectedReportMonth;
-  const fallbackB = keys.find(key => key !== compareMonthA) || keys[0];
-  if (!compareMonthB || !keys.includes(compareMonthB) || compareMonthB === compareMonthA) compareMonthB = fallbackB;
-  const options = keys.map(key => `<option value="${key}">${escapeHtml(formatHistoryMonth(key))}</option>`).join('');
+  if (!IS_PREMIUM) {
+    selectedReportMonth = CURRENT_MONTH_KEY;
+    compareMonthA = CURRENT_MONTH_KEY;
+    compareMonthB = PREVIOUS_MONTH_KEY;
+  } else {
+    if (!selectedReportMonth || !keys.includes(selectedReportMonth)) selectedReportMonth = keys[0] || CURRENT_MONTH_KEY;
+    if (!compareMonthA || !keys.includes(compareMonthA)) compareMonthA = selectedReportMonth;
+    const fallbackB = keys.find(key => key !== compareMonthA) || getRelativeMonthKey(compareMonthA, -1);
+    if (!compareMonthB || compareMonthB === compareMonthA) compareMonthB = fallbackB;
+  }
+
+  const fullKeys = Array.from(new Set([...keys, CURRENT_MONTH_KEY, PREVIOUS_MONTH_KEY])).sort().reverse();
+  const options = fullKeys.map(key => `<option value="${key}">${escapeHtml(formatHistoryMonth(key))}</option>`).join('');
   if (els.reportMonthSelect && els.reportMonthSelect.innerHTML !== options) els.reportMonthSelect.innerHTML = options;
   if (els.compareMonthA && els.compareMonthA.innerHTML !== options) els.compareMonthA.innerHTML = options;
   if (els.compareMonthB && els.compareMonthB.innerHTML !== options) els.compareMonthB.innerHTML = options;
-  if (els.reportMonthSelect) els.reportMonthSelect.value = selectedReportMonth;
-  if (els.compareMonthA) els.compareMonthA.value = compareMonthA;
-  if (els.compareMonthB) els.compareMonthB.value = compareMonthB;
+
+  if (els.reportMonthDisplay) els.reportMonthDisplay.textContent = formatHistoryMonth(selectedReportMonth);
+  if (els.reportMonthSelect) {
+    els.reportMonthSelect.value = selectedReportMonth;
+    els.reportMonthSelect.disabled = !IS_PREMIUM;
+    els.reportMonthSelect.title = IS_PREMIUM ? 'Seleccionar mes' : 'Premium permite consultar cualquier mes';
+  }
+  if (els.compareMonthA) { els.compareMonthA.value = compareMonthA; els.compareMonthA.disabled = !IS_PREMIUM; }
+  if (els.compareMonthB) { els.compareMonthB.value = compareMonthB; els.compareMonthB.disabled = !IS_PREMIUM; }
 }
 
 function groupSum(rows, keyFn) {
@@ -836,7 +872,7 @@ function renderReports() {
   const cheap = sortedMonths[sortedMonths.length - 1];
 
   if (els.reportTotalMonth) els.reportTotalMonth.textContent = money(selectedTotal);
-  if (els.reportTotalDelta) els.reportTotalDelta.textContent = formatHistoryMonth(selectedReportMonth);
+  if (els.reportTotalDelta) els.reportTotalDelta.textContent = IS_PREMIUM ? formatHistoryMonth(selectedReportMonth) : 'Free: solo mes actual';
   if (els.reportAverageMonth) els.reportAverageMonth.textContent = money(average);
   if (els.reportExpensiveMonth) els.reportExpensiveMonth.textContent = expensive ? formatHistoryMonth(expensive.key).replace(' de ', ' ') : '—';
   if (els.reportExpensiveAmount) els.reportExpensiveAmount.textContent = money(expensive?.amount || 0);

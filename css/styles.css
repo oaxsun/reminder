@@ -3154,3 +3154,140 @@ button[type="submit"].primary-btn,
   .premium-notifications-card .report-icon { width: 36px; height: 36px; }
   .premium-notifications-card button { grid-column: 1 / -1; }
 }
+
+/* Korah v2.5 reportes free/premium UX */
+.premium-mini-cta {
+  min-height: 40px;
+  border: 1px solid #d9ccff;
+  color: var(--purple);
+  background: #fff;
+  border-radius: 12px;
+  padding: 0 14px;
+  font-weight: 850;
+  cursor: pointer;
+}
+.report-free-badge,
+.premium-lock-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 28px;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: #f3edff;
+  color: var(--purple);
+  font-size: 11px;
+  font-weight: 850;
+  border: 1px solid #e2d7ff;
+  white-space: nowrap;
+}
+.premium-lock-chip {
+  height: 32px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+.report-month-control.is-locked,
+.report-month-control:has(select:disabled) {
+  background: linear-gradient(135deg, #fff, #fbf8ff);
+  border-color: #dccfff;
+}
+.report-month-control:has(select:disabled)::after {
+  content: 'Premium desbloquea otros meses';
+  position: absolute;
+  left: 44px;
+  bottom: -17px;
+  font-size: 10px;
+  font-weight: 750;
+  color: #8b5cf6;
+  white-space: nowrap;
+  opacity: .9;
+}
+.locked-compare-controls {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px !important;
+}
+.locked-compare-controls select:disabled {
+  opacity: .9;
+  background: #fbfcff;
+  color: #64748b;
+  cursor: not-allowed;
+}
+.compact-premium-link {
+  width: 100%;
+  margin-top: 8px;
+  background: #fbf8ff;
+}
+#reportsView .reports-header-row {
+  align-items: flex-start;
+}
+#reportsView .reports-header-row > div:first-child::before {
+  content: 'Reporte del mes actual';
+  display: block;
+  color: var(--text);
+  font-weight: 900;
+  font-size: 15px;
+  letter-spacing: -.02em;
+}
+#reportsView .reports-header-row > div:first-child::after {
+  content: 'Free incluye el reporte de este mes. Premium desbloquea meses anteriores, comparativas y exportación.';
+  display: block;
+  margin-top: 3px;
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 650;
+}
+#reportsView .reports-metrics-grid {
+  grid-template-columns: 1.1fr 1fr 1fr 1fr;
+}
+#reportsView .report-metric-card:first-child {
+  border-color: #d9ccff;
+  background: linear-gradient(135deg, #fff, #faf7ff);
+}
+#reportsView .category-card .category-chart-layout {
+  grid-template-columns: 170px minmax(0, 1fr);
+  gap: 16px;
+}
+#reportsView .donut-chart {
+  width: 168px;
+  height: 168px;
+}
+#reportsView .donut-chart::after { inset: 40px; }
+#reportsView .trend-chart,
+#reportsView .trend-chart svg { min-height: 188px; height: 188px; }
+#reportsView .compare-card,
+#reportsView .export-card {
+  min-height: 0;
+}
+.export-option {
+  position: relative;
+  opacity: .8;
+}
+.export-option::after {
+  content: 'Premium';
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  padding: 3px 7px;
+  border-radius: 999px;
+  background: #f3edff;
+  color: var(--purple);
+  font-size: 10px;
+  font-weight: 850;
+}
+@media (max-width: 760px) {
+  #reportsView { height: auto; overflow: visible; padding-bottom: 92px; }
+  #reportsView .reports-header-row { gap: 12px; }
+  #reportsView .reports-header-row > div:first-child::before { font-size: 14px; }
+  #reportsView .reports-header-row > div:first-child::after { font-size: 11px; line-height: 1.35; }
+  .reports-actions { grid-template-columns: 1fr auto; }
+  .premium-mini-cta { min-height: 44px; }
+  .report-month-control:has(select:disabled)::after { display: none; }
+  #reportsView .reports-metrics-grid { grid-template-columns: 1fr 1fr; }
+  #reportsView .category-card .category-chart-layout { grid-template-columns: 1fr; }
+  .locked-compare-controls { grid-template-columns: 1fr auto 1fr; width: 100%; }
+  .locked-compare-controls .premium-lock-chip { grid-column: 1 / -1; width: 100%; }
+}
+.report-month-control #reportMonthDisplay { display: inline-block; min-width: 130px; padding-left: 2px; pointer-events: none; }
+@media (max-width: 760px) { .report-month-control #reportMonthDisplay { min-width: 0; } }

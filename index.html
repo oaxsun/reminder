@@ -188,10 +188,11 @@
         <div class="reports-actions">
           <label class="report-month-control" aria-label="Seleccionar mes de reportes">
             <span class="sf"><svg viewBox="0 0 24 24"><path d="M6 4h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2ZM4 9h16M8 3v4M16 3v4"/></svg></span>
+            <span id="reportMonthDisplay">Junio de 2026</span>
             <select id="reportMonthSelect"></select>
             <span class="select-chevron"><svg viewBox="0 0 24 24"><path d="m7 10 5 5 5-5"/></svg></span>
           </label>
-          <button class="filter-btn" type="button" data-view="premium"><span class="sf"><svg viewBox="0 0 24 24"><path d="M4 6h16M7 12h10M10 18h4"/></svg></span> Premium</button>
+          <button class="premium-mini-cta" type="button" data-view="premium">Premium</button>
         </div>
       </div>
 
@@ -204,7 +205,7 @@
 
       <section class="reports-grid-main">
         <article class="report-card category-card">
-          <div class="report-card-head"><h3>Gastos por categoría</h3><select id="categoryChartMode"><option>Monto</option><option>Porcentaje</option></select></div>
+          <div class="report-card-head"><h3>Gastos por categoría</h3><span class="report-free-badge">Mes actual</span></div>
           <div class="category-chart-layout">
             <div class="donut-chart" id="categoryDonut"><span>Total<br><strong>$0</strong></span></div>
             <div class="category-legend" id="categoryLegend"></div>
@@ -218,9 +219,9 @@
 
       <section class="reports-bottom-grid">
         <article class="report-card compare-card">
-          <div class="report-card-head compare-head"><h3>Comparativa de meses</h3><div><select id="compareMonthA"></select><span>vs</span><select id="compareMonthB"></select></div></div>
+          <div class="report-card-head compare-head"><h3>Comparativa de meses</h3><div class="locked-compare-controls"><select id="compareMonthA" disabled></select><span>vs</span><select id="compareMonthB" disabled></select><button type="button" class="premium-lock-chip" data-view="premium">Premium</button></div></div>
           <div id="compareList" class="compare-list"></div>
-          <button class="outline-purple-btn" type="button" data-view="premium">Ver detalle completo</button>
+          <button class="outline-purple-btn compact-premium-link" type="button" data-view="premium">Comparativa avanzada en Premium</button>
         </article>
         <article class="report-card export-card">
           <h3>Exportar reportes</h3>
