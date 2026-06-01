@@ -1,5 +1,5 @@
-console.log('Korah v2.2.0-history-mobile-actions');
-const APP_VERSION = 'v2.2.0-history-mobile-actions';
+console.log('Korah v2.3.0-reports-premium');
+const APP_VERSION = 'v2.3.0-reports-premium';
 const SUPABASE_URL = 'https://qjicwqpjxsqynoudwylk.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_rl7m3zQsatLJL2Lb3yHPOg_nnCr712U';
 const PAYMENTS_TABLE = 'payments';
@@ -28,6 +28,9 @@ let initialLoadDone = false;
 let paymentsLoadTimer = null;
 let lastLoadedUserId = null;
 let selectedHistoryMonth = '';
+let selectedReportMonth = '';
+let compareMonthA = '';
+let compareMonthB = '';
 let isLoadingPayments = false;
 
 const els = {
@@ -57,6 +60,24 @@ const els = {
   historyCount: document.querySelector('#historyCount'),
   historyRangeLabel: document.querySelector('#historyRangeLabel'),
   historyMonthSelect: document.querySelector('#historyMonthSelect'),
+  reportsView: document.querySelector('#reportsView'),
+  premiumView: document.querySelector('#premiumView'),
+  reportMonthSelect: document.querySelector('#reportMonthSelect'),
+  compareMonthA: document.querySelector('#compareMonthA'),
+  compareMonthB: document.querySelector('#compareMonthB'),
+  reportTotalMonth: document.querySelector('#reportTotalMonth'),
+  reportTotalDelta: document.querySelector('#reportTotalDelta'),
+  reportAverageMonth: document.querySelector('#reportAverageMonth'),
+  reportExpensiveMonth: document.querySelector('#reportExpensiveMonth'),
+  reportExpensiveAmount: document.querySelector('#reportExpensiveAmount'),
+  reportCheapMonth: document.querySelector('#reportCheapMonth'),
+  reportCheapAmount: document.querySelector('#reportCheapAmount'),
+  categoryDonut: document.querySelector('#categoryDonut'),
+  categoryLegend: document.querySelector('#categoryLegend'),
+  trendChart: document.querySelector('#trendChart'),
+  compareList: document.querySelector('#compareList'),
+  exportPdfBtn: document.querySelector('#exportPdfBtn'),
+  exportExcelBtn: document.querySelector('#exportExcelBtn'),
   moreView: document.querySelector('#moreView'),
   desktopNav: document.querySelector('#desktopNav'),
   calendarNewPaymentBtn: document.querySelector('#calendarNewPaymentBtn'),
@@ -165,6 +186,15 @@ function bindEvents() {
     if (els.historyRangeLabel) els.historyRangeLabel.textContent = formatHistoryMonth(selectedHistoryMonth);
     renderHistory();
   });
+
+  els.reportMonthSelect?.addEventListener('change', event => {
+    selectedReportMonth = event.target.value;
+    renderReports();
+  });
+  els.compareMonthA?.addEventListener('change', event => { compareMonthA = event.target.value; renderReports(); });
+  els.compareMonthB?.addEventListener('change', event => { compareMonthB = event.target.value; renderReports(); });
+  els.exportPdfBtn?.addEventListener('click', () => { setActiveView('premium'); showToast('Exportar PDF está disponible en Premium'); });
+  els.exportExcelBtn?.addEventListener('click', () => { setActiveView('premium'); showToast('Exportar Excel está disponible en Premium'); });
 
   els.paymentCategory.addEventListener('change', () => {
     setSelectedIcon(getDefaultIcon(els.paymentCategory.value));
@@ -582,7 +612,9 @@ function render() {
   renderSummary(enriched);
   if (activeView === 'calendar') renderCalendar();
   if (activeView === 'history') renderHistory();
+  if (activeView === 'reports') renderReports();
 }
+
 
 function setActiveView(view) {
   activeView = view || 'dashboard';
@@ -590,13 +622,15 @@ function setActiveView(view) {
     dashboard: ['Dashboard', 'Hola, aquí tienes el resumen de tus pagos.'],
     calendar: ['Calendario', 'Visualiza tus pagos y fechas de vencimiento.'],
     history: ['Historial', 'Consulta tus pagos registrados.'],
+    reports: ['Reportes', 'Analiza tus gastos y toma mejores decisiones.'],
+    premium: ['Premium', 'Desbloquea todo el poder de tus finanzas.'],
     more: ['Más', 'Configuración y opciones de Korah.']
   };
   const [title, copy] = titles[activeView] || titles.dashboard;
   if (els.topbarTitle) els.topbarTitle.textContent = title;
   if (els.topbarCopy) els.topbarCopy.textContent = copy;
 
-  ['dashboard', 'calendar', 'history', 'more'].forEach(name => {
+  ['dashboard', 'calendar', 'history', 'reports', 'premium', 'more'].forEach(name => {
     const screen = els[`${name}View`];
     screen?.classList.toggle('hidden', name !== activeView);
   });
@@ -607,6 +641,7 @@ function setActiveView(view) {
 
   if (activeView === 'calendar') renderCalendar();
   if (activeView === 'history') renderHistory();
+  if (activeView === 'reports') renderReports();
 }
 
 
@@ -728,6 +763,161 @@ function renderHistory() {
   if (els.historyCount) els.historyCount.textContent = `Mostrando 1 a ${rows.length} de ${allRows.length} pagos`;
 }
 
+
+
+function buildHistoryRows() {
+  return [...paymentHistory]
+    .map(item => {
+      const payment = payments.find(payment => payment.id === item.payment_id) || {};
+      const paidDate = parseDateValue(item.paid_at || item.created_at);
+      if (!paidDate || Number.isNaN(paidDate.getTime())) return null;
+      const category = payment.category || item.category || 'Otros';
+      const frequency = payment.frequency || item.frequency || 'monthly';
+      return {
+        ...item,
+        payment,
+        name: payment.name || item.name || 'Pago eliminado',
+        category,
+        frequency,
+        amount: Number(item.amount || 0),
+        date: paidDate,
+        monthKey: getHistoryMonthKey(paidDate)
+      };
+    })
+    .filter(Boolean)
+    .sort((a, b) => b.date - a.date);
+}
+
+function getAvailableReportMonths(rows) {
+  const keys = Array.from(new Set(rows.map(item => item.monthKey).filter(Boolean))).sort().reverse();
+  const currentKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
+  return keys.length ? keys : [currentKey];
+}
+
+function syncReportSelectors(rows) {
+  const keys = getAvailableReportMonths(rows);
+  if (!selectedReportMonth || !keys.includes(selectedReportMonth)) selectedReportMonth = keys[0];
+  if (!compareMonthA || !keys.includes(compareMonthA)) compareMonthA = selectedReportMonth;
+  const fallbackB = keys.find(key => key !== compareMonthA) || keys[0];
+  if (!compareMonthB || !keys.includes(compareMonthB) || compareMonthB === compareMonthA) compareMonthB = fallbackB;
+  const options = keys.map(key => `<option value="${key}">${escapeHtml(formatHistoryMonth(key))}</option>`).join('');
+  if (els.reportMonthSelect && els.reportMonthSelect.innerHTML !== options) els.reportMonthSelect.innerHTML = options;
+  if (els.compareMonthA && els.compareMonthA.innerHTML !== options) els.compareMonthA.innerHTML = options;
+  if (els.compareMonthB && els.compareMonthB.innerHTML !== options) els.compareMonthB.innerHTML = options;
+  if (els.reportMonthSelect) els.reportMonthSelect.value = selectedReportMonth;
+  if (els.compareMonthA) els.compareMonthA.value = compareMonthA;
+  if (els.compareMonthB) els.compareMonthB.value = compareMonthB;
+}
+
+function groupSum(rows, keyFn) {
+  const map = new Map();
+  rows.forEach(row => {
+    const key = keyFn(row) || 'Otros';
+    map.set(key, (map.get(key) || 0) + Number(row.amount || 0));
+  });
+  return Array.from(map.entries()).map(([key, amount]) => ({ key, amount })).sort((a, b) => b.amount - a.amount);
+}
+
+function getCategoryColor(index) {
+  return ['#6D38F5', '#2f80ed', '#22c55e', '#ff9f2d', '#f45b7f', '#94a3b8', '#06b6d4', '#a855f7'][index % 8];
+}
+
+function renderReports() {
+  if (!els.reportsView) return;
+  const rows = buildHistoryRows();
+  syncReportSelectors(rows);
+  const selectedRows = rows.filter(row => row.monthKey === selectedReportMonth);
+  const selectedTotal = sum(selectedRows.map(row => row.amount));
+  const byMonth = groupSum(rows, row => row.monthKey).sort((a, b) => a.key.localeCompare(b.key));
+  const monthsWithData = byMonth.filter(item => item.amount > 0);
+  const average = monthsWithData.length ? sum(monthsWithData.map(item => item.amount)) / monthsWithData.length : 0;
+  const sortedMonths = [...monthsWithData].sort((a, b) => b.amount - a.amount);
+  const expensive = sortedMonths[0];
+  const cheap = sortedMonths[sortedMonths.length - 1];
+
+  if (els.reportTotalMonth) els.reportTotalMonth.textContent = money(selectedTotal);
+  if (els.reportTotalDelta) els.reportTotalDelta.textContent = formatHistoryMonth(selectedReportMonth);
+  if (els.reportAverageMonth) els.reportAverageMonth.textContent = money(average);
+  if (els.reportExpensiveMonth) els.reportExpensiveMonth.textContent = expensive ? formatHistoryMonth(expensive.key).replace(' de ', ' ') : '—';
+  if (els.reportExpensiveAmount) els.reportExpensiveAmount.textContent = money(expensive?.amount || 0);
+  if (els.reportCheapMonth) els.reportCheapMonth.textContent = cheap ? formatHistoryMonth(cheap.key).replace(' de ', ' ') : '—';
+  if (els.reportCheapAmount) els.reportCheapAmount.textContent = money(cheap?.amount || 0);
+
+  renderCategoryReport(selectedRows, selectedTotal);
+  renderTrendReport(byMonth);
+  renderCompareReport(rows);
+}
+
+function renderCategoryReport(rows, total) {
+  if (!els.categoryDonut || !els.categoryLegend) return;
+  const categories = groupSum(rows, row => row.category);
+  if (!categories.length || total <= 0) {
+    els.categoryDonut.style.background = '#f3edff';
+    els.categoryDonut.innerHTML = `<span>Total<br><strong>${money(0)}</strong></span>`;
+    els.categoryLegend.innerHTML = `<p class="empty-copy">No hay datos para este mes.</p>`;
+    return;
+  }
+  let start = 0;
+  const segments = categories.map((cat, index) => {
+    const pct = (cat.amount / total) * 100;
+    const end = start + pct;
+    const segment = `${getCategoryColor(index)} ${start}% ${end}%`;
+    start = end;
+    return segment;
+  });
+  els.categoryDonut.style.background = `conic-gradient(${segments.join(', ')})`;
+  els.categoryDonut.innerHTML = `<span>Total<br><strong>${money(total)}</strong></span>`;
+  els.categoryLegend.innerHTML = categories.map((cat, index) => {
+    const pct = total ? Math.round((cat.amount / total) * 100) : 0;
+    return `<div class="legend-row"><span><i style="background:${getCategoryColor(index)}"></i>${escapeHtml(cat.key)}</span><strong>${money(cat.amount)}</strong><em>${pct}%</em></div>`;
+  }).join('');
+}
+
+function renderTrendReport(byMonth) {
+  if (!els.trendChart) return;
+  const keys = getAvailableReportMonths(buildHistoryRows()).slice(0, 6).reverse();
+  const data = keys.map(key => ({ key, amount: byMonth.find(item => item.key === key)?.amount || 0 }));
+  const max = Math.max(...data.map(item => item.amount), 1);
+  const width = 520;
+  const height = 230;
+  const pad = 36;
+  const step = data.length > 1 ? (width - pad * 2) / (data.length - 1) : 1;
+  const points = data.map((item, index) => {
+    const x = pad + index * step;
+    const y = height - pad - (item.amount / max) * (height - pad * 2);
+    return { ...item, x, y };
+  });
+  const polyline = points.map(p => `${p.x},${p.y}`).join(' ');
+  const area = `${pad},${height - pad} ${polyline} ${width - pad},${height - pad}`;
+  els.trendChart.innerHTML = `<svg viewBox="0 0 ${width} ${height}" role="img" aria-label="Evolución mensual">
+    <defs><linearGradient id="korahTrend" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#6D38F5" stop-opacity=".25"/><stop offset="100%" stop-color="#6D38F5" stop-opacity="0"/></linearGradient></defs>
+    <g class="trend-grid"><line x1="${pad}" y1="${pad}" x2="${width-pad}" y2="${pad}"/><line x1="${pad}" y1="${height/2}" x2="${width-pad}" y2="${height/2}"/><line x1="${pad}" y1="${height-pad}" x2="${width-pad}" y2="${height-pad}"/></g>
+    <polygon points="${area}" fill="url(#korahTrend)"/>
+    <polyline points="${polyline}" fill="none" stroke="#6D38F5" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+    ${points.map(p => `<circle cx="${p.x}" cy="${p.y}" r="5" fill="#6D38F5"/>`).join('')}
+    ${points.map(p => `<text x="${p.x}" y="${height-10}" text-anchor="middle">${formatHistoryMonth(p.key).slice(0,3)}</text>`).join('')}
+  </svg>`;
+}
+
+function renderCompareReport(rows) {
+  if (!els.compareList) return;
+  const aRows = rows.filter(row => row.monthKey === compareMonthA);
+  const bRows = rows.filter(row => row.monthKey === compareMonthB);
+  const aCats = groupSum(aRows, row => row.category);
+  const bCats = groupSum(bRows, row => row.category);
+  const categories = Array.from(new Set([...aCats.map(i => i.key), ...bCats.map(i => i.key)])).slice(0, 6);
+  if (!categories.length) {
+    els.compareList.innerHTML = `<p class="empty-copy">No hay datos suficientes para comparar.</p>`;
+    return;
+  }
+  els.compareList.innerHTML = categories.map((category, index) => {
+    const a = aCats.find(item => item.key === category)?.amount || 0;
+    const b = bCats.find(item => item.key === category)?.amount || 0;
+    const diff = b ? ((a - b) / b) * 100 : (a ? 100 : 0);
+    const positive = diff >= 0;
+    return `<div class="compare-row"><span><i style="background:${getCategoryColor(index)}"></i>${escapeHtml(category)}</span><strong>${money(a)}</strong><em>vs ${money(b)}</em><b class="${positive ? 'up' : 'down'}">${positive ? '↑' : '↓'} ${Math.abs(diff).toFixed(1)}%</b></div>`;
+  }).join('');
+}
 
 function renderDashboardSkeletonRows() {
   return Array.from({ length: 6 }).map(() => `
