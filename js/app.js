@@ -1,5 +1,5 @@
-console.log('Korah v1.2.0-cycle-coverage-fix');
-const APP_VERSION = 'v1.2.0-cycle-coverage-fix';
+console.log('Korah v1.3.0-monthly-totals-fix');
+const APP_VERSION = 'v1.3.0-monthly-totals-fix';
 const SUPABASE_URL = 'https://qjicwqpjxsqynoudwylk.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_rl7m3zQsatLJL2Lb3yHPOg_nnCr712U';
 const PAYMENTS_TABLE = 'payments';
@@ -504,9 +504,9 @@ function render() {
   }));
 
   const visible = enriched.filter(payment => {
-    if (activeFilter === 'paid') return payment.isPaid;
-    if (activeFilter === 'pending') return !payment.isPaid;
-    if (activeFilter === 'overdue') return !payment.isPaid && payment.isOverdue;
+    if (activeFilter === 'paid') return wasPaidInCurrentMonth(payment);
+    if (activeFilter === 'pending') return isPendingCurrentMonth(payment);
+    if (activeFilter === 'overdue') return isOverdueCurrentMonth(payment);
     return true;
   }).sort(sortPayments);
 
@@ -679,16 +679,24 @@ function formatShortDate(date) {
 }
 
 function renderSummary(items) {
-  const total = sum(items.map(item => item.amount));
-  const paidItems = items.filter(item => item.isPaid);
-  const pendingItems = items.filter(item => !item.isPaid);
-  const overdueItems = items.filter(item => !item.isPaid && item.isOverdue);
+  // Dashboard totals are about the current calendar month, not about every
+  // payment that is covered by a longer cycle. Example: if a bimonthly bill was
+  // paid in May, it remains visually "Pagado" during June, but it should not
+  // add $0 or an old amount to June's paid summary.
+  const paidItems = items.filter(wasPaidInCurrentMonth);
+  const pendingItems = items.filter(isPendingCurrentMonth);
+  const overdueItems = items.filter(isOverdueCurrentMonth);
+
+  const paidTotal = sum(paidItems.map(getDisplayPaidAmount));
+  const pendingTotal = sum(pendingItems.map(getOpenMonthAmount));
+  const overdueTotal = sum(overdueItems.map(getOpenMonthAmount));
+  const total = paidTotal + pendingTotal;
 
   els.totalMonth.textContent = money(total);
-  els.totalPaid.textContent = money(sum(paidItems.map(getDisplayPaidAmount)));
-  els.totalPending.textContent = money(sum(pendingItems.map(item => item.amount)));
-  els.totalOverdue.textContent = money(sum(overdueItems.map(item => item.amount)));
-  els.totalCount.textContent = plural(items.length, 'pago', 'pagos');
+  els.totalPaid.textContent = money(paidTotal);
+  els.totalPending.textContent = money(pendingTotal);
+  els.totalOverdue.textContent = money(overdueTotal);
+  els.totalCount.textContent = plural(paidItems.length + pendingItems.length, 'pago', 'pagos');
   els.paidCount.textContent = plural(paidItems.length, 'pago', 'pagos');
   els.pendingCount.textContent = plural(pendingItems.length, 'pago', 'pagos');
   els.overdueCount.textContent = plural(overdueItems.length, 'pago', 'pagos');
@@ -827,6 +835,34 @@ function isPaid(payment) {
 
 function isOverdue(payment) {
   return !isPaid(payment) && getDueDate(payment) < startOfToday();
+}
+
+function isSameMonth(a, b = new Date()) {
+  return a && a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth();
+}
+
+function wasPaidInCurrentMonth(payment) {
+  if (!payment.lastPaid) return false;
+  return isSameMonth(inputDate(payment.lastPaid), startOfToday());
+}
+
+function isDueInCurrentMonth(payment) {
+  return isSameMonth(getDueDate(payment), startOfToday());
+}
+
+function isPendingCurrentMonth(payment) {
+  return !isPaid(payment) && isDueInCurrentMonth(payment);
+}
+
+function isOverdueCurrentMonth(payment) {
+  return isPendingCurrentMonth(payment) && isOverdue(payment);
+}
+
+function getOpenMonthAmount(payment) {
+  // Variable bills do not have a reliable pending amount. They only affect the
+  // month totals once the user registers the real paid amount.
+  if ((payment.amountType || 'variable') === 'variable') return 0;
+  return Number(payment.amount || 0);
 }
 
 function getDueDate(payment) {
