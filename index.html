@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/styles.css?v=1.0.0-korah-production" />
+  <link rel="stylesheet" href="css/styles.css?v=1.4.0-history" />
 </head>
 <body>
   <section class="auth-screen hidden" id="authScreen">
@@ -42,6 +42,12 @@
       </nav>
     </div>
     <div class="sidebar-bottom">
+      <div class="premium-card">
+        <div class="premium-crown">♛</div>
+        <strong>Korah Premium</strong>
+        <p>Obtén reportes avanzados, categorías personalizadas y más beneficios.</p>
+        <button type="button">Conocer más <span>›</span></button>
+      </div>
       <div class="user-card"><div class="avatar" id="userAvatar">E</div><strong id="userName">Usuario</strong><button class="logout-btn" id="logoutBtn" type="button">Salir</button></div>
     </div>
   </aside>
@@ -135,7 +141,38 @@
     </section>
 
     <section class="view-screen hidden" id="historyView">
-      <div class="placeholder-panel"><h3>Historial</h3><p>Próximamente verás aquí todos los pagos registrados y sus montos.</p></div>
+      <div class="history-toolbar">
+        <div></div>
+        <div class="history-actions">
+          <button class="date-filter" type="button"><span class="sf"><svg viewBox="0 0 24 24"><path d="M6 4h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2ZM4 9h16M8 3v4M16 3v4"/></svg></span><span id="historyRangeLabel">Este mes</span><span>⌄</span></button>
+          <button class="filter-btn" type="button"><span class="sf"><svg viewBox="0 0 24 24"><path d="M4 5h16l-6 7v5l-4 2v-7L4 5Z"/></svg></span>Filtros</button>
+        </div>
+      </div>
+      <section class="history-panel">
+        <div class="history-table-wrap">
+          <table class="history-table">
+            <thead>
+              <tr>
+                <th>Concepto</th>
+                <th>Fecha de pago</th>
+                <th>Categoría</th>
+                <th>Frecuencia</th>
+                <th>Monto</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="historyTable"></tbody>
+          </table>
+          <div class="history-empty hidden" id="historyEmpty">
+            <strong>Aún no hay pagos registrados</strong>
+            <p>Cuando marques un pago como completado, aparecerá aquí.</p>
+          </div>
+        </div>
+        <div class="history-footer">
+          <span id="historyCount">Mostrando 0 pagos</span>
+          <div class="history-pagination"><button type="button">‹</button><button type="button" class="active">1</button><button type="button">›</button></div>
+        </div>
+      </section>
     </section>
 
     <section class="view-screen hidden" id="moreView">
@@ -234,6 +271,6 @@
 
   <div class="toast hidden" id="toast">Pago registrado</div>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="js/app.js?v=1.0.0-korah-production"></script>
+  <script src="js/app.js?v=1.4.0-history"></script>
 </body>
 </html>

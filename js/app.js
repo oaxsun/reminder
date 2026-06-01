@@ -1,5 +1,5 @@
-console.log('Korah v1.3.0-monthly-totals-fix');
-const APP_VERSION = 'v1.3.0-monthly-totals-fix';
+console.log('Korah v1.4.0-history-module');
+const APP_VERSION = 'v1.4.0-history-module';
 const SUPABASE_URL = 'https://qjicwqpjxsqynoudwylk.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_rl7m3zQsatLJL2Lb3yHPOg_nnCr712U';
 const PAYMENTS_TABLE = 'payments';
@@ -18,6 +18,7 @@ const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_
 
 let currentUser = null;
 let payments = [];
+let paymentHistory = [];
 let activeFilter = 'all';
 let activeView = 'dashboard';
 let calendarCursor = new Date(today.getFullYear(), today.getMonth(), 1);
@@ -49,6 +50,10 @@ const els = {
   dashboardView: document.querySelector('#dashboardView'),
   calendarView: document.querySelector('#calendarView'),
   historyView: document.querySelector('#historyView'),
+  historyTable: document.querySelector('#historyTable'),
+  historyEmpty: document.querySelector('#historyEmpty'),
+  historyCount: document.querySelector('#historyCount'),
+  historyRangeLabel: document.querySelector('#historyRangeLabel'),
   moreView: document.querySelector('#moreView'),
   desktopNav: document.querySelector('#desktopNav'),
   calendarNewPaymentBtn: document.querySelector('#calendarNewPaymentBtn'),
@@ -466,11 +471,52 @@ async function loadPayments(source = 'manual') {
     }
 
     payments = Array.isArray(data) ? data.map(fromDb) : [];
+    await loadPaymentHistory(session.access_token);
     console.info(`Korah ${APP_VERSION}: pagos cargados REST (${source})`, payments.length, payments.map(item => item.name));
     render();
   } catch (error) {
     console.error('Error cargando pagos:', error);
     showToast('No se pudieron cargar los pagos');
+  }
+}
+
+async function loadPaymentHistory(accessToken) {
+  if (!currentUser || !accessToken) {
+    paymentHistory = [];
+    return;
+  }
+
+  try {
+    const url = `${SUPABASE_URL}/rest/v1/${PAYMENT_HISTORY_TABLE}?select=*&user_id=eq.${encodeURIComponent(currentUser.id)}&order=paid_at.desc&order=created_at.desc`;
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        apikey: SUPABASE_ANON_KEY,
+        Authorization: `Bearer ${accessToken}`,
+        Accept: 'application/json'
+      },
+      cache: 'no-store'
+    });
+
+    const text = await response.text();
+    let data = [];
+    try {
+      data = text ? JSON.parse(text) : [];
+    } catch (parseError) {
+      console.error('Korah respuesta no JSON al cargar historial:', text);
+      throw parseError;
+    }
+
+    if (!response.ok) {
+      console.error('Korah error cargando historial:', response.status, data);
+      paymentHistory = [];
+      return;
+    }
+
+    paymentHistory = Array.isArray(data) ? data : [];
+  } catch (error) {
+    console.error('Error cargando historial:', error);
+    paymentHistory = [];
   }
 }
 
@@ -514,6 +560,7 @@ function render() {
   els.empty.classList.toggle('hidden', payments.length > 0);
   renderSummary(enriched);
   if (activeView === 'calendar') renderCalendar();
+  if (activeView === 'history') renderHistory();
 }
 
 function setActiveView(view) {
@@ -538,8 +585,61 @@ function setActiveView(view) {
   });
 
   if (activeView === 'calendar') renderCalendar();
+  if (activeView === 'history') renderHistory();
 }
 
+
+function renderHistory() {
+  if (!els.historyTable) return;
+
+  const frequencyLabels = { monthly: 'Mensual', bimonthly: 'Bimestral', quarterly: 'Trimestral', yearly: 'Anual' };
+  const rows = [...paymentHistory].sort((a, b) => {
+    const dateDiff = inputDate(b.paid_at).getTime() - inputDate(a.paid_at).getTime();
+    if (dateDiff !== 0) return dateDiff;
+    return String(b.created_at || '').localeCompare(String(a.created_at || ''));
+  });
+
+  const monthLabel = new Intl.DateTimeFormat('es-MX', { month: 'long', year: 'numeric' }).format(today);
+  if (els.historyRangeLabel) els.historyRangeLabel.textContent = monthLabel.charAt(0).toUpperCase() + monthLabel.slice(1);
+
+  if (!rows.length) {
+    els.historyTable.innerHTML = '';
+    els.historyEmpty?.classList.remove('hidden');
+    if (els.historyCount) els.historyCount.textContent = 'Mostrando 0 pagos';
+    return;
+  }
+
+  els.historyEmpty?.classList.add('hidden');
+  els.historyTable.innerHTML = rows.map(item => {
+    const payment = payments.find(payment => payment.id === item.payment_id) || {};
+    const paidDate = inputDate(item.paid_at);
+    const icon = getIconSvg(payment.icon || getDefaultIcon(payment.category || 'Otro'));
+    const color = payment.iconColor || getDefaultColor(payment.category || 'Otro');
+    const category = payment.category || 'Pago';
+    const frequency = frequencyLabels[payment.frequency] || '—';
+    const amount = money(Number(item.amount || 0));
+    const dateMain = formatDate(paidDate);
+    const weekday = new Intl.DateTimeFormat('es-MX', { weekday: 'long' }).format(paidDate);
+    const subcopy = payment.amountType === 'variable' ? 'Monto variable' : 'Monto fijo';
+
+    return `
+      <tr>
+        <td>
+          <div class="history-concept">
+            <div class="service-icon ${color}">${icon}</div>
+            <div><strong>${escapeHtml(payment.name || 'Pago eliminado')}</strong><span>${escapeHtml(subcopy)}</span></div>
+          </div>
+        </td>
+        <td><div class="history-date"><strong>${dateMain}</strong><span>${escapeHtml(capitalize(weekday))}</span></div></td>
+        <td><span class="category-pill ${categoryClass(category)}">${escapeHtml(category)}</span></td>
+        <td><span class="frequency-pill">${escapeHtml(frequency)}</span></td>
+        <td><strong class="history-amount">${amount}</strong></td>
+        <td class="history-more">•••</td>
+      </tr>`;
+  }).join('');
+
+  if (els.historyCount) els.historyCount.textContent = `Mostrando 1 a ${rows.length} de ${rows.length} pagos`;
+}
 
 function sortPayments(a, b) {
   const group = payment => {
@@ -1111,6 +1211,11 @@ function getIconSvg(icon) {
 
 function categoryClass(category) {
   return String(category).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+}
+
+function capitalize(value) {
+  if (!value) return '';
+  return String(value).charAt(0).toUpperCase() + String(value).slice(1);
 }
 
 function money(value) {
