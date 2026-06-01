@@ -1,5 +1,5 @@
-console.log('Korah v1.0.0-production');
-const APP_VERSION = 'v1.0.0-korah-production';
+console.log('Korah v1.1.0-cycle-logic');
+const APP_VERSION = 'v1.1.0-cycle-logic';
 const SUPABASE_URL = 'https://qjicwqpjxsqynoudwylk.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_rl7m3zQsatLJL2Lb3yHPOg_nnCr712U';
 const PAYMENTS_TABLE = 'payments';
@@ -799,24 +799,67 @@ function getDueInfo(payment) {
 }
 
 function isPaid(payment) {
-  return payment.paidPeriod === getCurrentPeriodKey(payment.frequency);
+  const normalized = normalizePayment(payment);
+  const now = startOfToday();
+
+  if (normalized.frequency === 'monthly') {
+    if (normalized.paidPeriod === getCurrentPeriodKey('monthly')) return true;
+    if (!normalized.lastPaid) return false;
+    const lastPaid = inputDate(normalized.lastPaid);
+    return lastPaid.getFullYear() === now.getFullYear() && lastPaid.getMonth() === now.getMonth();
+  }
+
+  if (!normalized.lastPaid) return false;
+
+  const nextDue = getNextDueDateFromLastPaid(normalized);
+
+  // For non-monthly payments, the user is covered during the months between
+  // the paid month and the next due month. Example: paid in January +
+  // bimonthly => February remains paid; March becomes pending.
+  return isBeforeMonth(now, nextDue);
 }
 
 function isOverdue(payment) {
-  return getDueDate(payment) < startOfToday();
+  return !isPaid(payment) && getDueDate(payment) < startOfToday();
 }
 
 function getDueDate(payment) {
+  const normalized = normalizePayment(payment);
   const now = new Date();
-  const thisPeriodDue = new Date(now.getFullYear(), now.getMonth(), clampDueDay(payment.dueDay, now.getFullYear(), now.getMonth()));
+  const thisMonthDue = new Date(now.getFullYear(), now.getMonth(), clampDueDay(normalized.dueDay, now.getFullYear(), now.getMonth()));
 
-  if (payment.frequency === 'monthly' || !payment.lastPaid) return thisPeriodDue;
+  if (!normalized.lastPaid) return thisMonthDue;
 
-  const step = { bimonthly: 2, quarterly: 3, yearly: 12 }[payment.frequency] || 1;
+  if (normalized.frequency === 'monthly') {
+    if (isPaid(normalized)) {
+      const next = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+      next.setDate(clampDueDay(normalized.dueDay, next.getFullYear(), next.getMonth()));
+      return next;
+    }
+    return thisMonthDue;
+  }
+
+  const nextDue = getNextDueDateFromLastPaid(normalized);
+
+  // If the next due month has not arrived, keep the next due date in the
+  // future. Once that month arrives, the payment becomes pending for that day.
+  return nextDue;
+}
+
+function getNextDueDateFromLastPaid(payment) {
+  const step = getFrequencyStep(payment.frequency);
   const lastPaid = inputDate(payment.lastPaid);
   const next = new Date(lastPaid.getFullYear(), lastPaid.getMonth() + step, 1);
   next.setDate(clampDueDay(payment.dueDay, next.getFullYear(), next.getMonth()));
   return next;
+}
+
+function getFrequencyStep(frequency = 'monthly') {
+  return { monthly: 1, bimonthly: 2, quarterly: 3, yearly: 12 }[frequency] || 1;
+}
+
+function isBeforeMonth(a, b) {
+  return a.getFullYear() < b.getFullYear() || (a.getFullYear() === b.getFullYear() && a.getMonth() < b.getMonth());
 }
 
 function getCurrentPeriodKey(frequency = 'monthly') {
