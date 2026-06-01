@@ -1,30 +1,28 @@
-# ANCHR / Reminder
+# Korah
 
-Version v18 conectada al proyecto Supabase `reminder`.
+Control inteligente de pagos y recordatorios financieros.
 
-Supabase URL:
+## Deploy
+
+Sube el contenido de este ZIP a la raíz del repositorio de GitHub Pages.
+
+Estructura esperada:
+
+```text
+index.html
+css/
+js/
+assets/
+database/
+.nojekyll
+```
+
+## Supabase
+
+Este build apunta al proyecto Supabase `reminder`:
+
+```text
 https://qjicwqpjxsqynoudwylk.supabase.co
+```
 
-Tablas usadas:
-- payments
-- payment_history
-
-Despues de subir a GitHub Pages, abre DevTools > Console y confirma que aparezca:
-ANCHR v18-reminder conectado a https://qjicwqpjxsqynoudwylk.supabase.co
-
-Si sigues viendo otra URL de Supabase, GitHub Pages o el navegador estan cargando una version vieja. Haz hard refresh o espera a que termine el deploy.
-
-
-## v20
-- Corrige labels móviles por columna.
-- Evita overflow horizontal del menú de edición en móvil.
-- Restaura tabbar móvil visible.
-
-
-## v21
-- Corrige carga inicial de pagos al iniciar sesión o refrescar la app.
-- Fuerza recarga segura desde Supabase en pageshow/visibilitychange.
-
-
-## v24
-Corrige la carga inicial con restauración de sesión y reintentos controlados.
+Si cambias de proyecto, actualiza `SUPABASE_URL` y `SUPABASE_ANON_KEY` en `js/app.js`.

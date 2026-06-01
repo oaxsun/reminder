@@ -1,10 +1,10 @@
-console.log('ANCHR v37-calendar-spacing-fix');
-const APP_VERSION = 'v36-calendar-compact-colors';
+console.log('Korah v1.0.0-production');
+const APP_VERSION = 'v1.0.0-korah-production';
 const SUPABASE_URL = 'https://qjicwqpjxsqynoudwylk.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_rl7m3zQsatLJL2Lb3yHPOg_nnCr712U';
 const PAYMENTS_TABLE = 'payments';
 const PAYMENT_HISTORY_TABLE = 'payment_history';
-console.info(`ANCHR ${APP_VERSION} conectado a ${SUPABASE_URL}`);
+console.info(`Korah ${APP_VERSION} conectado a ${SUPABASE_URL}`);
 
 const today = new Date();
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
@@ -211,7 +211,7 @@ async function initAuth() {
   validateSupabaseConfig();
 
   supabaseClient.auth.onAuthStateChange((event, session) => {
-    console.info(`ANCHR ${APP_VERSION}: auth event`, event, session?.user?.id || 'sin usuario');
+    console.info(`Korah ${APP_VERSION}: auth event`, event, session?.user?.id || 'sin usuario');
     currentUser = session?.user || null;
     updateAuthUI();
 
@@ -271,12 +271,12 @@ async function restoreSessionAndLoad(source = 'manual') {
     updateAuthUI();
 
     if (currentUser) {
-      console.info(`ANCHR ${APP_VERSION}: sesión restaurada (${source})`, currentUser.id);
+      console.info(`Korah ${APP_VERSION}: sesión restaurada (${source})`, currentUser.id);
       await loadPayments(source);
       initialLoadDone = true;
       lastLoadedUserId = currentUser.id;
     } else {
-      console.info(`ANCHR ${APP_VERSION}: sin sesión (${source})`);
+      console.info(`Korah ${APP_VERSION}: sin sesión (${source})`);
     }
   } catch (error) {
     console.error('No se pudo restaurar la sesión:', error);
@@ -340,7 +340,7 @@ async function handleAuthSubmit(event) {
   els.authSubmit.textContent = authMode === 'register' ? 'Creando cuenta...' : 'Entrando...';
 
   const remember = els.rememberMe ? els.rememberMe.checked : true;
-  localStorage.setItem('anchr_remember_session', remember ? '1' : '0');
+  localStorage.setItem('korah_remember_session', remember ? '1' : '0');
   const payload = { email, password };
   const response = authMode === 'register'
     ? await supabaseClient.auth.signUp(payload)
@@ -420,10 +420,10 @@ function toDb(payment) {
 }
 
 async function loadPayments(source = 'manual') {
-  console.info(`ANCHR ${APP_VERSION}: loadPayments iniciado (${source})`);
+  console.info(`Korah ${APP_VERSION}: loadPayments iniciado (${source})`);
   try {
     const { data: sessionData, error: sessionError } = await supabaseClient.auth.getSession();
-    if (sessionError) console.warn('ANCHR sesión no disponible antes de cargar pagos:', sessionError);
+    if (sessionError) console.warn('Korah sesión no disponible antes de cargar pagos:', sessionError);
 
     const session = sessionData?.session || null;
     const user = session?.user || currentUser || null;
@@ -431,13 +431,13 @@ async function loadPayments(source = 'manual') {
     if (!user || !session?.access_token) {
       payments = [];
       render();
-      console.info(`ANCHR ${APP_VERSION}: no hay sesión válida para cargar pagos (${source})`);
+      console.info(`Korah ${APP_VERSION}: no hay sesión válida para cargar pagos (${source})`);
       return;
     }
 
     currentUser = user;
     updateAuthUI();
-    console.info(`ANCHR ${APP_VERSION}: consultando pagos REST (${source})`, currentUser.id);
+    console.info(`Korah ${APP_VERSION}: consultando pagos REST (${source})`, currentUser.id);
 
     const url = `${SUPABASE_URL}/rest/v1/${PAYMENTS_TABLE}?select=*&user_id=eq.${encodeURIComponent(currentUser.id)}&order=created_at.asc`;
     const response = await fetch(url, {
@@ -455,18 +455,18 @@ async function loadPayments(source = 'manual') {
     try {
       data = text ? JSON.parse(text) : [];
     } catch (parseError) {
-      console.error('ANCHR respuesta no JSON al cargar pagos:', text);
+      console.error('Korah respuesta no JSON al cargar pagos:', text);
       throw parseError;
     }
 
     if (!response.ok) {
-      console.error('ANCHR error REST cargando pagos:', response.status, data);
+      console.error('Korah error REST cargando pagos:', response.status, data);
       showToast(data?.message || 'No se pudieron cargar los pagos');
       return;
     }
 
     payments = Array.isArray(data) ? data.map(fromDb) : [];
-    console.info(`ANCHR ${APP_VERSION}: pagos cargados REST (${source})`, payments.length, payments.map(item => item.name));
+    console.info(`Korah ${APP_VERSION}: pagos cargados REST (${source})`, payments.length, payments.map(item => item.name));
     render();
   } catch (error) {
     console.error('Error cargando pagos:', error);
@@ -522,7 +522,7 @@ function setActiveView(view) {
     dashboard: ['Dashboard', 'Hola, aquí tienes el resumen de tus pagos.'],
     calendar: ['Calendario', 'Visualiza tus pagos y fechas de vencimiento.'],
     history: ['Historial', 'Consulta tus pagos registrados.'],
-    more: ['Más', 'Configuración y opciones de ANCHR.']
+    more: ['Más', 'Configuración y opciones de Korah.']
   };
   const [title, copy] = titles[activeView] || titles.dashboard;
   if (els.topbarTitle) els.topbarTitle.textContent = title;

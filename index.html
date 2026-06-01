@@ -3,16 +3,17 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>ANCHR · Reminder</title>
+  <title>Korah</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='18' fill='%231e293b'/%3E%3Ctext x='32' y='42' text-anchor='middle' font-size='34' font-family='Arial,sans-serif' font-weight='800' fill='%23ffffff'%3EK%3C/text%3E%3C/svg%3E">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/styles.css?v=37-calendar-spacing-fix" />
+  <link rel="stylesheet" href="css/styles.css?v=1.0.0-korah-production" />
 </head>
 <body>
   <section class="auth-screen hidden" id="authScreen">
     <div class="auth-card">
-      <div class="auth-brand"><div class="brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3v18M7 8h10M12 3a2 2 0 1 1 0 4 2 2 0 0 1 0-4ZM5 13c0 4 3 7 7 7s7-3 7-7M4 13h4M16 13h4"/></svg></div><h1>ANCHR</h1></div>
+      <div class="auth-brand"><div class="brand-mark" aria-hidden="true"><span class="brand-letter">K</span></div><h1>Korah</h1></div>
       <h2 id="authTitle">Iniciar sesión</h2>
       <p id="authCopy">Entra para sincronizar tus pagos en todos tus dispositivos.</p>
       <form id="authForm" class="auth-form">
@@ -30,10 +31,8 @@
   <aside class="sidebar hidden" id="sidebar">
     <div>
       <div class="brand">
-        <div class="brand-mark" aria-hidden="true">
-          <svg viewBox="0 0 24 24"><path d="M12 3v18M7 8h10M12 3a2 2 0 1 1 0 4 2 2 0 0 1 0-4ZM5 13c0 4 3 7 7 7s7-3 7-7M4 13h4M16 13h4"/></svg>
-        </div>
-        <h1>ANCHR</h1>
+        <div class="brand-mark" aria-hidden="true"><span class="brand-letter">K</span></div>
+        <h1>Korah</h1>
       </div>
       <nav class="nav" id="desktopNav">
         <button class="nav-item active" data-view="dashboard"><span class="sf"><svg viewBox="0 0 24 24"><path d="M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z"/></svg></span>Dashboard</button>
@@ -235,6 +234,6 @@
 
   <div class="toast hidden" id="toast">Pago registrado</div>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="js/app.js?v=37-calendar-spacing-fix"></script>
+  <script src="js/app.js?v=1.0.0-korah-production"></script>
 </body>
 </html>

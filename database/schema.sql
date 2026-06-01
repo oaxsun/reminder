@@ -1,4 +1,4 @@
--- ANCHR Supabase schema
+-- Korah Supabase schema
 -- Ejecuta este script en Supabase > SQL Editor.
 
 create table if not exists public.payments (
