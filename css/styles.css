@@ -2394,3 +2394,38 @@ body.is-calendar .upcoming-item {
   outline: none;
   box-shadow: 0 0 0 3px rgba(124, 58, 237, .18);
 }
+
+
+/* v1.9 history + Korah purple refinements */
+.link-btn,
+.text-btn,
+.auth-footer button,
+#toggleAuthMode {
+  color: var(--purple) !important;
+}
+.due-label.paid {
+  color: var(--purple) !important;
+}
+.primary-btn,
+.auth-submit,
+#openModalBtn,
+#calendarNewPaymentBtn,
+.modal-actions .primary-btn,
+.pay-modal .primary-btn {
+  background: linear-gradient(135deg, var(--purple), var(--purple-2)) !important;
+  color: #fff !important;
+  border-color: transparent !important;
+}
+.primary-btn:hover,
+.auth-submit:hover,
+#openModalBtn:hover,
+#calendarNewPaymentBtn:hover,
+.modal-actions .primary-btn:hover,
+.pay-modal .primary-btn:hover {
+  background: linear-gradient(135deg, #5b21b6, #7c3aed) !important;
+}
+.history-empty {
+  padding: 34px 16px;
+  text-align: center;
+  color: var(--muted);
+}
