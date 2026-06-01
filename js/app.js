@@ -1,5 +1,5 @@
-console.log('Korah v1.4.0-history-module');
-const APP_VERSION = 'v1.4.0-history-module';
+console.log('Korah v1.6.0-history-logo-update');
+const APP_VERSION = 'v1.6.0-history-logo-update';
 const SUPABASE_URL = 'https://qjicwqpjxsqynoudwylk.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_rl7m3zQsatLJL2Lb3yHPOg_nnCr712U';
 const PAYMENTS_TABLE = 'payments';
@@ -27,6 +27,7 @@ let authMode = 'login';
 let initialLoadDone = false;
 let paymentsLoadTimer = null;
 let lastLoadedUserId = null;
+let selectedHistoryMonth = toMonthKey(today);
 
 const els = {
   authScreen: document.querySelector('#authScreen'),
@@ -54,6 +55,7 @@ const els = {
   historyEmpty: document.querySelector('#historyEmpty'),
   historyCount: document.querySelector('#historyCount'),
   historyRangeLabel: document.querySelector('#historyRangeLabel'),
+  historyMonthSelect: document.querySelector('#historyMonthSelect'),
   moreView: document.querySelector('#moreView'),
   desktopNav: document.querySelector('#desktopNav'),
   calendarNewPaymentBtn: document.querySelector('#calendarNewPaymentBtn'),
@@ -167,6 +169,9 @@ function bindEvents() {
   els.paymentAmountType.addEventListener('change', syncAmountField);
 
   document.addEventListener('click', event => {
+    if (!event.target.closest('.history-more')) {
+      document.querySelectorAll('.history-menu').forEach(menu => menu.classList.add('hidden'));
+    }
     if (!event.target.closest('.menu-wrap')) {
       document.querySelectorAll('.row-menu').forEach(menu => {
         menu.classList.add('hidden');
@@ -593,14 +598,15 @@ function renderHistory() {
   if (!els.historyTable) return;
 
   const frequencyLabels = { monthly: 'Mensual', bimonthly: 'Bimestral', quarterly: 'Trimestral', yearly: 'Anual' };
-  const rows = [...paymentHistory].sort((a, b) => {
+  const sortedAll = [...paymentHistory].sort((a, b) => {
     const dateDiff = inputDate(b.paid_at).getTime() - inputDate(a.paid_at).getTime();
     if (dateDiff !== 0) return dateDiff;
     return String(b.created_at || '').localeCompare(String(a.created_at || ''));
   });
 
-  const monthLabel = new Intl.DateTimeFormat('es-MX', { month: 'long', year: 'numeric' }).format(today);
-  if (els.historyRangeLabel) els.historyRangeLabel.textContent = monthLabel.charAt(0).toUpperCase() + monthLabel.slice(1);
+  syncHistoryMonthSelector(sortedAll);
+
+  const rows = sortedAll.filter(item => toMonthKey(inputDate(item.paid_at)) === selectedHistoryMonth);
 
   if (!rows.length) {
     els.historyTable.innerHTML = '';
@@ -634,11 +640,59 @@ function renderHistory() {
         <td><span class="category-pill ${categoryClass(category)}">${escapeHtml(category)}</span></td>
         <td><span class="frequency-pill">${escapeHtml(frequency)}</span></td>
         <td><strong class="history-amount">${amount}</strong></td>
-        <td class="history-more">•••</td>
+        <td class="history-more"><button class="history-more-btn" type="button" onclick="toggleHistoryMenu(event, '${item.id}')">•••</button><div class="history-menu hidden" id="history-menu-${item.id}"><button type="button" onclick="deleteHistoryItem('${item.id}')">Eliminar pago</button></div></td>
       </tr>`;
   }).join('');
 
   if (els.historyCount) els.historyCount.textContent = `Mostrando 1 a ${rows.length} de ${rows.length} pagos`;
+}
+
+function syncHistoryMonthSelector(rows) {
+  if (!els.historyMonthSelect) return;
+  const monthKeys = Array.from(new Set(rows.map(item => toMonthKey(inputDate(item.paid_at)))));
+  const currentKey = toMonthKey(today);
+  if (!monthKeys.includes(currentKey)) monthKeys.unshift(currentKey);
+  monthKeys.sort().reverse();
+
+  if (!monthKeys.includes(selectedHistoryMonth)) selectedHistoryMonth = monthKeys[0] || currentKey;
+
+  const previous = els.historyMonthSelect.value;
+  const options = monthKeys.map(key => `<option value="${key}">${escapeHtml(formatMonthKey(key))}</option>`).join('');
+  if (els.historyMonthSelect.innerHTML !== options) els.historyMonthSelect.innerHTML = options;
+  els.historyMonthSelect.value = monthKeys.includes(previous) ? previous : selectedHistoryMonth;
+  selectedHistoryMonth = els.historyMonthSelect.value || selectedHistoryMonth;
+}
+
+function toMonthKey(date) {
+  const value = inputDate(date);
+  return `${value.getFullYear()}-${String(value.getMonth() + 1).padStart(2, '0')}`;
+}
+
+function formatMonthKey(key) {
+  const [year, month] = key.split('-').map(Number);
+  const date = new Date(year, month - 1, 1);
+  const label = new Intl.DateTimeFormat('es-MX', { month: 'long', year: 'numeric' }).format(date);
+  return label.charAt(0).toUpperCase() + label.slice(1);
+}
+
+async function deleteHistoryItem(id) {
+  const item = paymentHistory.find(row => row.id === id);
+  if (!item) return;
+  if (!confirm('¿Eliminar este pago del historial?')) return;
+  const { error } = await supabaseClient.from(PAYMENT_HISTORY_TABLE).delete().eq('id', id);
+  if (error) { showToast('No se pudo eliminar del historial'); console.error(error); return; }
+  paymentHistory = paymentHistory.filter(row => row.id !== id);
+  renderHistory();
+  showToast('Pago eliminado del historial');
+}
+
+function toggleHistoryMenu(event, id) {
+  event?.stopPropagation?.();
+  const menu = document.querySelector(`#history-menu-${id}`);
+  if (!menu) return;
+  const willOpen = menu.classList.contains('hidden');
+  document.querySelectorAll('.history-menu').forEach(item => item.classList.add('hidden'));
+  if (willOpen) menu.classList.remove('hidden');
 }
 
 function sortPayments(a, b) {
@@ -1288,4 +1342,6 @@ function escapeHtml(value) {
 window.togglePaid = togglePaid;
 window.editPayment = editPayment;
 window.deletePayment = deletePayment;
+window.toggleHistoryMenu = toggleHistoryMenu;
+window.deleteHistoryItem = deleteHistoryItem;
 window.toggleMenu = toggleMenu;

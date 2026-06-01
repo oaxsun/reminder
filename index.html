@@ -4,16 +4,16 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Korah</title>
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='18' fill='%231e293b'/%3E%3Ctext x='32' y='42' text-anchor='middle' font-size='34' font-family='Arial,sans-serif' font-weight='800' fill='%23ffffff'%3EK%3C/text%3E%3C/svg%3E">
+  <link rel="icon" type="image/png" href="assets/favicon.png?v=1.6.0">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/styles.css?v=1.4.0-history" />
+  <link rel="stylesheet" href="css/styles.css?v=1.6.0-history-logo" />
 </head>
 <body>
   <section class="auth-screen hidden" id="authScreen">
     <div class="auth-card">
-      <div class="auth-brand"><div class="brand-mark" aria-hidden="true"><span class="brand-letter">K</span></div><h1>Korah</h1></div>
+      <div class="auth-brand"><img class="brand-logo-mark" src="assets/korah-logo-mark.png" alt="" /><h1>Korah</h1></div>
       <h2 id="authTitle">Iniciar sesión</h2>
       <p id="authCopy">Entra para sincronizar tus pagos en todos tus dispositivos.</p>
       <form id="authForm" class="auth-form">
@@ -31,7 +31,7 @@
   <aside class="sidebar hidden" id="sidebar">
     <div>
       <div class="brand">
-        <div class="brand-mark" aria-hidden="true"><span class="brand-letter">K</span></div>
+        <img class="brand-logo-mark" src="assets/korah-logo-mark.png" alt="" />
         <h1>Korah</h1>
       </div>
       <nav class="nav" id="desktopNav">
@@ -144,8 +144,11 @@
       <div class="history-toolbar">
         <div></div>
         <div class="history-actions">
-          <button class="date-filter" type="button"><span class="sf"><svg viewBox="0 0 24 24"><path d="M6 4h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2ZM4 9h16M8 3v4M16 3v4"/></svg></span><span id="historyRangeLabel">Este mes</span><span>⌄</span></button>
-          <button class="filter-btn" type="button"><span class="sf"><svg viewBox="0 0 24 24"><path d="M4 5h16l-6 7v5l-4 2v-7L4 5Z"/></svg></span>Filtros</button>
+          <label class="history-month-control" aria-label="Seleccionar mes">
+            <span class="sf"><svg viewBox="0 0 24 24"><path d="M6 4h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2ZM4 9h16M8 3v4M16 3v4"/></svg></span>
+            <select id="historyMonthSelect"></select>
+            <span class="select-chevron" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></span>
+          </label>
         </div>
       </div>
       <section class="history-panel">
@@ -271,6 +274,6 @@
 
   <div class="toast hidden" id="toast">Pago registrado</div>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="js/app.js?v=1.4.0-history"></script>
+  <script src="js/app.js?v=1.6.0-history-logo"></script>
 </body>
 </html>

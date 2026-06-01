@@ -2215,3 +2215,159 @@ body.is-calendar .upcoming-item {
   .category-pill, .frequency-pill { font-size: 11px; min-height: 26px; padding: 5px 9px; }
   .history-footer { display: none; }
 }
+
+/* v1.6 Korah logo + history UX refinements */
+.brand-logo-mark {
+  width: 42px;
+  height: 42px;
+  object-fit: contain;
+  display: block;
+  flex: 0 0 auto;
+}
+.auth-brand .brand-logo-mark {
+  width: 44px;
+  height: 44px;
+}
+.brand {
+  gap: 10px;
+}
+.brand h1,
+.auth-brand h1 {
+  color: #0f172a;
+}
+#openModalBtn,
+#calendarNewPaymentBtn {
+  background: linear-gradient(135deg, var(--purple), var(--purple-2));
+  color: #fff;
+}
+#openModalBtn:hover,
+#calendarNewPaymentBtn:hover {
+  filter: brightness(.97);
+  background: linear-gradient(135deg, #5b21b6, #7c3aed);
+}
+.history-actions {
+  justify-content: flex-end;
+}
+.history-month-control {
+  position: relative;
+  height: 44px;
+  min-width: 246px;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid var(--line);
+  background: #fff;
+  color: #27324d;
+  border-radius: 12px;
+  padding: 0 42px 0 15px;
+  font-weight: 700;
+  box-shadow: var(--shadow);
+}
+.history-month-control .sf {
+  width: 20px;
+  height: 20px;
+  color: var(--purple);
+}
+.history-month-control select {
+  appearance: none;
+  -webkit-appearance: none;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-weight: 700;
+  width: 100%;
+  padding: 0;
+}
+.history-month-control .select-chevron {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 17px;
+  height: 17px;
+  color: #334155;
+  pointer-events: none;
+}
+.history-more { position: relative; width: 46px; }
+.history-more-btn {
+  border: 0;
+  background: transparent;
+  color: #14213f;
+  font-weight: 900;
+  letter-spacing: .12em;
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+}
+.history-more-btn:hover { background: #f8fafc; }
+.history-menu {
+  position: absolute;
+  right: 16px;
+  top: 48px;
+  z-index: 30;
+  min-width: 150px;
+  padding: 8px;
+  border: 1px solid var(--line);
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 14px 34px rgba(15,23,42,.12);
+}
+.history-menu button {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  color: #dc2626;
+  font-weight: 800;
+  text-align: left;
+  padding: 10px 11px;
+  border-radius: 9px;
+}
+.history-menu button:hover { background: #fff1f2; }
+
+@media (max-width: 860px) {
+  .history-actions { grid-template-columns: 1fr; }
+  .history-month-control {
+    width: 100%;
+    min-width: 0;
+    height: 40px;
+    padding-left: 12px;
+    font-size: 12px;
+  }
+  .history-table tr {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: start;
+  }
+  .history-table td:nth-child(1)::before,
+  .history-table td:nth-child(2)::before,
+  .history-table td:nth-child(3)::before,
+  .history-table td:nth-child(4)::before,
+  .history-table td:nth-child(5)::before {
+    display: block;
+    margin-bottom: 5px;
+    color: #94a3b8;
+    font-size: 9px;
+    line-height: 1;
+    font-weight: 900;
+    letter-spacing: .09em;
+    text-transform: uppercase;
+  }
+  .history-table td:nth-child(1)::before { content: 'Concepto'; margin-left: 50px; }
+  .history-table td:nth-child(2)::before { content: 'Fecha de pago'; margin-left: 50px; }
+  .history-table td:nth-child(3)::before { content: 'Categoría'; text-align: right; }
+  .history-table td:nth-child(4)::before { content: 'Frecuencia'; text-align: right; }
+  .history-table td:nth-child(5)::before { content: 'Monto'; text-align: right; }
+  .history-date { margin-left: 50px; }
+  .history-table td:nth-child(6) {
+    display: block;
+    grid-column: 2;
+    grid-row: 4;
+    justify-self: end;
+    align-self: end;
+  }
+  .history-menu {
+    right: 0;
+    top: 38px;
+  }
+}
