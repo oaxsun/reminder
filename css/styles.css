@@ -2216,216 +2216,181 @@ body.is-calendar .upcoming-item {
   .history-footer { display: none; }
 }
 
-/* v1.6 Korah logo + history UX refinements */
+/* Korah v2.0 stable patch: restored history, purple brand, mobile polish */
+:root {
+  --purple: #6D38F5;
+  --purple-dark: #5527d9;
+  --purple-soft: #f3edff;
+}
 .brand-logo-mark {
-  width: 42px;
-  height: 42px;
+  width: 36px;
+  height: 36px;
   object-fit: contain;
   display: block;
   flex: 0 0 auto;
 }
-.auth-brand .brand-logo-mark {
-  width: 44px;
-  height: 44px;
-}
-.brand {
-  gap: 10px;
-}
+.auth-brand .brand-logo-mark { width: 42px; height: 42px; }
 .brand h1,
-.auth-brand h1 {
-  color: #0f172a;
+.auth-brand h1 { color: var(--text); }
+.primary-btn,
+.auth-submit,
+.modal-actions .primary-btn,
+.pay-modal .primary-btn,
+#calendarView .calendar-actions .primary-btn,
+.filters .primary-btn {
+  background: var(--purple) !important;
+  border-color: var(--purple) !important;
+  color: #fff !important;
+  box-shadow: none !important;
 }
-#openModalBtn,
-#calendarNewPaymentBtn {
-  background: linear-gradient(135deg, var(--purple), var(--purple-2));
-  color: #fff;
+.primary-btn:hover,
+.auth-submit:hover,
+.modal-actions .primary-btn:hover,
+.pay-modal .primary-btn:hover,
+.filters .primary-btn:hover {
+  background: var(--purple-dark) !important;
+  border-color: var(--purple-dark) !important;
 }
-#openModalBtn:hover,
-#calendarNewPaymentBtn:hover {
-  filter: brightness(.97);
-  background: linear-gradient(135deg, #5b21b6, #7c3aed);
+.link-btn,
+.text-btn,
+#toggleAuthMode {
+  color: var(--purple) !important;
 }
-.history-actions {
-  justify-content: flex-end;
-}
+.remember-row input { accent-color: var(--purple) !important; }
+.due-label.paid { color: var(--purple) !important; }
+.badge.paid { color: var(--green); background: var(--green-soft); }
 .history-month-control {
   position: relative;
-  height: 44px;
-  min-width: 246px;
   display: inline-flex;
   align-items: center;
   gap: 10px;
+  min-height: 40px;
+  padding: 0 42px 0 14px;
   border: 1px solid var(--line);
-  background: #fff;
-  color: #27324d;
   border-radius: 12px;
-  padding: 0 42px 0 15px;
+  background: #fff;
+  color: var(--text);
   font-weight: 700;
-  box-shadow: var(--shadow);
+  box-shadow: 0 1px 2px rgba(15,23,42,.04);
 }
 .history-month-control .sf {
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
   color: var(--purple);
+  display: grid;
+  place-items: center;
 }
 .history-month-control select {
   appearance: none;
   -webkit-appearance: none;
   border: 0;
-  outline: 0;
   background: transparent;
-  color: inherit;
+  color: var(--text);
   font: inherit;
-  font-weight: 700;
-  width: 100%;
+  min-width: 190px;
+  outline: none;
   padding: 0;
 }
 .history-month-control .select-chevron {
   position: absolute;
-  right: 14px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 17px;
-  height: 17px;
-  color: #334155;
+  right: 13px;
+  width: 16px;
+  height: 16px;
+  display: grid;
+  place-items: center;
+  color: #64748b;
   pointer-events: none;
 }
-.history-more { position: relative; width: 46px; }
-.history-more-btn {
-  border: 0;
-  background: transparent;
-  color: #14213f;
-  font-weight: 900;
-  letter-spacing: .12em;
-  width: 34px;
-  height: 34px;
-  border-radius: 9px;
-}
-.history-more-btn:hover { background: #f8fafc; }
-.history-menu {
-  position: absolute;
-  right: 16px;
-  top: 48px;
-  z-index: 30;
-  min-width: 150px;
-  padding: 8px;
-  border: 1px solid var(--line);
-  background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 14px 34px rgba(15,23,42,.12);
-}
-.history-menu button {
-  width: 100%;
-  border: 0;
-  background: transparent;
-  color: #dc2626;
-  font-weight: 800;
-  text-align: left;
-  padding: 10px 11px;
-  border-radius: 9px;
-}
-.history-menu button:hover { background: #fff1f2; }
+.history-month-control svg { display: block; }
+.filter-btn { display: none !important; }
+.mobile-tabbar { grid-template-columns: repeat(4, 1fr) !important; }
+.mobile-tabbar button.active { color: var(--purple) !important; }
+.mobile-tabbar button.active svg { color: var(--purple) !important; }
 
-@media (max-width: 860px) {
-  .history-actions { grid-template-columns: 1fr; }
+@media (max-width: 760px) {
+  .topbar::before {
+    content: '' !important;
+    width: 26px;
+    height: 26px;
+    background: url('../assets/korah-logo-mark.png') center/contain no-repeat;
+    top: calc(12px + env(safe-area-inset-top));
+    left: 16px;
+  }
+  .topbar::after {
+    content: 'Korah';
+    display: block;
+    position: absolute;
+    top: calc(15px + env(safe-area-inset-top));
+    left: 48px;
+    color: var(--text);
+    font-weight: 800;
+    letter-spacing: -.04em;
+    font-size: 17px;
+    line-height: 1;
+  }
+  .topbar > div:first-child { padding-top: 34px; }
+  .top-actions .avatar { background: var(--purple) !important; }
+  .history-toolbar {
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .history-actions { width: 100%; justify-content: flex-start; }
   .history-month-control {
     width: 100%;
-    min-width: 0;
-    height: 40px;
-    padding-left: 12px;
-    font-size: 12px;
+    min-height: 38px;
+    border-radius: 11px;
   }
-  .history-table tr {
-    grid-template-columns: minmax(0, 1fr) auto;
-    align-items: start;
+  .history-month-control select { min-width: 0; width: 100%; font-size: 13px; }
+  .history-panel {
+    border: 0;
+    box-shadow: none;
+    background: transparent;
   }
-  .history-table td:nth-child(1)::before,
-  .history-table td:nth-child(2)::before,
-  .history-table td:nth-child(3)::before,
-  .history-table td:nth-child(4)::before,
-  .history-table td:nth-child(5)::before {
-    display: block;
-    margin-bottom: 5px;
-    color: #94a3b8;
+  .history-table-wrap { overflow: visible; }
+  .history-table thead { display: grid !important; }
+  .history-table thead tr {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 96px;
+    column-gap: 10px;
+    padding: 0 0 8px;
+    border-bottom: 1px solid var(--line);
+  }
+  .history-table thead th {
+    display: none;
+    padding: 0;
     font-size: 9px;
-    line-height: 1;
-    font-weight: 900;
-    letter-spacing: .09em;
+    color: #94a3b8;
     text-transform: uppercase;
+    letter-spacing: .08em;
+    background: transparent;
+    border: 0;
   }
-  .history-table td:nth-child(1)::before { content: 'Concepto'; margin-left: 50px; }
-  .history-table td:nth-child(2)::before { content: 'Fecha de pago'; margin-left: 50px; }
-  .history-table td:nth-child(3)::before { content: 'Categoría'; text-align: right; }
-  .history-table td:nth-child(4)::before { content: 'Frecuencia'; text-align: right; }
-  .history-table td:nth-child(5)::before { content: 'Monto'; text-align: right; }
-  .history-date { margin-left: 50px; }
-  .history-table td:nth-child(6) {
-    display: block;
-    grid-column: 2;
-    grid-row: 4;
-    justify-self: end;
-    align-self: end;
+  .history-table thead th:nth-child(1),
+  .history-table thead th:nth-child(2) { display: block; }
+  .history-table tbody { display: block; }
+  .history-table tbody tr {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 96px;
+    grid-template-areas: 'concept date';
+    align-items: center;
+    column-gap: 10px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--line);
   }
-  .history-menu {
-    right: 0;
-    top: 38px;
+  .history-table tbody td { padding: 0; border: 0; display: none; }
+  .history-table tbody td:nth-child(1) { display: block; grid-area: concept; min-width: 0; }
+  .history-table tbody td:nth-child(2) { display: block; grid-area: date; text-align: right; }
+  .history-concept { gap: 10px; min-width: 0; }
+  .history-concept .service-icon { width: 36px; height: 36px; border-radius: 10px; }
+  .history-concept strong { font-size: 12.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; max-width: 160px; }
+  .history-concept span { font-size: 10.5px; }
+  .history-date strong { font-size: 11.5px; }
+  .history-date span { font-size: 10px; }
+  .history-footer { padding: 12px 0; }
+  .history-pagination { display: none; }
+  .mobile-tabbar {
+    grid-template-columns: repeat(4, 1fr) !important;
+    padding-left: 6px;
+    padding-right: 6px;
   }
-}
-
-
-/* v1.7 Primary buttons + history restore */
-.primary-btn,
-.auth-submit,
-#openModalBtn,
-#calendarNewPaymentBtn {
-  background: linear-gradient(135deg, var(--purple), var(--purple-2)) !important;
-  color: #fff !important;
-  border-color: transparent !important;
-}
-.primary-btn:hover,
-.auth-submit:hover,
-#openModalBtn:hover,
-#calendarNewPaymentBtn:hover {
-  background: linear-gradient(135deg, #5b21b6, #7c3aed) !important;
-  filter: none !important;
-}
-.primary-btn:focus-visible,
-.auth-submit:focus-visible {
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(124, 58, 237, .18);
-}
-
-
-/* v1.9 history + Korah purple refinements */
-.link-btn,
-.text-btn,
-.auth-footer button,
-#toggleAuthMode {
-  color: var(--purple) !important;
-}
-.due-label.paid {
-  color: var(--purple) !important;
-}
-.primary-btn,
-.auth-submit,
-#openModalBtn,
-#calendarNewPaymentBtn,
-.modal-actions .primary-btn,
-.pay-modal .primary-btn {
-  background: linear-gradient(135deg, var(--purple), var(--purple-2)) !important;
-  color: #fff !important;
-  border-color: transparent !important;
-}
-.primary-btn:hover,
-.auth-submit:hover,
-#openModalBtn:hover,
-#calendarNewPaymentBtn:hover,
-.modal-actions .primary-btn:hover,
-.pay-modal .primary-btn:hover {
-  background: linear-gradient(135deg, #5b21b6, #7c3aed) !important;
-}
-.history-empty {
-  padding: 34px 16px;
-  text-align: center;
-  color: var(--muted);
 }
