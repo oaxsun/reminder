@@ -1,5 +1,5 @@
-console.log('Korah v1.1.0-cycle-logic');
-const APP_VERSION = 'v1.1.0-cycle-logic';
+console.log('Korah v1.2.0-cycle-coverage-fix');
+const APP_VERSION = 'v1.2.0-cycle-coverage-fix';
 const SUPABASE_URL = 'https://qjicwqpjxsqynoudwylk.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_rl7m3zQsatLJL2Lb3yHPOg_nnCr712U';
 const PAYMENTS_TABLE = 'payments';
@@ -802,20 +802,26 @@ function isPaid(payment) {
   const normalized = normalizePayment(payment);
   const now = startOfToday();
 
-  if (normalized.frequency === 'monthly') {
-    if (normalized.paidPeriod === getCurrentPeriodKey('monthly')) return true;
-    if (!normalized.lastPaid) return false;
-    const lastPaid = inputDate(normalized.lastPaid);
-    return lastPaid.getFullYear() === now.getFullYear() && lastPaid.getMonth() === now.getMonth();
+  // First trust the stored paid period. This is important for non-monthly
+  // cycles: if a bimonthly bill was paid in May, its paid period is May/June,
+  // so June must still appear as paid and only become pending in July.
+  if (normalized.paidPeriod && normalized.paidPeriod === getCurrentPeriodKey(normalized.frequency, now)) {
+    return true;
   }
 
   if (!normalized.lastPaid) return false;
 
+  const lastPaid = inputDate(normalized.lastPaid);
+
+  if (normalized.frequency === 'monthly') {
+    return lastPaid.getFullYear() === now.getFullYear() && lastPaid.getMonth() === now.getMonth();
+  }
+
   const nextDue = getNextDueDateFromLastPaid(normalized);
 
-  // For non-monthly payments, the user is covered during the months between
-  // the paid month and the next due month. Example: paid in January +
-  // bimonthly => February remains paid; March becomes pending.
+  // For non-monthly payments, keep the bill as paid until the next due month
+  // arrives. Example: paid in May + bimonthly => June stays paid; July becomes
+  // pending.
   return isBeforeMonth(now, nextDue);
 }
 
@@ -862,9 +868,9 @@ function isBeforeMonth(a, b) {
   return a.getFullYear() < b.getFullYear() || (a.getFullYear() === b.getFullYear() && a.getMonth() < b.getMonth());
 }
 
-function getCurrentPeriodKey(frequency = 'monthly') {
-  const year = today.getFullYear();
-  const month = today.getMonth();
+function getCurrentPeriodKey(frequency = 'monthly', date = new Date()) {
+  const year = date.getFullYear();
+  const month = date.getMonth();
   if (frequency === 'bimonthly') return `${year}-B${Math.floor(month / 2) + 1}`;
   if (frequency === 'quarterly') return `${year}-Q${Math.floor(month / 3) + 1}`;
   if (frequency === 'yearly') return `${year}`;
