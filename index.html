@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/styles.css?v=2.0.0-stable-history" />
+  <link rel="stylesheet" href="css/styles.css?v=2.1.0-history-mobile" />
 </head>
 <body>
   <section class="auth-screen hidden" id="authScreen">
@@ -144,8 +144,12 @@
       <div class="history-toolbar">
         <div></div>
         <div class="history-actions">
-          <button class="date-filter" type="button"><span class="sf"><svg viewBox="0 0 24 24"><path d="M6 4h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2ZM4 9h16M8 3v4M16 3v4"/></svg></span><span id="historyRangeLabel">Este mes</span><span>⌄</span></button>
-          <button class="filter-btn" type="button"><span class="sf"><svg viewBox="0 0 24 24"><path d="M4 5h16l-6 7v5l-4 2v-7L4 5Z"/></svg></span>Filtros</button>
+          <label class="history-month-control" aria-label="Seleccionar mes de historial">
+            <span class="sf"><svg viewBox="0 0 24 24"><path d="M6 4h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2ZM4 9h16M8 3v4M16 3v4"/></svg></span>
+            <select id="historyMonthSelect"></select>
+            <span class="select-chevron"><svg viewBox="0 0 24 24"><path d="m7 10 5 5 5-5"/></svg></span>
+          </label>
+          <span id="historyRangeLabel" class="sr-only">Este mes</span>
         </div>
       </div>
       <section class="history-panel">
@@ -271,6 +275,6 @@
 
   <div class="toast hidden" id="toast">Pago registrado</div>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="js/app.js?v=2.0.0-stable-history"></script>
+  <script src="js/app.js?v=1.4.0-history"></script>
 </body>
 </html>

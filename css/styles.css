@@ -2394,3 +2394,204 @@ body.is-calendar .upcoming-item {
     padding-right: 6px;
   }
 }
+
+/* Korah v2.1 history UX fixes */
+.sr-only {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+.history-actions { justify-content: flex-end; }
+.history-month-control {
+  min-width: 260px;
+  height: 44px;
+}
+.history-month-control .select-chevron svg {
+  width: 16px;
+  height: 16px;
+}
+.history-more-wrap { position: relative; display: inline-flex; justify-content: center; }
+.history-row-menu {
+  position: fixed;
+  z-index: 99999;
+  width: 156px;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 6px;
+  box-shadow: 0 18px 40px rgba(15, 23, 42, .16);
+}
+.history-row-menu button {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  border-radius: 10px;
+  padding: 10px 11px;
+  text-align: left;
+  font-size: 13px;
+  font-weight: 750;
+  color: var(--text);
+}
+.history-row-menu button:hover { background: #f8fafc; }
+.history-row-menu button.danger { color: var(--red); }
+.history-row-menu button:disabled { opacity: .45; cursor: not-allowed; }
+.history-mobile-date { display: none !important; }
+.history-desktop-subcopy { display: block; }
+.history-mobile-money { display: inline-flex; flex-direction: column; align-items: flex-end; gap: 3px; }
+.history-mobile-money span { display: none; color: #64748b; font-size: 12px; font-weight: 700; }
+.skeleton {
+  display: block;
+  position: relative;
+  overflow: hidden;
+  background: #edf2f7;
+  border-radius: 999px;
+}
+.skeleton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.72), transparent);
+  animation: korahSkeleton 1.15s infinite;
+}
+@keyframes korahSkeleton { 100% { transform: translateX(100%); } }
+.skeleton-icon { width: 40px; height: 40px; border-radius: 12px; }
+.skeleton-line { width: 92px; height: 13px; margin: 3px 0; }
+.skeleton-line.wide { width: 150px; }
+.skeleton-line.small { width: 80px; height: 11px; opacity: .8; }
+.skeleton-pill { width: 82px; height: 28px; }
+.history-skeleton-row { pointer-events: none; }
+
+/* Keep primary actions and text buttons on brand purple */
+.primary-btn,
+.auth-submit,
+button[type="submit"].primary-btn,
+#authSubmit,
+#openModalBtn,
+#calendarNewPaymentBtn,
+.filters .primary-btn {
+  background: var(--purple) !important;
+  border-color: var(--purple) !important;
+  color: #fff !important;
+}
+.primary-btn:hover,
+.auth-submit:hover,
+#authSubmit:hover,
+#openModalBtn:hover,
+#calendarNewPaymentBtn:hover,
+.filters .primary-btn:hover {
+  background: var(--purple-dark) !important;
+  border-color: var(--purple-dark) !important;
+}
+.link-btn,
+.text-btn,
+#toggleAuthMode,
+.auth-card a {
+  color: var(--purple) !important;
+}
+.due-label.paid { color: var(--purple) !important; }
+
+@media (max-width: 760px) {
+  #historyView { gap: 14px; }
+  .history-toolbar { margin-bottom: 2px; }
+  .history-actions { margin-top: 12px; display: block; width: 100%; }
+  .history-month-control {
+    width: 100%;
+    min-width: 0;
+    height: 42px;
+    padding-left: 14px;
+    padding-right: 42px;
+  }
+  .history-month-control select {
+    font-size: 14px;
+    font-weight: 800;
+  }
+  .history-panel {
+    border: 0 !important;
+    box-shadow: none !important;
+    background: transparent !important;
+    overflow: visible !important;
+  }
+  .history-table-wrap { overflow: visible !important; }
+  .history-table,
+  .history-table tbody { display: block !important; min-width: 0 !important; width: 100% !important; }
+  .history-table thead { display: grid !important; margin-bottom: 8px; }
+  .history-table thead tr {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) 116px;
+    align-items: center;
+    padding: 0 2px 8px;
+    border-bottom: 1px solid var(--line);
+    column-gap: 12px;
+  }
+  .history-table thead th {
+    display: none !important;
+    position: static !important;
+    padding: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+    color: #94a3b8 !important;
+    font-size: 10px !important;
+    line-height: 1.2;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+  }
+  .history-table thead th:nth-child(1) { display: block !important; text-align: left; }
+  .history-table thead th:nth-child(5) { display: block !important; text-align: right; }
+  .history-table thead th:nth-child(1)::after { content: ''; }
+  .history-table thead th:nth-child(5)::before { content: 'Monto'; }
+  .history-table thead th:nth-child(5) { font-size: 0 !important; }
+  .history-table thead th:nth-child(5)::before { font-size: 10px; }
+  .history-table tbody tr {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) 116px;
+    grid-template-areas: 'concept amount';
+    align-items: center;
+    gap: 12px;
+    margin: 0 0 10px;
+    padding: 12px;
+    background: #fff;
+    border: 1px solid #e5eaf2;
+    border-radius: 16px;
+    box-shadow: 0 1px 2px rgba(15,23,42,.02);
+  }
+  .history-table tbody td {
+    display: none !important;
+    padding: 0 !important;
+    border: 0 !important;
+    white-space: normal;
+  }
+  .history-table tbody td:nth-child(1) { display: block !important; grid-area: concept; min-width: 0; }
+  .history-table tbody td:nth-child(5) { display: block !important; grid-area: amount; text-align: right; min-width: 0; }
+  .history-table tbody td:nth-child(6) { display: none !important; }
+  .history-concept { min-width: 0 !important; gap: 11px !important; align-items: center !important; }
+  .history-concept .service-icon { width: 42px !important; height: 42px !important; border-radius: 13px !important; padding: 9px; }
+  .history-concept strong {
+    max-width: none !important;
+    font-size: 14px !important;
+    line-height: 1.15;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .history-concept span { margin-top: 4px !important; }
+  .history-mobile-date { display: block !important; color: #64748b !important; font-size: 11.5px !important; font-weight: 600; }
+  .history-desktop-subcopy { display: none !important; }
+  .history-mobile-money { display: flex; align-items: flex-end; }
+  .history-mobile-money .history-amount { font-size: 14px !important; line-height: 1.1; }
+  .history-mobile-money span { display: block; font-size: 11px; }
+  .history-empty {
+    position: static !important;
+    min-height: 220px;
+    border: 1px dashed var(--line);
+    border-radius: 16px;
+    background: #fff;
+  }
+  .history-footer { display: none !important; }
+}

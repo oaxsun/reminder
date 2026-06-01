@@ -1,5 +1,5 @@
-console.log('Korah v2.0.0-stable-history-mobile-fix');
-const APP_VERSION = 'v2.0.0-stable-history-mobile-fix';
+console.log('Korah v2.1.0-history-mobile-ux');
+const APP_VERSION = 'v2.1.0-history-mobile-ux';
 const SUPABASE_URL = 'https://qjicwqpjxsqynoudwylk.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_rl7m3zQsatLJL2Lb3yHPOg_nnCr712U';
 const PAYMENTS_TABLE = 'payments';
@@ -28,6 +28,7 @@ let initialLoadDone = false;
 let paymentsLoadTimer = null;
 let lastLoadedUserId = null;
 let selectedHistoryMonth = '';
+let isLoadingPayments = false;
 
 const els = {
   authScreen: document.querySelector('#authScreen'),
@@ -159,6 +160,12 @@ function bindEvents() {
     render();
   });
 
+  els.historyMonthSelect?.addEventListener('change', event => {
+    selectedHistoryMonth = event.target.value;
+    if (els.historyRangeLabel) els.historyRangeLabel.textContent = formatHistoryMonth(selectedHistoryMonth);
+    renderHistory();
+  });
+
   els.paymentCategory.addEventListener('change', () => {
     setSelectedIcon(getDefaultIcon(els.paymentCategory.value));
     setSelectedColor(getDefaultColor(els.paymentCategory.value));
@@ -169,8 +176,8 @@ function bindEvents() {
   els.paymentAmountType.addEventListener('change', syncAmountField);
 
   document.addEventListener('click', event => {
-    if (!event.target.closest('.menu-wrap')) {
-      document.querySelectorAll('.row-menu').forEach(menu => {
+    if (!event.target.closest('.menu-wrap') && !event.target.closest('.history-more-wrap')) {
+      document.querySelectorAll('.row-menu, .history-row-menu').forEach(menu => {
         menu.classList.add('hidden');
         menu.removeAttribute('style');
       });
@@ -428,6 +435,8 @@ function toDb(payment) {
 
 async function loadPayments(source = 'manual') {
   console.info(`Korah ${APP_VERSION}: loadPayments iniciado (${source})`);
+  isLoadingPayments = true;
+  render();
   try {
     const { data: sessionData, error: sessionError } = await supabaseClient.auth.getSession();
     if (sessionError) console.warn('Korah sesión no disponible antes de cargar pagos:', sessionError);
@@ -437,6 +446,8 @@ async function loadPayments(source = 'manual') {
 
     if (!user || !session?.access_token) {
       payments = [];
+      paymentHistory = [];
+      isLoadingPayments = false;
       render();
       console.info(`Korah ${APP_VERSION}: no hay sesión válida para cargar pagos (${source})`);
       return;
@@ -474,11 +485,14 @@ async function loadPayments(source = 'manual') {
 
     payments = Array.isArray(data) ? data.map(fromDb) : [];
     await loadPaymentHistory(session.access_token);
+    isLoadingPayments = false;
     console.info(`Korah ${APP_VERSION}: pagos cargados REST (${source})`, payments.length, payments.map(item => item.name));
     render();
   } catch (error) {
+    isLoadingPayments = false;
     console.error('Error cargando pagos:', error);
     showToast('No se pudieron cargar los pagos');
+    render();
   }
 }
 
@@ -558,8 +572,13 @@ function render() {
     return true;
   }).sort(sortPayments);
 
-  els.table.innerHTML = visible.map(rowTemplate).join('');
-  els.empty.classList.toggle('hidden', payments.length > 0);
+  if (isLoadingPayments) {
+    els.table.innerHTML = renderDashboardSkeletonRows();
+    els.empty.classList.add('hidden');
+  } else {
+    els.table.innerHTML = visible.map(rowTemplate).join('');
+    els.empty.classList.toggle('hidden', payments.length > 0);
+  }
   renderSummary(enriched);
   if (activeView === 'calendar') renderCalendar();
   if (activeView === 'history') renderHistory();
@@ -639,6 +658,13 @@ function syncHistoryMonthSelector(rows) {
 function renderHistory() {
   if (!els.historyTable) return;
 
+  if (isLoadingPayments) {
+    els.historyEmpty?.classList.add('hidden');
+    els.historyTable.innerHTML = renderHistorySkeletonRows();
+    if (els.historyCount) els.historyCount.textContent = 'Cargando pagos...';
+    return;
+  }
+
   const frequencyLabels = { monthly: 'Mensual', bimonthly: 'Bimestral', quarterly: 'Trimestral', yearly: 'Anual' };
   const allRows = [...paymentHistory]
     .map(item => ({ ...item, monthKey: getHistoryMonthKey(item.paid_at || item.created_at) }))
@@ -674,23 +700,104 @@ function renderHistory() {
     const weekday = new Intl.DateTimeFormat('es-MX', { weekday: 'long' }).format(paidDate);
     const subcopy = payment.amountType === 'variable' ? 'Monto variable' : 'Monto fijo';
 
+    const historyId = item.id || '';
+    const canDelete = Boolean(historyId);
     return `
       <tr>
         <td>
           <div class="history-concept">
             <div class="service-icon ${color}">${icon}</div>
-            <div><strong>${escapeHtml(payment.name || item.name || 'Pago eliminado')}</strong><span>${escapeHtml(subcopy)}</span></div>
+            <div><strong>${escapeHtml(payment.name || item.name || 'Pago eliminado')}</strong><span class="history-mobile-date">${escapeHtml(dateMain)} · ${escapeHtml(capitalize(weekday))}</span><span class="history-desktop-subcopy">${escapeHtml(subcopy)}</span></div>
           </div>
         </td>
         <td><div class="history-date"><strong>${dateMain}</strong><span>${escapeHtml(capitalize(weekday))}</span></div></td>
         <td><span class="category-pill ${categoryClass(category)}">${escapeHtml(category)}</span></td>
         <td><span class="frequency-pill">${escapeHtml(frequency)}</span></td>
-        <td><strong class="history-amount">${amount}</strong></td>
-        <td class="history-more">•••</td>
+        <td><div class="history-mobile-money"><strong class="history-amount">${amount}</strong><span>${escapeHtml(frequency)}</span></div></td>
+        <td class="history-more">
+          <div class="history-more-wrap">
+            <button class="icon-btn" type="button" onclick="toggleHistoryMenu(event, '${historyId}')" aria-label="Opciones de historial">•••</button>
+            <div class="history-row-menu hidden" id="history-menu-${historyId}">
+              <button class="danger" type="button" ${canDelete ? `onclick="deleteHistoryRecord('${historyId}')"` : 'disabled'}>Eliminar pago</button>
+            </div>
+          </div>
+        </td>
       </tr>`;
   }).join('');
 
   if (els.historyCount) els.historyCount.textContent = `Mostrando 1 a ${rows.length} de ${allRows.length} pagos`;
+}
+
+
+function renderDashboardSkeletonRows() {
+  return Array.from({ length: 6 }).map(() => `
+    <tr class="history-skeleton-row">
+      <td><div class="pay-cell"><div class="skeleton skeleton-icon"></div><div><span class="skeleton skeleton-line wide"></span><span class="skeleton skeleton-line small"></span></div></div></td>
+      <td><span class="skeleton skeleton-line small"></span></td>
+      <td><span class="skeleton skeleton-line"></span></td>
+      <td><span class="skeleton skeleton-line"></span></td>
+      <td><span class="skeleton skeleton-line"></span></td>
+      <td><span class="skeleton skeleton-pill"></span></td>
+      <td></td>
+    </tr>`).join('');
+}
+
+function renderHistorySkeletonRows() {
+  return Array.from({ length: 5 }).map(() => `
+    <tr class="history-skeleton-row">
+      <td><div class="history-concept"><div class="skeleton skeleton-icon"></div><div><span class="skeleton skeleton-line wide"></span><span class="skeleton skeleton-line small"></span></div></div></td>
+      <td><span class="skeleton skeleton-line"></span><span class="skeleton skeleton-line small"></span></td>
+      <td><span class="skeleton skeleton-pill"></span></td>
+      <td><span class="skeleton skeleton-pill"></span></td>
+      <td><span class="skeleton skeleton-line"></span></td>
+      <td></td>
+    </tr>`).join('');
+}
+
+function toggleHistoryMenu(event, id) {
+  event?.stopPropagation?.();
+  if (!id) return;
+  const trigger = event?.currentTarget;
+  const menu = document.querySelector(`#history-menu-${id}`);
+  if (!trigger || !menu) return;
+  const willOpen = menu.classList.contains('hidden');
+  document.querySelectorAll('.history-row-menu, .row-menu').forEach(item => {
+    item.classList.add('hidden');
+    item.removeAttribute('style');
+  });
+  if (!willOpen) return;
+  if (menu.parentElement !== document.body) document.body.appendChild(menu);
+  menu.classList.remove('hidden');
+  menu.style.visibility = 'hidden';
+  menu.style.left = '0px';
+  menu.style.top = '0px';
+  const buttonRect = trigger.getBoundingClientRect();
+  const menuRect = menu.getBoundingClientRect();
+  const margin = 12;
+  const left = Math.min(window.innerWidth - menuRect.width - margin, Math.max(margin, buttonRect.right - menuRect.width));
+  const spaceBelow = window.innerHeight - buttonRect.bottom;
+  const spaceAbove = buttonRect.top;
+  let top = buttonRect.bottom + 8;
+  if (spaceBelow < menuRect.height + margin && spaceAbove > spaceBelow) top = buttonRect.top - menuRect.height - 8;
+  top = Math.min(window.innerHeight - menuRect.height - margin, Math.max(margin, top));
+  menu.style.left = `${Math.round(left)}px`;
+  menu.style.top = `${Math.round(top)}px`;
+  menu.style.visibility = 'visible';
+}
+
+async function deleteHistoryRecord(id) {
+  if (!id) return;
+  if (!confirm('¿Eliminar este pago del historial?')) return;
+  const { error } = await supabaseClient.from(PAYMENT_HISTORY_TABLE).delete().eq('id', id);
+  if (error) {
+    console.error('Error eliminando historial:', error);
+    showToast('No se pudo eliminar del historial');
+    return;
+  }
+  paymentHistory = paymentHistory.filter(item => item.id !== id);
+  document.querySelectorAll('.history-row-menu').forEach(menu => menu.classList.add('hidden'));
+  renderHistory();
+  showToast('Pago eliminado del historial');
 }
 
 function sortPayments(a, b) {
@@ -1340,4 +1447,6 @@ function escapeHtml(value) {
 window.togglePaid = togglePaid;
 window.editPayment = editPayment;
 window.deletePayment = deletePayment;
+window.toggleHistoryMenu = toggleHistoryMenu;
+window.deleteHistoryRecord = deleteHistoryRecord;
 window.toggleMenu = toggleMenu;
