@@ -1,5 +1,5 @@
-console.log('Korah v1.7.0-history-primary-fix');
-const APP_VERSION = 'v1.7.0-history-primary-fix';
+console.log('Korah v1.8.0-history-restore-fix');
+const APP_VERSION = 'v1.8.0-history-restore-fix';
 const SUPABASE_URL = 'https://qjicwqpjxsqynoudwylk.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_rl7m3zQsatLJL2Lb3yHPOg_nnCr712U';
 const PAYMENTS_TABLE = 'payments';
@@ -497,7 +497,7 @@ async function loadPaymentHistory(accessToken) {
   }
 
   try {
-    const url = `${SUPABASE_URL}/rest/v1/${PAYMENT_HISTORY_TABLE}?select=*&user_id=eq.${encodeURIComponent(currentUser.id)}&order=paid_at.desc&order=created_at.desc`;
+    const url = `${SUPABASE_URL}/rest/v1/${PAYMENT_HISTORY_TABLE}?select=*&user_id=eq.${encodeURIComponent(currentUser.id)}&order=paid_at.desc,created_at.desc`;
     const response = await fetch(url, {
       method: 'GET',
       headers: {
@@ -599,11 +599,43 @@ function setActiveView(view) {
 }
 
 
+function getHistoryRows() {
+  const normalizedHistory = Array.isArray(paymentHistory) ? paymentHistory.map(item => ({
+    ...item,
+    id: item.id || `history-${item.payment_id}-${item.paid_at}`,
+    source: 'history'
+  })) : [];
+
+  // Fallback para pagos existentes creados antes de que la tabla payment_history se usara bien.
+  // Si un pago tiene lastPaid, debe aparecer en Historial aunque aún no exista su fila histórica.
+  const fallbackFromPayments = payments
+    .filter(payment => payment.lastPaid)
+    .map(payment => ({
+      id: `payment-${payment.id}-${payment.lastPaid}`,
+      payment_id: payment.id,
+      user_id: currentUser?.id,
+      amount: payment.lastPaidAmount ?? payment.amount ?? 0,
+      period: payment.paidPeriod || getPeriodKeyFromDate(inputDate(payment.lastPaid), payment.frequency),
+      paid_at: payment.lastPaid,
+      created_at: payment.lastPaid,
+      source: 'payment'
+    }));
+
+  const seen = new Set();
+  return [...normalizedHistory, ...fallbackFromPayments].filter(item => {
+    const key = `${item.payment_id || ''}|${toInputDate(inputDate(item.paid_at))}|${Number(item.amount || 0)}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
 function renderHistory() {
   if (!els.historyTable) return;
 
   const frequencyLabels = { monthly: 'Mensual', bimonthly: 'Bimestral', quarterly: 'Trimestral', yearly: 'Anual' };
-  const sortedAll = [...paymentHistory].sort((a, b) => {
+  const allRows = getHistoryRows();
+  const sortedAll = allRows.sort((a, b) => {
     const dateDiff = inputDate(b.paid_at).getTime() - inputDate(a.paid_at).getTime();
     if (dateDiff !== 0) return dateDiff;
     return String(b.created_at || '').localeCompare(String(a.created_at || ''));
@@ -632,6 +664,7 @@ function renderHistory() {
     const dateMain = formatDate(paidDate);
     const weekday = new Intl.DateTimeFormat('es-MX', { weekday: 'long' }).format(paidDate);
     const subcopy = payment.amountType === 'variable' ? 'Monto variable' : 'Monto fijo';
+    const canDelete = item.source !== 'payment';
 
     return `
       <tr>
@@ -645,7 +678,7 @@ function renderHistory() {
         <td><span class="category-pill ${categoryClass(category)}">${escapeHtml(category)}</span></td>
         <td><span class="frequency-pill">${escapeHtml(frequency)}</span></td>
         <td><strong class="history-amount">${amount}</strong></td>
-        <td class="history-more"><button class="history-more-btn" type="button" onclick="toggleHistoryMenu(event, '${item.id}')">•••</button><div class="history-menu hidden" id="history-menu-${item.id}"><button type="button" onclick="deleteHistoryItem('${item.id}')">Eliminar pago</button></div></td>
+        <td class="history-more">${canDelete ? `<button class="history-more-btn" type="button" onclick="toggleHistoryMenu(event, '${item.id}')">•••</button><div class="history-menu hidden" id="history-menu-${item.id}"><button type="button" onclick="deleteHistoryItem('${item.id}')">Eliminar pago</button></div>` : ''}</td>
       </tr>`;
   }).join('');
 
@@ -672,6 +705,16 @@ function syncHistoryMonthSelector(rows) {
   const options = monthKeys.map(key => `<option value="${key}">${escapeHtml(formatMonthKey(key))}</option>`).join('');
   if (els.historyMonthSelect.innerHTML !== options) els.historyMonthSelect.innerHTML = options;
   els.historyMonthSelect.value = selectedHistoryMonth;
+}
+
+function getPeriodKeyFromDate(date, frequency = 'monthly') {
+  const value = inputDate(date);
+  const year = value.getFullYear();
+  const month = value.getMonth();
+  if (frequency === 'yearly') return String(year);
+  if (frequency === 'quarterly') return `${year}-Q${Math.floor(month / 3) + 1}`;
+  if (frequency === 'bimonthly') return `${year}-B${Math.floor(month / 2) + 1}`;
+  return `${year}-${String(month + 1).padStart(2, '0')}`;
 }
 
 function toMonthKey(date) {
