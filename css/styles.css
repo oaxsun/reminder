@@ -2595,3 +2595,149 @@ button[type="submit"].primary-btn,
   }
   .history-footer { display: none !important; }
 }
+
+/* Korah v2.2 history mobile labels + actions */
+@media (max-width: 760px) {
+  #historyView .history-panel {
+    margin-top: 0 !important;
+  }
+
+  #historyView .history-table-wrap {
+    overflow: visible !important;
+  }
+
+  #historyView .history-table thead {
+    display: block !important;
+    margin: 2px 0 10px !important;
+    padding: 0 !important;
+    background: transparent !important;
+    border: 0 !important;
+  }
+
+  #historyView .history-table thead tr {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) 92px 32px !important;
+    column-gap: 8px !important;
+    align-items: center !important;
+    padding: 0 2px 7px !important;
+    margin: 0 !important;
+    border: 0 !important;
+    border-bottom: 1px solid var(--line) !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  #historyView .history-table thead th {
+    display: none !important;
+    padding: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+    color: #94a3b8 !important;
+    font-size: 9px !important;
+    line-height: 1.2 !important;
+    font-weight: 900 !important;
+    letter-spacing: .095em !important;
+    text-transform: uppercase !important;
+  }
+
+  #historyView .history-table thead th:nth-child(1) {
+    display: block !important;
+    grid-column: 1 !important;
+    text-align: left !important;
+  }
+
+  #historyView .history-table thead th:nth-child(5) {
+    display: block !important;
+    grid-column: 2 !important;
+    text-align: right !important;
+    font-size: 0 !important;
+  }
+
+  #historyView .history-table thead th:nth-child(5)::before {
+    content: 'Monto';
+    font-size: 9px !important;
+  }
+
+  #historyView .history-table tbody tr {
+    grid-template-columns: minmax(0, 1fr) 92px 32px !important;
+    grid-template-areas: 'concept amount more' !important;
+    gap: 8px !important;
+    align-items: center !important;
+    padding: 12px !important;
+  }
+
+  #historyView .history-table tbody td:nth-child(1) {
+    display: block !important;
+    grid-area: concept !important;
+    min-width: 0 !important;
+  }
+
+  #historyView .history-table tbody td:nth-child(5) {
+    display: block !important;
+    grid-area: amount !important;
+    text-align: right !important;
+    min-width: 0 !important;
+  }
+
+  #historyView .history-table tbody td:nth-child(6) {
+    display: flex !important;
+    grid-area: more !important;
+    justify-content: flex-end !important;
+    align-items: center !important;
+    min-width: 0 !important;
+  }
+
+  #historyView .history-concept strong {
+    max-width: calc(100vw - 230px) !important;
+  }
+
+  #historyView .history-mobile-date {
+    display: none !important;
+  }
+
+  #historyView .history-mobile-money {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-end !important;
+    gap: 3px !important;
+  }
+
+  #historyView .history-mobile-money .history-amount {
+    font-size: 13.5px !important;
+    font-weight: 900 !important;
+    line-height: 1.08 !important;
+    white-space: nowrap !important;
+  }
+
+  #historyView .history-mobile-money span {
+    display: block !important;
+    font-size: 10.5px !important;
+    font-weight: 700 !important;
+    color: #64748b !important;
+    line-height: 1.05 !important;
+    white-space: nowrap !important;
+  }
+
+  #historyView .history-more .icon-btn {
+    width: 30px !important;
+    height: 30px !important;
+    border-radius: 10px !important;
+    display: grid !important;
+    place-items: center !important;
+    font-size: 16px !important;
+    letter-spacing: .08em !important;
+    color: #64748b !important;
+    background: transparent !important;
+  }
+
+  #historyView .history-more .icon-btn:hover,
+  #historyView .history-more .icon-btn:focus-visible {
+    background: #f6f3ff !important;
+    color: var(--purple) !important;
+  }
+
+  .history-row-menu {
+    max-width: calc(100vw - 24px) !important;
+    z-index: 100000 !important;
+  }
+}
