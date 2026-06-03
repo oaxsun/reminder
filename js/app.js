@@ -1,5 +1,5 @@
-console.log('Korah v2.9.0-calendar-redesign-fix');
-const APP_VERSION = 'v2.9.0-calendar-redesign-fix';
+console.log('Korah v3.3.0-no-calendar-more-ux');
+const APP_VERSION = 'v3.3.0-no-calendar-more-ux';
 const SUPABASE_URL = 'https://qjicwqpjxsqynoudwylk.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_rl7m3zQsatLJL2Lb3yHPOg_nnCr712U';
 const PAYMENTS_TABLE = 'payments';
@@ -635,17 +635,16 @@ function render() {
     els.empty.classList.toggle('hidden', payments.length > 0);
   }
   renderSummary(enriched);
-  if (activeView === 'calendar') renderCalendar();
   if (activeView === 'history') renderHistory();
   if (activeView === 'reports') renderReports();
 }
 
 
 function setActiveView(view) {
+  if (view === 'calendar') view = 'dashboard';
   activeView = view || 'dashboard';
   const titles = {
     dashboard: ['Dashboard', 'Hola, aquí tienes el resumen de tus pagos.'],
-    calendar: ['Calendario', 'Visualiza tus pagos y fechas de vencimiento.'],
     history: ['Historial', 'Consulta tus pagos registrados.'],
     reports: ['Reportes', 'Analiza tus gastos y toma mejores decisiones.'],
     premium: ['Premium', 'Desbloquea todo el poder de tus finanzas.'],
@@ -655,7 +654,7 @@ function setActiveView(view) {
   if (els.topbarTitle) els.topbarTitle.textContent = title;
   if (els.topbarCopy) els.topbarCopy.textContent = copy;
 
-  ['dashboard', 'calendar', 'history', 'reports', 'premium', 'more'].forEach(name => {
+  ['dashboard', 'history', 'reports', 'premium', 'more'].forEach(name => {
     const screen = els[`${name}View`];
     screen?.classList.toggle('hidden', name !== activeView);
   });
@@ -664,7 +663,6 @@ function setActiveView(view) {
     button.classList.toggle('active', button.dataset.view === activeView);
   });
 
-  if (activeView === 'calendar') renderCalendar();
   if (activeView === 'history') renderHistory();
   if (activeView === 'reports') renderReports();
 }

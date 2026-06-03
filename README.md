@@ -1,28 +1,7 @@
-# Korah
+# Korah v3.3
 
-Control inteligente de pagos y recordatorios financieros.
-
-## Deploy
-
-Sube el contenido de este ZIP a la raíz del repositorio de GitHub Pages.
-
-Estructura esperada:
-
-```text
-index.html
-css/
-js/
-assets/
-database/
-.nojekyll
-```
-
-## Supabase
-
-Este build apunta al proyecto Supabase `reminder`:
-
-```text
-https://qjicwqpjxsqynoudwylk.supabase.co
-```
-
-Si cambias de proyecto, actualiza `SUPABASE_URL` y `SUPABASE_ANON_KEY` en `js/app.js`.
+Cambios:
+- Se elimina el módulo Calendario del menú para producción.
+- Navegación: Dashboard, Historial, Reportes, Premium y Más.
+- Pantalla Más rediseñada con opciones: Configuración, Categorías, Premium, Ayuda y Cerrar sesión.
+- Mejoras UX/UI en desktop y móvil.
