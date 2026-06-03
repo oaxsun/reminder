@@ -3746,3 +3746,155 @@ body { overflow: hidden; }
   #reportsView .report-export-redesign .export-grid { grid-template-columns: 1fr; }
   #reportsView .reports-premium-banner { margin-bottom: 10px; }
 }
+
+
+/* Korah v2.8 reports summary + responsive no-hide fix */
+#reportsView {
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  min-height: 0 !important;
+  padding-bottom: clamp(56px, 7vh, 96px) !important;
+}
+
+/* Restore the report summary cards. They were hidden in v2.7. */
+#reportsView .reports-metrics-grid {
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  gap: clamp(10px, 1.1vw, 16px) !important;
+  margin: 0 !important;
+  flex: 0 0 auto;
+}
+#reportsView .report-metric-card {
+  min-width: 0;
+  min-height: clamp(92px, 9vw, 118px) !important;
+  padding: clamp(14px, 1.5vw, 20px) !important;
+  gap: clamp(10px, 1vw, 16px) !important;
+  overflow: hidden;
+}
+#reportsView .report-metric-card > div:last-child {
+  min-width: 0;
+}
+#reportsView .report-metric-card span,
+#reportsView .report-metric-card p,
+#reportsView .report-metric-card strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+#reportsView .report-metric-card strong {
+  font-size: clamp(18px, 1.9vw, 25px) !important;
+}
+#reportsView .report-metric-card span,
+#reportsView .report-metric-card p {
+  font-size: clamp(11px, .95vw, 13px) !important;
+}
+#reportsView .report-icon {
+  width: clamp(38px, 4vw, 52px) !important;
+  height: clamp(38px, 4vw, 52px) !important;
+  padding: clamp(9px, 1vw, 14px) !important;
+  flex: 0 0 auto;
+}
+
+/* Keep Export before Premium and ensure both are always visible through page scroll. */
+#reportsView .report-export-redesign { order: 20 !important; }
+#reportsView .reports-premium-banner { order: 30 !important; }
+
+/* Make chart blocks adapt without hiding or overlapping text. */
+#reportsView .reports-analytics-grid {
+  grid-template-columns: minmax(300px, 1.05fr) minmax(300px, 1fr) minmax(280px, .88fr) !important;
+}
+#reportsView .category-card .category-chart-layout {
+  grid-template-columns: minmax(140px, clamp(150px, 14vw, 190px)) minmax(0, 1fr) !important;
+}
+#reportsView .legend-row {
+  grid-template-columns: minmax(0, 1.2fr) minmax(60px, auto) minmax(38px, auto) !important;
+}
+#reportsView .legend-row span,
+#reportsView .compare-row span {
+  min-width: 0 !important;
+}
+#reportsView .report-export-redesign,
+#reportsView .reports-premium-banner,
+#reportsView .report-card,
+#reportsView .report-metric-card {
+  box-sizing: border-box;
+}
+
+@media (max-width: 1320px) {
+  #reportsView .reports-analytics-grid {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important;
+  }
+  #reportsView .compare-card {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 1100px) {
+  #reportsView .reports-metrics-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+  #reportsView .reports-analytics-grid {
+    grid-template-columns: 1fr !important;
+  }
+  #reportsView .category-card .category-chart-layout {
+    grid-template-columns: minmax(150px, 190px) minmax(0, 1fr) !important;
+  }
+}
+
+@media (max-width: 760px) {
+  #reportsView {
+    height: calc(100vh - 128px) !important;
+    max-height: none !important;
+    overflow-y: auto !important;
+    padding-bottom: 118px !important;
+  }
+  #reportsView .reports-metrics-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 10px !important;
+  }
+  #reportsView .report-metric-card {
+    min-height: 98px !important;
+    padding: 12px !important;
+    gap: 8px !important;
+  }
+  #reportsView .report-metric-card strong {
+    font-size: clamp(16px, 5vw, 19px) !important;
+  }
+  #reportsView .category-card .category-chart-layout {
+    grid-template-columns: 1fr !important;
+    justify-items: center;
+  }
+  #reportsView .category-legend {
+    width: 100%;
+    max-width: 100%;
+  }
+  #reportsView .legend-row {
+    grid-template-columns: minmax(0, 1fr) minmax(62px, auto) 40px !important;
+    column-gap: 8px !important;
+  }
+  #reportsView .compare-row {
+    grid-template-columns: minmax(0, 1fr) auto auto !important;
+  }
+  #reportsView .report-export-redesign {
+    grid-template-columns: 1fr !important;
+  }
+  #reportsView .reports-premium-banner {
+    grid-template-columns: 48px minmax(0, 1fr) !important;
+  }
+}
+
+@media (max-width: 390px) {
+  #reportsView .reports-metrics-grid {
+    grid-template-columns: 1fr !important;
+  }
+  #reportsView .report-metric-card {
+    flex-direction: row !important;
+    align-items: center !important;
+  }
+  #reportsView .report-card-head {
+    align-items: flex-start;
+  }
+  #reportsView .legend-row {
+    font-size: 11px !important;
+  }
+}

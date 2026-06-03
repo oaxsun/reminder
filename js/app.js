@@ -1,5 +1,5 @@
-console.log('Korah v2.7.0-reports-responsive-fix');
-const APP_VERSION = 'v2.7.0-reports-responsive-fix';
+console.log('Korah v2.8.0-reports-summary-responsive-fix');
+const APP_VERSION = 'v2.8.0-reports-summary-responsive-fix';
 const SUPABASE_URL = 'https://qjicwqpjxsqynoudwylk.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_rl7m3zQsatLJL2Lb3yHPOg_nnCr712U';
 const PAYMENTS_TABLE = 'payments';
