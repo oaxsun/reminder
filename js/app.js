@@ -1,5 +1,5 @@
-console.log('Korah v2.9.0-calendar-redesign-fix');
-const APP_VERSION = 'v2.9.0-calendar-redesign-fix';
+console.log('Korah v3.0-calendar-layout-polish');
+const APP_VERSION = 'v3.0-calendar-layout-polish';
 const SUPABASE_URL = 'https://qjicwqpjxsqynoudwylk.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_rl7m3zQsatLJL2Lb3yHPOg_nnCr712U';
 const PAYMENTS_TABLE = 'payments';
@@ -1075,6 +1075,14 @@ function renderCalendar() {
     .filter(item => item.dueDate >= startOfToday())
     .sort((a, b) => a.dueDate - b.dueDate);
   const next = upcoming[0] || pendingItems.sort((a, b) => a.dueDate - b.dueDate)[0] || null;
+  if (next) {
+    const hasSelectedItems = items.some(item => toInputDate(item.dueDate) === selectedCalendarDate);
+    const nextMonthKey = `${next.dueDate.getFullYear()}-${next.dueDate.getMonth()}`;
+    const cursorMonthKey = `${calendarCursor.getFullYear()}-${calendarCursor.getMonth()}`;
+    if (!hasSelectedItems && nextMonthKey === cursorMonthKey) {
+      selectedCalendarDate = toInputDate(next.dueDate);
+    }
+  }
   renderNextPayment(next);
   renderCalendarGrid(items);
   renderSelectedDay(items);
