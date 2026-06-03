@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/styles.css?v=2.6.0-reports-redesign" />
+  <link rel="stylesheet" href="css/styles.css?v=2.4.0-compact" />
 </head>
 <body>
   <section class="auth-screen hidden" id="authScreen">
@@ -183,11 +183,8 @@
 
 
     <section class="view-screen hidden" id="reportsView">
-      <div class="reports-header-row reports-redesign-header">
-        <div class="reports-title-copy">
-          <h2>Reportes</h2>
-          <p>Analiza tus gastos y toma mejores decisiones.</p>
-        </div>
+      <div class="reports-header-row">
+        <div></div>
         <div class="reports-actions">
           <label class="report-month-control" aria-label="Seleccionar mes de reportes">
             <span class="sf"><svg viewBox="0 0 24 24"><path d="M6 4h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2ZM4 9h16M8 3v4M16 3v4"/></svg></span>
@@ -195,40 +192,46 @@
             <select id="reportMonthSelect"></select>
             <span class="select-chevron"><svg viewBox="0 0 24 24"><path d="m7 10 5 5 5-5"/></svg></span>
           </label>
-          <button class="report-plan-chip" type="button" data-view="premium"><span>🔒</span> Actual (Free)</button>
+          <button class="premium-mini-cta" type="button" data-view="premium">Premium</button>
         </div>
       </div>
 
-      <div class="report-info-strip"><span class="sf"><svg viewBox="0 0 24 24"><path d="M12 17v-6M12 7h.01M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20Z"/></svg></span>Estás viendo el reporte del mes actual. Con Premium puedes ver cualquier mes del historial.</div>
-
-      <section class="reports-metrics-grid reports-redesign-metrics">
-        <article class="report-metric-card"><div class="report-icon purple"><svg viewBox="0 0 24 24"><path d="M4 8h16v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8Zm3-4h10l3 4H4l3-4"/></svg></div><div><span>Gasto total</span><strong id="reportTotalMonth">$0</strong><p id="reportTotalDelta">Este mes</p></div></article>
-        <article class="report-metric-card"><div class="report-icon green"><svg viewBox="0 0 24 24"><path d="M4 17 10 11l4 4 6-8M20 7v6h-6"/></svg></div><div><span>Promedio mensual</span><strong id="reportAverageMonth">$0</strong><p>Últimos 6 meses</p></div></article>
-        <article class="report-metric-card"><div class="report-icon red"><svg viewBox="0 0 24 24"><path d="M5 17 17 5M9 5h8v8"/></svg></div><div><span>Mes más alto</span><strong id="reportExpensiveMonth">—</strong><p id="reportExpensiveAmount">$0</p></div></article>
-        <article class="report-metric-card"><div class="report-icon blue"><svg viewBox="0 0 24 24"><path d="M5 7 17 19M17 11v8H9"/></svg></div><div><span>Mes más bajo</span><strong id="reportCheapMonth">—</strong><p id="reportCheapAmount">$0</p></div></article>
+      <section class="reports-metrics-grid">
+        <article class="report-metric-card"><div class="report-icon purple"><svg viewBox="0 0 24 24"><path d="M4 8h16v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8Zm3-4h10l3 4H4l3-4"/></svg></div><div><span>Total gastado</span><strong id="reportTotalMonth">$0</strong><p id="reportTotalDelta">Este mes</p></div></article>
+        <article class="report-metric-card"><div class="report-icon purple"><svg viewBox="0 0 24 24"><path d="M4 17 10 11l4 4 6-8M20 7v6h-6"/></svg></div><div><span>Promedio mensual</span><strong id="reportAverageMonth">$0</strong><p>Últimos meses</p></div></article>
+        <article class="report-metric-card"><div class="report-icon red"><svg viewBox="0 0 24 24"><path d="M5 17 17 5M9 5h8v8"/></svg></div><div><span>Mes más caro</span><strong id="reportExpensiveMonth">—</strong><p id="reportExpensiveAmount">$0</p></div></article>
+        <article class="report-metric-card"><div class="report-icon green"><svg viewBox="0 0 24 24"><path d="M5 7 17 19M17 11v8H9"/></svg></div><div><span>Mes más barato</span><strong id="reportCheapMonth">—</strong><p id="reportCheapAmount">$0</p></div></article>
       </section>
 
       <section class="reports-analytics-grid">
         <article class="report-card category-card">
-          <div class="report-card-head"><h3>Gastos por categoría</h3></div>
+          <div class="report-card-head"><h3>Gastos por categoría</h3><span class="report-free-badge">Mes actual</span></div>
           <div class="category-chart-layout">
             <div class="donut-chart" id="categoryDonut"><span>Total<br><strong>$0</strong></span></div>
             <div class="category-legend" id="categoryLegend"></div>
           </div>
         </article>
-
         <article class="report-card trend-card">
-          <div class="report-card-head"><h3>Evolución mensual</h3><span class="premium-lock-dot">🔒</span></div>
+          <div class="report-card-head"><h3>Evolución mensual</h3><span class="mini-select">6 meses</span></div>
           <div class="trend-chart" id="trendChart"></div>
         </article>
-
         <article class="report-card compare-card">
           <div class="report-card-head compare-head"><div><h3>Comparativa: Junio vs Mayo</h3><p>Solo puedes comparar el mes actual con el anterior.</p></div><span class="premium-lock-dot">🔒</span></div>
           <div id="compareList" class="compare-list"></div>
-          <div class="compare-premium-note"><span>🔒</span> Con Premium puedes comparar cualquier mes del historial.</div>
-          <div class="hidden locked-compare-controls" aria-hidden="true"><select id="compareMonthA" disabled></select><span>vs</span><select id="compareMonthB" disabled></select></div>
+          <div class="compare-premium-note"><span>🔒</span><span>Con Premium puedes comparar cualquier mes del historial.</span></div>
         </article>
       </section>
+
+      <article class="report-card export-card report-export-redesign">
+        <div>
+          <h3>Exportar reporte</h3>
+          <p>Descarga tu reporte del mes actual.</p>
+        </div>
+        <div class="export-grid">
+          <button type="button" class="export-option" id="exportPdfBtn"><span class="pdf-icon">PDF</span><strong>Exportar PDF</strong><small>Disponible en Premium</small><i>🔒</i></button>
+          <button type="button" class="export-option" id="exportExcelBtn"><span class="excel-icon">X</span><strong>Exportar Excel</strong><small>Disponible en Premium</small><i>🔒</i></button>
+        </div>
+      </article>
 
       <section class="reports-premium-banner">
         <div class="premium-banner-icon">◇</div>
@@ -236,16 +239,8 @@
           <h3>Desbloquea todo el poder de Korah Premium</h3>
           <p><span>✓ Historial ilimitado</span><span>✓ Comparativas avanzadas</span><span>✓ Exportar reportes</span><span>✓ Notificaciones inteligentes</span></p>
         </div>
-        <button type="button" class="white-premium-btn" data-view="premium">Actualizar a Premium</button>
+        <button class="white-premium-btn" type="button" data-view="premium">Actualizar a Premium</button>
         <small>Desde $49 MXN / mes</small>
-      </section>
-
-      <section class="report-card export-card report-export-redesign">
-        <div><h3>Exportar reporte</h3><p>Descarga tu reporte del mes actual.</p></div>
-        <div class="export-grid">
-          <button type="button" class="export-option" id="exportPdfBtn"><span class="pdf-icon">PDF</span><strong>Exportar PDF</strong><small>Disponible en Premium</small></button>
-          <button type="button" class="export-option" id="exportExcelBtn"><span class="excel-icon">X</span><strong>Exportar Excel</strong><small>Disponible en Premium</small></button>
-        </div>
       </section>
     </section>
 
