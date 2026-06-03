@@ -1,5 +1,5 @@
-console.log('Korah v2.8.0-reports-summary-responsive-fix');
-const APP_VERSION = 'v2.8.0-reports-summary-responsive-fix';
+console.log('Korah v2.9.0-calendar-redesign-fix');
+const APP_VERSION = 'v2.9.0-calendar-redesign-fix';
 const SUPABASE_URL = 'https://qjicwqpjxsqynoudwylk.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_rl7m3zQsatLJL2Lb3yHPOg_nnCr712U';
 const PAYMENTS_TABLE = 'payments';
@@ -86,6 +86,7 @@ const els = {
   desktopNav: document.querySelector('#desktopNav'),
   calendarNewPaymentBtn: document.querySelector('#calendarNewPaymentBtn'),
   calendarTodayBtn: document.querySelector('#calendarTodayBtn'),
+  calendarMonthSelect: document.querySelector('#calendarMonthSelect'),
   prevMonthBtn: document.querySelector('#prevMonthBtn'),
   nextMonthBtn: document.querySelector('#nextMonthBtn'),
   calendarMonthLabel: document.querySelector('#calendarMonthLabel'),
@@ -147,6 +148,14 @@ function bindEvents() {
   els.calendarTodayBtn?.addEventListener('click', () => { calendarCursor = new Date(today.getFullYear(), today.getMonth(), 1); selectedCalendarDate = toInputDate(today); renderCalendar(); });
   els.prevMonthBtn?.addEventListener('click', () => { calendarCursor = new Date(calendarCursor.getFullYear(), calendarCursor.getMonth() - 1, 1); selectedCalendarDate = toInputDate(new Date(calendarCursor.getFullYear(), calendarCursor.getMonth(), 1)); renderCalendar(); });
   els.nextMonthBtn?.addEventListener('click', () => { calendarCursor = new Date(calendarCursor.getFullYear(), calendarCursor.getMonth() + 1, 1); selectedCalendarDate = toInputDate(new Date(calendarCursor.getFullYear(), calendarCursor.getMonth(), 1)); renderCalendar(); });
+  els.calendarMonthSelect?.addEventListener('change', () => {
+    const [year, month] = els.calendarMonthSelect.value.split('-').map(Number);
+    if (!Number.isNaN(year) && !Number.isNaN(month)) {
+      calendarCursor = new Date(year, month - 1, 1);
+      selectedCalendarDate = toInputDate(new Date(year, month - 1, 1));
+      renderCalendar();
+    }
+  });
   els.logoutBtn.addEventListener('click', logout);
   document.querySelector('#moreLogoutBtn')?.addEventListener('click', logout);
   document.querySelectorAll('[data-view]').forEach(button => {
@@ -1079,17 +1088,45 @@ function renderNextPayment(payment) {
     return;
   }
   const dueInfo = getDueInfo(payment);
+  const category = escapeHtml(payment.category || 'Pago');
   els.nextPaymentCard.innerHTML = `
     <div class="next-payment-icon ${payment.iconColor || getDefaultColor(payment.category)}">${getIconSvg(payment.icon || getDefaultIcon(payment.category))}</div>
-    <div class="next-payment-main"><span class="eyebrow">Próximo pago</span><h3>${escapeHtml(payment.name)}</h3><p>${escapeHtml(payment.category)}</p></div>
-    <div class="next-payment-date"><span>Vence</span><strong>${dueInfo.label}</strong><p>${formatDate(payment.dueDate)}</p></div>`;
+    <div class="next-payment-main">
+      <span class="eyebrow">Próximo pago</span>
+      <h3>${escapeHtml(payment.name)}</h3>
+      <div class="next-payment-meta">
+        <span><svg viewBox="0 0 24 24"><path d="M6 4h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2ZM4 9h16M8 3v4M16 3v4"/></svg>${formatDate(payment.dueDate)}</span>
+        <span>${compactMoney(payment)}</span>
+        <span class="soft-pill">${category}</span>
+      </div>
+    </div>
+    <div class="next-payment-date"><span>Vence en</span><strong>${dueInfo.label}</strong><button type="button" class="primary-btn" onclick="editPayment('${payment.id}')">Ver detalle</button></div>`;
+}
+
+
+function syncCalendarMonthSelect() {
+  if (!els.calendarMonthSelect) return;
+  const currentValue = `${calendarCursor.getFullYear()}-${String(calendarCursor.getMonth() + 1).padStart(2, '0')}`;
+  const options = [];
+  for (let offset = -12; offset <= 12; offset++) {
+    const date = new Date(today.getFullYear(), today.getMonth() + offset, 1);
+    const value = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+    const label = date.toLocaleDateString('es-MX', { month: 'long', year: 'numeric' });
+    options.push(`<option value="${value}" ${value === currentValue ? 'selected' : ''}>${label.charAt(0).toUpperCase() + label.slice(1)}</option>`);
+  }
+  els.calendarMonthSelect.innerHTML = options.join('');
+}
+
+function compactMoney(payment) {
+  return payment.amountType === 'variable' ? 'Variable' : money(payment.amount);
 }
 
 function renderCalendarGrid(items) {
   const year = calendarCursor.getFullYear();
   const month = calendarCursor.getMonth();
   const label = calendarCursor.toLocaleDateString('es-MX', { month: 'long', year: 'numeric' });
-  if (els.calendarMonthLabel) els.calendarMonthLabel.textContent = label.charAt(0).toUpperCase() + label.slice(1);
+  if (els.calendarMonthLabel) els.calendarMonthLabel.textContent = 'Calendario';
+  syncCalendarMonthSelect();
   const first = new Date(year, month, 1);
   const firstDay = (first.getDay() + 6) % 7;
   const daysInMonth = new Date(year, month + 1, 0).getDate();
@@ -1106,7 +1143,8 @@ function renderCalendarGrid(items) {
     const dayItems = items.filter(item => toInputDate(item.dueDate) === key);
     const isSelected = key === selectedCalendarDate;
     const isToday = key === toInputDate(today);
-    const dots = dayItems.slice(0, 3).map(item => `<span class="calendar-dot ${item.iconColor || getDefaultColor(item.category)}">${getIconSvg(item.icon || getDefaultIcon(item.category))}</span>`).join('');
+    const visibleItems = dayItems.slice(0, 2);
+    const dots = visibleItems.map(item => `<span class="calendar-dot ${item.iconColor || getDefaultColor(item.category)}">${getIconSvg(item.icon || getDefaultIcon(item.category))}</span>`).join('') + (dayItems.length > 2 ? `<span class="calendar-more-dot">+${dayItems.length - 2}</span>` : '');
     weeks.push(`<button type="button" class="calendar-day ${inMonth ? '' : 'muted'} ${isSelected ? 'selected' : ''} ${isToday ? 'today' : ''}" data-date="${key}"><span>${labelDay}</span><div>${dots}</div></button>`);
   }
   els.calendarGrid.innerHTML = weeks.join('');
@@ -1130,7 +1168,7 @@ function renderSelectedDay(items) {
 
 function renderUpcomingPayments(items) {
   if (!els.upcomingPayments) return;
-  const list = items.slice(0, 8);
+  const list = items.slice(0, 5);
   if (!list.length) {
     els.upcomingPayments.innerHTML = `<p class="empty-copy">No hay próximos pagos.</p>`;
     return;
@@ -1143,7 +1181,7 @@ function renderUpcomingPayments(items) {
       <div class="pay-cell"><div class="service-icon ${payment.iconColor || getDefaultColor(payment.category)}">${getIconSvg(payment.icon || getDefaultIcon(payment.category))}</div><div><div class="payment-name">${escapeHtml(payment.name)}</div><div class="subtext">${escapeHtml(payment.category)}</div></div></div>
       <div class="upcoming-date"><strong>${formatShortDate(payment.dueDate)}</strong><em class="due-label ${dueInfo.className}">${dueInfo.label}</em></div>
       <span class="badge ${statusClass}"><span class="status-dot"></span>${statusLabel}</span>
-      <strong class="upcoming-amount">${payment.amountType === 'variable' ? 'Variable' : money(payment.amount)}</strong>
+      <strong class="upcoming-amount">${compactMoney(payment)}</strong><span class="upcoming-arrow">›</span>
     </div>`;
   }).join('');
 }
@@ -1152,10 +1190,12 @@ function calendarPaymentCard(payment) {
   const statusClass = payment.isPaid ? 'paid' : (payment.isOverdue ? 'overdue' : 'pending');
   const statusLabel = payment.isPaid ? 'Pagado' : (payment.isOverdue ? 'Vencido' : 'Pendiente');
   return `<article class="calendar-payment-card">
-    <div class="pay-cell"><div class="service-icon ${payment.iconColor || getDefaultColor(payment.category)}">${getIconSvg(payment.icon || getDefaultIcon(payment.category))}</div><div><div class="payment-name">${escapeHtml(payment.name)}</div><div class="subtext">${escapeHtml(payment.category)}</div></div></div>
-    <span class="badge ${statusClass}"><span class="status-dot"></span>${statusLabel}</span>
-    <p>${payment.amountType === 'variable' ? 'Monto variable' : money(payment.amount)}</p>
-    <button type="button" class="secondary-btn" onclick="editPayment('${payment.id}')">Ver detalles</button>
+    <div class="calendar-payment-main">
+      <div class="service-icon ${payment.iconColor || getDefaultColor(payment.category)}">${getIconSvg(payment.icon || getDefaultIcon(payment.category))}</div>
+      <div><div class="payment-name">${escapeHtml(payment.name)}</div><div class="subtext">${escapeHtml(payment.category)}</div></div>
+    </div>
+    <div class="calendar-payment-side"><strong>${compactMoney(payment)}</strong><span class="badge ${statusClass}"><span class="status-dot"></span>${statusLabel}</span></div>
+    <button type="button" class="icon-btn" onclick="editPayment('${payment.id}')" aria-label="Ver detalles">⋮</button>
   </article>`;
 }
 

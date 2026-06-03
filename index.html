@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/styles.css?v=2.8.0-reports-summary-responsive" />
+  <link rel="stylesheet" href="css/styles.css?v=2.9.0-calendar-redesign" />
 </head>
 <body>
   <section class="auth-screen hidden" id="authScreen">
@@ -111,13 +111,19 @@
     </section>
 
     <section class="view-screen hidden" id="calendarView">
-      <div class="calendar-toolbar">
+      <div class="calendar-toolbar korah-calendar-toolbar">
         <div>
           <h3>Calendario</h3>
-          <p>Visualiza tus pagos y fechas de vencimiento.</p>
+          <p>Organiza y visualiza tus pagos y vencimientos.</p>
         </div>
         <div class="calendar-actions">
+          <label class="calendar-month-select-wrap" aria-label="Seleccionar mes de calendario">
+            <span class="sf"><svg viewBox="0 0 24 24"><path d="M6 4h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2ZM4 9h16M8 3v4M16 3v4"/></svg></span>
+            <select id="calendarMonthSelect"></select>
+          </label>
           <button class="secondary-btn" id="calendarTodayBtn" type="button">Hoy</button>
+          <button class="ghost-nav" id="prevMonthBtn" type="button" aria-label="Mes anterior">‹</button>
+          <button class="ghost-nav" id="nextMonthBtn" type="button" aria-label="Mes siguiente">›</button>
           <button class="primary-btn" id="calendarNewPaymentBtn" type="button"><span>＋</span> Nuevo pago</button>
         </div>
       </div>
@@ -125,9 +131,7 @@
       <section class="calendar-layout">
         <article class="calendar-card">
           <div class="calendar-month-head">
-            <button class="ghost-nav" id="prevMonthBtn" type="button" aria-label="Mes anterior">‹</button>
-            <h3 id="calendarMonthLabel">Mes</h3>
-            <button class="ghost-nav" id="nextMonthBtn" type="button" aria-label="Mes siguiente">›</button>
+            <h3 id="calendarMonthLabel">Calendario</h3>
           </div>
           <div class="calendar-grid" id="calendarGrid"></div>
         </article>
@@ -137,9 +141,10 @@
         </aside>
       </section>
       <section class="panel calendar-upcoming-panel">
-        <div class="panel-header"><h3>Próximos pagos</h3></div>
+        <div class="panel-header"><h3>Próximos pagos</h3><button class="link-btn calendar-see-all" type="button" data-view="dashboard">Ver todos</button></div>
         <div id="upcomingPayments" class="upcoming-list"></div>
       </section>
+      <div class="calendar-premium-note"><span>ⓘ</span><p>Con Premium puedes recibir recordatorios antes de cada vencimiento.</p><button type="button" data-view="premium">Conocer más</button></div>
     </section>
 
     <section class="view-screen hidden" id="historyView">
@@ -366,6 +371,6 @@
 
   <div class="toast hidden" id="toast">Pago registrado</div>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="js/app.js?v=2.8.0-reports-summary-responsive"></script>
+  <script src="js/app.js?v=2.9.0-calendar-redesign"></script>
 </body>
 </html>
