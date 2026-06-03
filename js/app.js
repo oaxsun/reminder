@@ -1,5 +1,5 @@
-console.log('Korah v3.0-calendar-layout-polish');
-const APP_VERSION = 'v3.0-calendar-layout-polish';
+console.log('Korah v2.9.0-calendar-redesign-fix');
+const APP_VERSION = 'v2.9.0-calendar-redesign-fix';
 const SUPABASE_URL = 'https://qjicwqpjxsqynoudwylk.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_rl7m3zQsatLJL2Lb3yHPOg_nnCr712U';
 const PAYMENTS_TABLE = 'payments';
@@ -1075,14 +1075,6 @@ function renderCalendar() {
     .filter(item => item.dueDate >= startOfToday())
     .sort((a, b) => a.dueDate - b.dueDate);
   const next = upcoming[0] || pendingItems.sort((a, b) => a.dueDate - b.dueDate)[0] || null;
-  if (next) {
-    const hasSelectedItems = items.some(item => toInputDate(item.dueDate) === selectedCalendarDate);
-    const nextMonthKey = `${next.dueDate.getFullYear()}-${next.dueDate.getMonth()}`;
-    const cursorMonthKey = `${calendarCursor.getFullYear()}-${calendarCursor.getMonth()}`;
-    if (!hasSelectedItems && nextMonthKey === cursorMonthKey) {
-      selectedCalendarDate = toInputDate(next.dueDate);
-    }
-  }
   renderNextPayment(next);
   renderCalendarGrid(items);
   renderSelectedDay(items);
@@ -1140,7 +1132,7 @@ function renderCalendarGrid(items) {
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const prevDays = new Date(year, month, 0).getDate();
   const weeks = [];
-  const dayNames = ['L', 'M', 'M', 'J', 'V', 'S', 'D'];
+  const dayNames = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
   dayNames.forEach(day => weeks.push(`<div class="calendar-weekday">${day}</div>`));
   for (let i = 0; i < 42; i++) {
     const offset = i - firstDay + 1;
@@ -1156,9 +1148,32 @@ function renderCalendarGrid(items) {
     weeks.push(`<button type="button" class="calendar-day ${inMonth ? '' : 'muted'} ${isSelected ? 'selected' : ''} ${isToday ? 'today' : ''}" data-date="${key}"><span>${labelDay}</span><div>${dots}</div></button>`);
   }
   els.calendarGrid.innerHTML = weeks.join('');
+  renderCalendarLegend(items);
   els.calendarGrid.querySelectorAll('[data-date]').forEach(button => {
     button.addEventListener('click', () => { selectedCalendarDate = button.dataset.date; renderCalendar(); });
   });
+}
+
+function renderCalendarLegend(items) {
+  const legend = document.getElementById('calendarLegend');
+  if (!legend) return;
+  const seen = new Map();
+  items.forEach(item => {
+    const category = item.category || 'Otros';
+    if (!seen.has(category)) {
+      seen.set(category, {
+        label: category,
+        icon: item.icon || getDefaultIcon(category),
+        color: item.iconColor || getDefaultColor(category)
+      });
+    }
+  });
+  const values = Array.from(seen.values()).slice(0, 5);
+  if (!values.length) {
+    legend.innerHTML = '';
+    return;
+  }
+  legend.innerHTML = values.map(item => `<span><i class="calendar-legend-icon ${item.color}">${getIconSvg(item.icon)}</i>${escapeHtml(item.label)}</span>`).join('');
 }
 
 function renderSelectedDay(items) {
