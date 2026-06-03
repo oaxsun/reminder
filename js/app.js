@@ -1,5 +1,5 @@
-console.log('Korah v2.5.0-free-reports-premium-locks');
-const APP_VERSION = 'v2.5.0-free-reports-premium-locks';
+console.log('Korah v2.6.0-reports-redesign');
+const APP_VERSION = 'v2.6.0-reports-redesign';
 const SUPABASE_URL = 'https://qjicwqpjxsqynoudwylk.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_rl7m3zQsatLJL2Lb3yHPOg_nnCr712U';
 const PAYMENTS_TABLE = 'payments';
