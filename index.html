@@ -250,27 +250,59 @@
     </section>
 
     <section class="view-screen hidden" id="premiumView">
-      <section class="premium-hero">
-        <div><span class="premium-tag">Korah Premium</span><h3>Entiende tus pagos, no solo los recuerdes.</h3><p>Desbloquea historial ilimitado, análisis financiero, comparativas de meses, exportación de reportes y notificaciones inteligentes.</p><button type="button" class="primary-btn" onclick="showToast('Premium estará disponible próximamente')">Actualizar a Premium</button></div>
-        <div class="premium-price"><span>Desde</span><strong>$49 MXN</strong><p>al mes</p></div>
-      </section>
-      <section class="premium-comparison">
-        <h3>Free vs Premium</h3>
-        <div class="comparison-table">
-          <div class="comparison-row head"><span>Función</span><span>Free</span><span>Premium</span></div>
-          <div class="comparison-row"><span>Dashboard y calendario</span><span>✓</span><span>✓</span></div>
-          <div class="comparison-row"><span>Historial mes actual y anterior</span><span>✓</span><span>✓</span></div>
-          <div class="comparison-row"><span>Historial ilimitado</span><span>—</span><span>✓</span></div>
-          <div class="comparison-row"><span>Análisis financiero</span><span>—</span><span>✓</span></div>
-          <div class="comparison-row"><span>Comparativa de meses</span><span>—</span><span>✓</span></div>
-          <div class="comparison-row"><span>Descargar reportes</span><span>—</span><span>✓</span></div>
-          <div class="comparison-row"><span>Notificación 1 día antes de vencer</span><span>—</span><span>✓</span></div>
+      <section class="premium-pro-hero">
+        <div class="premium-pro-copy">
+          <span class="premium-tag">Korah Premium</span>
+          <h3>Desbloquea todo el poder de tus finanzas.</h3>
+          <p>Convierte tus pagos en decisiones: historial ilimitado, análisis financiero, comparativas, exportación y notificaciones inteligentes.</p>
+          <div class="premium-hero-actions">
+            <button type="button" class="primary-btn" data-premium-cta onclick="handlePremiumCta()">Actualizar a Premium</button>
+            <span class="premium-status-pill" data-premium-state>Free</span>
+          </div>
+        </div>
+        <div class="premium-glass-card">
+          <span>Desde</span>
+          <strong>$49 MXN</strong>
+          <p data-premium-note>Desde $49 MXN / mes</p>
+          <small>Usuarios @oaxsun.tech tienen Premium incluido.</small>
         </div>
       </section>
-      <section class="premium-notifications-card">
+
+      <section class="premium-benefit-grid">
+        <article><span>∞</span><h4>Historial ilimitado</h4><p>Consulta todos tus pagos desde que comenzaste a usar Korah.</p></article>
+        <article><span>⌁</span><h4>Análisis financiero</h4><p>Entiende a dónde se va tu dinero por categoría y por mes.</p></article>
+        <article><span>↔</span><h4>Comparativa de meses</h4><p>Compara meses y detecta aumentos o disminuciones importantes.</p></article>
+        <article><span>⇩</span><h4>Descargar reportes</h4><p>Exporta tu información en PDF o Excel cuando lo necesites.</p></article>
+        <article><span>◴</span><h4>Notificaciones inteligentes</h4><p>Recibe avisos si un pago pendiente está a 1 día de vencer.</p></article>
+      </section>
+
+      <section class="premium-plan-compare">
+        <div class="plan-card free-plan">
+          <div><span class="plan-eyebrow">Free</span><h3>Organiza tus pagos</h3><p>Todo lo necesario para tener control del mes.</p></div>
+          <ul>
+            <li>Dashboard</li>
+            <li>Gestión de pagos</li>
+            <li>Historial del mes actual y anterior</li>
+            <li>Reporte del mes actual</li>
+          </ul>
+        </div>
+        <div class="plan-card premium-plan">
+          <div><span class="plan-eyebrow">Premium</span><h3>Entiende tus finanzas</h3><p>Herramientas avanzadas para analizar, comparar y exportar.</p></div>
+          <ul>
+            <li>Historial ilimitado</li>
+            <li>Análisis financiero</li>
+            <li>Comparativa de meses</li>
+            <li>Descargar reportes</li>
+            <li>Notificaciones 1 día antes</li>
+          </ul>
+          <button type="button" class="white-premium-btn" data-premium-cta onclick="handlePremiumCta()">Actualizar a Premium</button>
+        </div>
+      </section>
+
+      <section class="premium-notifications-card premium-pro-notice">
         <div class="report-icon purple"><svg viewBox="0 0 24 24"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9ZM10 21h4"/></svg></div>
-        <div><h3>Notificaciones inteligentes</h3><p>Premium podrá avisarte cuando un pago pendiente esté a 1 día de vencer, para que no se te pase ninguna fecha importante.</p></div>
-        <button class="outline-purple-btn" type="button" onclick="showToast('Disponible próximamente en Premium')">Activar</button>
+        <div><h3>Notificaciones Premium</h3><p>Activa avisos cuando un pago pendiente esté a 1 día de vencer. Ideal para tarjetas, servicios y suscripciones.</p></div>
+        <button class="outline-purple-btn" type="button" onclick="handlePremiumCta()">Activar</button>
       </section>
     </section>
 

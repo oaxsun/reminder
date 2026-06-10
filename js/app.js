@@ -1,5 +1,5 @@
-console.log('Korah v3.3.0-no-calendar-more-ux');
-const APP_VERSION = 'v3.3.0-no-calendar-more-ux';
+console.log('Korah v3.4.0-premium-oaxsun');
+const APP_VERSION = 'v3.4.0-premium-oaxsun';
 const SUPABASE_URL = 'https://qjicwqpjxsqynoudwylk.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_rl7m3zQsatLJL2Lb3yHPOg_nnCr712U';
 const PAYMENTS_TABLE = 'payments';
@@ -7,7 +7,7 @@ const PAYMENT_HISTORY_TABLE = 'payment_history';
 console.info(`Korah ${APP_VERSION} conectado a ${SUPABASE_URL}`);
 
 const today = new Date();
-const IS_PREMIUM = false;
+let IS_PREMIUM = false;
 const CURRENT_MONTH_KEY = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
 const PREVIOUS_MONTH_KEY = getRelativeMonthKey(CURRENT_MONTH_KEY, -1);
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
@@ -358,8 +358,24 @@ function validateSupabaseConfig() {
   }
 }
 
+function updatePremiumAccess() {
+  const email = (currentUser?.email || '').toLowerCase();
+  IS_PREMIUM = email.endsWith('@oaxsun.tech');
+  document.body.classList.toggle('is-premium-user', IS_PREMIUM);
+  document.querySelectorAll('[data-premium-state]').forEach(el => {
+    el.textContent = IS_PREMIUM ? 'Premium activo' : 'Free';
+  });
+  document.querySelectorAll('[data-premium-cta]').forEach(el => {
+    el.textContent = IS_PREMIUM ? 'Premium incluido' : 'Actualizar a Premium';
+  });
+  document.querySelectorAll('[data-premium-note]').forEach(el => {
+    el.textContent = IS_PREMIUM ? 'Tu cuenta Oaxsun tiene Premium activo por defecto.' : 'Desde $49 MXN / mes';
+  });
+}
+
 function updateAuthUI() {
   const loggedIn = Boolean(currentUser);
+  updatePremiumAccess();
   els.authScreen?.classList.toggle('hidden', loggedIn);
   els.appShell?.classList.toggle('hidden', !loggedIn);
   els.sidebar?.classList.toggle('hidden', !loggedIn);
@@ -1737,3 +1753,11 @@ window.deletePayment = deletePayment;
 window.toggleHistoryMenu = toggleHistoryMenu;
 window.deleteHistoryRecord = deleteHistoryRecord;
 window.toggleMenu = toggleMenu;
+
+function handlePremiumCta() {
+  if (IS_PREMIUM) {
+    showToast('Premium ya está activo en tu cuenta Oaxsun.');
+  } else {
+    showToast('Premium estará disponible próximamente.');
+  }
+}
