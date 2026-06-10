@@ -1,5 +1,5 @@
-console.log('Korah v3.4.0-premium-oaxsun');
-const APP_VERSION = 'v3.4.0-premium-oaxsun';
+console.log('Korah v3.5.0-premium-compresso-style');
+const APP_VERSION = 'v3.5.0-premium-compresso-style';
 const SUPABASE_URL = 'https://qjicwqpjxsqynoudwylk.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_rl7m3zQsatLJL2Lb3yHPOg_nnCr712U';
 const PAYMENTS_TABLE = 'payments';
@@ -362,14 +362,25 @@ function updatePremiumAccess() {
   const email = (currentUser?.email || '').toLowerCase();
   IS_PREMIUM = email.endsWith('@oaxsun.tech');
   document.body.classList.toggle('is-premium-user', IS_PREMIUM);
+
   document.querySelectorAll('[data-premium-state]').forEach(el => {
     el.textContent = IS_PREMIUM ? 'Premium activo' : 'Free';
   });
+  document.querySelectorAll('[data-premium-state-title]').forEach(el => {
+    el.textContent = IS_PREMIUM ? 'Premium Empresarial' : 'Plan Gratuito';
+  });
   document.querySelectorAll('[data-premium-cta]').forEach(el => {
-    el.textContent = IS_PREMIUM ? 'Premium incluido' : 'Actualizar a Premium';
+    el.textContent = IS_PREMIUM ? 'Gestionar cuenta' : 'Actualizar a Premium';
   });
   document.querySelectorAll('[data-premium-note]').forEach(el => {
-    el.textContent = IS_PREMIUM ? 'Tu cuenta Oaxsun tiene Premium activo por defecto.' : 'Desde $49 MXN / mes';
+    el.textContent = IS_PREMIUM ? 'Tu cuenta @oaxsun.tech tiene Premium activo por defecto.' : 'Desde $49 MXN / mes';
+  });
+
+  document.querySelectorAll('.export-option small').forEach(el => {
+    if (IS_PREMIUM) el.textContent = 'Premium activo';
+  });
+  document.querySelectorAll('.export-option i, .premium-lock-dot').forEach(el => {
+    el.style.display = IS_PREMIUM ? 'none' : '';
   });
 }
 
