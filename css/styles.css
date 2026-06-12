@@ -6229,3 +6229,43 @@ body.is-premium-user #premiumView .premium-gold-btn[data-premium-cta] {
     padding: 18px;
   }
 }
+
+
+/* Korah v3.9 sidebar account card + logout placement */
+.user-card.user-account-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px;
+  border-radius: 14px;
+}
+.user-card-main {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.user-card-main strong {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.user-card-main .user-card-chevron { display: none; }
+.user-card.user-account-link .logout-btn {
+  flex: 0 0 auto;
+  margin-left: 4px;
+  border-radius: 999px;
+  padding: 8px 11px;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1;
+}
+.user-card.user-account-link:hover .user-card-main strong { color: var(--purple); }
