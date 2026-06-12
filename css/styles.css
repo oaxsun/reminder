@@ -6129,3 +6129,103 @@ body.is-premium-user .export-option:hover {
     justify-self: stretch;
   }
 }
+
+/* Korah v3.8 Premium polish + account entry points */
+.user-account-link {
+  width: 100%;
+  border: 1px solid var(--line);
+  background: #fff;
+  text-align: left;
+  cursor: pointer;
+  appearance: none;
+}
+.user-account-link .user-card-chevron {
+  margin-left: auto;
+  color: #94a3b8;
+  font-size: 18px;
+  font-weight: 900;
+}
+.user-account-link .logout-btn {
+  margin-left: 8px;
+}
+.user-account-link:hover {
+  border-color: rgba(109,56,245,.25);
+  box-shadow: 0 14px 34px rgba(109,56,245,.08);
+}
+
+#premiumView {
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  padding-bottom: clamp(36px, 5vw, 72px) !important;
+}
+.premium-product-hero {
+  min-height: auto !important;
+  overflow: hidden;
+  padding: clamp(30px, 4.2vw, 54px) clamp(28px, 4.5vw, 56px) !important;
+  align-items: center !important;
+  margin-bottom: 8px;
+}
+.premium-product-copy h3 {
+  font-size: clamp(34px, 4.2vw, 54px) !important;
+  line-height: 1.05 !important;
+  max-width: 880px;
+  margin-bottom: 16px !important;
+}
+.premium-product-copy p {
+  max-width: 780px;
+}
+.premium-status-box {
+  align-self: center !important;
+  min-height: 0;
+}
+.premium-feature-row {
+  margin-top: 0;
+}
+.premium-feature-row article {
+  color: #fff;
+  border: 1px solid rgba(167,139,250,.28) !important;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(255,255,255,.16), transparent 34%),
+    linear-gradient(135deg, #5b21db 0%, #6d38f5 52%, #8b5cf6 100%) !important;
+  box-shadow: 0 18px 44px rgba(109,56,245,.18) !important;
+}
+.premium-feature-row article span {
+  color: #fff !important;
+  background: rgba(255,255,255,.17) !important;
+}
+.premium-feature-row article h4 {
+  color: #fff;
+}
+.premium-feature-row article p {
+  color: rgba(255,255,255,.82) !important;
+}
+body.is-premium-user .premium-feature-row article {
+  background:
+    radial-gradient(circle at 100% 0%, rgba(255,255,255,.12), transparent 34%),
+    linear-gradient(135deg, #312e81 0%, #5b21db 56%, #7c3aed 100%) !important;
+}
+body.is-premium-user #premiumView .premium-gold-btn[data-premium-cta] {
+  display: none;
+}
+
+@media (max-width: 1180px) {
+  .premium-product-hero {
+    grid-template-columns: 1fr !important;
+    gap: 22px;
+  }
+  .premium-status-box {
+    max-width: none;
+  }
+}
+@media (max-width: 720px) {
+  .premium-product-hero {
+    padding: 24px 20px !important;
+    border-radius: 22px;
+  }
+  .premium-product-copy h3 {
+    font-size: clamp(30px, 9vw, 42px) !important;
+  }
+  .premium-status-box {
+    padding: 18px;
+  }
+}
