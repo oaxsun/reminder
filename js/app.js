@@ -1,5 +1,5 @@
-console.log('Korah v3.6.0-account-export-premium-fix');
-const APP_VERSION = 'v3.6.0-account-export-premium-fix';
+console.log('Korah v3.7.0-account-pdf-format');
+const APP_VERSION = 'v3.7.0-account-pdf-format';
 const SUPABASE_URL = 'https://qjicwqpjxsqynoudwylk.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_rl7m3zQsatLJL2Lb3yHPOg_nnCr712U';
 const PAYMENTS_TABLE = 'payments';
@@ -1117,9 +1117,21 @@ function exportReportExcel() {
   showToast('Reporte Excel descargado');
 }
 
+function hexToRgb(hex) {
+  const clean = String(hex || '#6D38F5').replace('#', '');
+  const value = clean.length === 3 ? clean.split('').map(ch => ch + ch).join('') : clean;
+  const int = parseInt(value, 16);
+  return [(int >> 16) & 255, (int >> 8) & 255, int & 255];
+}
+
+function pdfMoney(value) {
+  return money(Number(value || 0)).replace('MXN', '').trim();
+}
+
 function exportReportPdf() {
   if (!requirePremiumForExport()) return;
   const rows = getReportRowsForExport();
+  const allRows = buildHistoryRows();
   const monthLabel = formatHistoryMonth(selectedReportMonth);
   const total = sum(rows.map(r => r.monto));
   const jsPDF = window.jspdf?.jsPDF;
@@ -1129,25 +1141,181 @@ function exportReportPdf() {
     showToast('Reporte descargado');
     return;
   }
-  const doc = new jsPDF();
+
+  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+  const pageW = doc.internal.pageSize.getWidth();
+  const pageH = doc.internal.pageSize.getHeight();
+  const margin = 14;
+  const purple = [109, 56, 245];
+  const ink = [15, 23, 42];
+  const muted = [100, 116, 139];
+  const line = [226, 232, 240];
+
+  const setText = (rgb = ink) => doc.setTextColor(rgb[0], rgb[1], rgb[2]);
+  const roundedCard = (x, y, w, h, fill = [255,255,255], stroke = line) => {
+    doc.setFillColor(fill[0], fill[1], fill[2]);
+    doc.setDrawColor(stroke[0], stroke[1], stroke[2]);
+    doc.roundedRect(x, y, w, h, 3.5, 3.5, 'FD');
+  };
+  const ensurePage = y => {
+    if (y > pageH - 28) {
+      doc.addPage();
+      return margin;
+    }
+    return y;
+  };
+
+  // Header
+  doc.setFillColor(248, 250, 252);
+  doc.rect(0, 0, pageW, pageH, 'F');
+  doc.setFillColor(...purple);
+  doc.roundedRect(margin, 12, 12, 12, 3, 3, 'F');
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(18);
-  doc.text('Korah', 14, 18);
-  doc.setFontSize(13);
-  doc.text(`Reporte ${monthLabel}`, 14, 28);
+  doc.setFontSize(20);
+  setText(ink);
+  doc.text('Korah', margin + 16, 21);
+  doc.setFontSize(16);
+  doc.text(`Reporte ${monthLabel}`, margin, 36);
   doc.setFont('helvetica', 'normal');
-  doc.setFontSize(11);
-  doc.text(`Total: ${money(total)}`, 14, 38);
-  let y = 50;
-  rows.forEach(row => {
-    if (y > 276) { doc.addPage(); y = 18; }
-    doc.setFont('helvetica', 'bold');
-    doc.text(String(row.concepto).slice(0, 44), 14, y);
-    doc.setFont('helvetica', 'normal');
-    doc.text(`${row.fecha} · ${row.categoria} · ${row.frecuencia}`, 14, y + 6);
-    doc.text(money(row.monto), 170, y, { align: 'right' });
-    y += 16;
+  doc.setFontSize(10);
+  setText(muted);
+  doc.text('Resumen financiero generado desde Korah.', margin, 43);
+  doc.text(new Date().toLocaleDateString('es-MX'), pageW - margin, 36, { align: 'right' });
+
+  // Summary cards
+  const byMonth = groupSum(allRows, row => row.monthKey).sort((a, b) => a.key.localeCompare(b.key));
+  const monthsWithData = byMonth.filter(item => item.amount > 0);
+  const average = monthsWithData.length ? sum(monthsWithData.map(item => item.amount)) / monthsWithData.length : 0;
+  const sortedMonths = [...monthsWithData].sort((a, b) => b.amount - a.amount);
+  const expensive = sortedMonths[0];
+  const cheap = sortedMonths[sortedMonths.length - 1];
+  const cardY = 54;
+  const cardW = (pageW - margin * 2 - 9) / 4;
+  const cards = [
+    ['Gasto total', pdfMoney(total), monthLabel],
+    ['Promedio mensual', pdfMoney(average), 'Últimos meses'],
+    ['Mes más alto', expensive ? formatHistoryMonth(expensive.key) : '—', expensive ? pdfMoney(expensive.amount) : '$0'],
+    ['Mes más bajo', cheap ? formatHistoryMonth(cheap.key) : '—', cheap ? pdfMoney(cheap.amount) : '$0'],
+  ];
+  cards.forEach((card, i) => {
+    const x = margin + i * (cardW + 3);
+    roundedCard(x, cardY, cardW, 26);
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(8); setText(muted); doc.text(card[0], x + 5, cardY + 8);
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(i > 1 ? 11 : 14); setText(ink); doc.text(String(card[1]).slice(0, 18), x + 5, cardY + 17);
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(7.5); setText(muted); doc.text(String(card[2]).slice(0, 20), x + 5, cardY + 23);
   });
+
+  // Category chart card
+  let y = 90;
+  const leftW = 86;
+  const rightW = pageW - margin * 2 - leftW - 6;
+  roundedCard(margin, y, leftW, 78);
+  doc.setFont('helvetica', 'bold'); doc.setFontSize(12); setText(ink); doc.text('Gastos por categoría', margin + 5, y + 10);
+  const cats = groupSum(rows, r => r.categoria || 'Otros');
+  const cx = margin + 32, cy = y + 43, r = 18;
+  if (cats.length && total > 0) {
+    let angle = -90;
+    cats.slice(0, 6).forEach((cat, idx) => {
+      const pct = (cat.amount / total) * 360;
+      const [rr, gg, bb] = hexToRgb(getCategoryColor(idx));
+      doc.setFillColor(rr, gg, bb);
+      // Draw approximate donut segments as full colored circles wedges are limited in jsPDF, so use legend + center total.
+      // Use small color dots around the ring to keep PDF robust.
+      const dotAngle = (angle + pct / 2) * Math.PI / 180;
+      doc.circle(cx + Math.cos(dotAngle) * r, cy + Math.sin(dotAngle) * r, 2.7, 'F');
+      angle += pct;
+    });
+    doc.setDrawColor(109, 56, 245); doc.setLineWidth(6); doc.circle(cx, cy, r, 'S');
+    doc.setFillColor(255,255,255); doc.circle(cx, cy, 10, 'F');
+  } else {
+    doc.setDrawColor(226,232,240); doc.setLineWidth(6); doc.circle(cx, cy, r, 'S');
+  }
+  doc.setFont('helvetica', 'bold'); doc.setFontSize(9); setText(ink); doc.text(pdfMoney(total), cx, cy + 2, { align: 'center' });
+  let ly = y + 26;
+  cats.slice(0, 6).forEach((cat, idx) => {
+    const [rr, gg, bb] = hexToRgb(getCategoryColor(idx));
+    const pct = total ? Math.round((cat.amount / total) * 100) : 0;
+    doc.setFillColor(rr, gg, bb); doc.circle(margin + 58, ly - 2, 1.6, 'F');
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(8); setText(ink); doc.text(String(cat.key).slice(0, 13), margin + 62, ly);
+    doc.setFont('helvetica', 'bold'); doc.text(pdfMoney(cat.amount), margin + 78, ly, { align: 'right' });
+    doc.setFont('helvetica', 'normal'); setText(muted); doc.text(`${pct}%`, margin + leftW - 5, ly, { align: 'right' });
+    ly += 8;
+  });
+
+  // Trend chart card
+  roundedCard(margin + leftW + 6, y, rightW, 78);
+  const trendX = margin + leftW + 12;
+  const trendY = y + 14;
+  doc.setFont('helvetica', 'bold'); doc.setFontSize(12); setText(ink); doc.text('Evolución mensual', trendX, y + 10);
+  const trendKeys = getAvailableReportMonths(allRows).slice(0, 6).reverse();
+  const trendData = trendKeys.map(key => ({ key, amount: byMonth.find(i => i.key === key)?.amount || 0 }));
+  const max = Math.max(...trendData.map(i => i.amount), 1);
+  const chartW = rightW - 18;
+  const chartH = 42;
+  const baseY = trendY + chartH;
+  doc.setDrawColor(226,232,240); doc.setLineWidth(.3);
+  [0, .5, 1].forEach(t => doc.line(trendX, trendY + chartH * t, trendX + chartW, trendY + chartH * t));
+  const pts = trendData.map((item, i) => ({
+    x: trendX + (trendData.length <= 1 ? 0 : (chartW / (trendData.length - 1)) * i),
+    y: baseY - (item.amount / max) * chartH,
+    ...item
+  }));
+  doc.setDrawColor(...purple); doc.setLineWidth(1.5);
+  for (let i = 1; i < pts.length; i++) doc.line(pts[i-1].x, pts[i-1].y, pts[i].x, pts[i].y);
+  pts.forEach(p => { doc.setFillColor(...purple); doc.circle(p.x, p.y, 1.6, 'F'); doc.setFont('helvetica','normal'); doc.setFontSize(7); setText(muted); doc.text(formatHistoryMonth(p.key).slice(0,3), p.x, baseY + 7, { align:'center' }); });
+
+  // Comparison card
+  y = 178;
+  roundedCard(margin, y, pageW - margin * 2, 44);
+  doc.setFont('helvetica', 'bold'); doc.setFontSize(12); setText(ink);
+  doc.text(`Comparativa: ${formatHistoryMonth(compareMonthA).replace(' de ', ' ')} vs ${formatHistoryMonth(compareMonthB).replace(' de ', ' ')}`, margin + 5, y + 10);
+  const aRows = allRows.filter(row => row.monthKey === compareMonthA);
+  const bRows = allRows.filter(row => row.monthKey === compareMonthB);
+  const aCats = groupSum(aRows, row => row.category);
+  const bCats = groupSum(bRows, row => row.category);
+  const compareCats = Array.from(new Set([...aCats.map(i => i.key), ...bCats.map(i => i.key)])).slice(0, 5);
+  let cxRow = margin + 5;
+  let cyRow = y + 23;
+  compareCats.forEach((category, idx) => {
+    const a = aCats.find(item => item.key === category)?.amount || 0;
+    const b = bCats.find(item => item.key === category)?.amount || 0;
+    const diff = b ? ((a - b) / b) * 100 : (a ? 100 : 0);
+    const w = (pageW - margin * 2 - 18) / 5;
+    roundedCard(cxRow, cyRow, w, 15, [250,250,255], [238,232,255]);
+    doc.setFont('helvetica','normal'); doc.setFontSize(6.8); setText(muted); doc.text(String(category).slice(0, 14), cxRow + 3, cyRow + 5);
+    doc.setFont('helvetica','bold'); doc.setFontSize(8); setText(ink); doc.text(pdfMoney(a), cxRow + 3, cyRow + 11);
+    setText(diff >= 0 ? [220, 38, 38] : [22, 163, 74]); doc.text(`${diff >= 0 ? '+' : '-'}${Math.abs(diff).toFixed(1)}%`, cxRow + w - 3, cyRow + 11, { align:'right' });
+    cxRow += w + 4.5;
+  });
+
+  // Details table
+  y = 236;
+  doc.setFont('helvetica','bold'); doc.setFontSize(12); setText(ink); doc.text('Pagos del mes', margin, y);
+  y += 7;
+  const header = ['Concepto', 'Fecha', 'Categoría', 'Frecuencia', 'Monto'];
+  const widths = [62, 30, 34, 28, 28];
+  doc.setFillColor(243, 246, 251); doc.rect(margin, y, pageW - margin*2, 8, 'F');
+  let x = margin + 3;
+  doc.setFontSize(7.5); setText(muted);
+  header.forEach((h, i) => { doc.text(h, x, y + 5.5); x += widths[i]; });
+  y += 10;
+  rows.slice(0, 22).forEach(row => {
+    y = ensurePage(y + 1);
+    x = margin + 3;
+    doc.setFont('helvetica','normal'); doc.setFontSize(7.5); setText(ink);
+    [row.concepto, row.fecha, row.categoria, row.frecuencia, pdfMoney(row.monto)].forEach((v, i) => {
+      doc.text(String(v).slice(0, i === 0 ? 34 : 16), x, y + 4);
+      x += widths[i];
+    });
+    doc.setDrawColor(235, 240, 246); doc.line(margin, y + 7, pageW - margin, y + 7);
+    y += 8;
+  });
+  if (rows.length > 22) {
+    y = ensurePage(y + 3);
+    doc.setFont('helvetica','normal'); doc.setFontSize(8); setText(muted);
+    doc.text(`+ ${rows.length - 22} pagos adicionales incluidos en el Excel.`, margin, y + 4);
+  }
+
   doc.save(`korah-reporte-${selectedReportMonth}.pdf`);
   showToast('Reporte PDF descargado');
 }
