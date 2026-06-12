@@ -1,5 +1,5 @@
-console.log('Korah v3.5.0-premium-compresso-style');
-const APP_VERSION = 'v3.5.0-premium-compresso-style';
+console.log('Korah v3.6.0-account-export-premium-fix');
+const APP_VERSION = 'v3.6.0-account-export-premium-fix';
 const SUPABASE_URL = 'https://qjicwqpjxsqynoudwylk.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_rl7m3zQsatLJL2Lb3yHPOg_nnCr712U';
 const PAYMENTS_TABLE = 'payments';
@@ -65,6 +65,16 @@ const els = {
   historyMonthSelect: document.querySelector('#historyMonthSelect'),
   reportsView: document.querySelector('#reportsView'),
   premiumView: document.querySelector('#premiumView'),
+  accountView: document.querySelector('#accountView'),
+  accountBtn: document.querySelector('#accountBtn'),
+  accountAvatar: document.querySelector('#accountAvatar'),
+  accountEmail: document.querySelector('#accountEmail'),
+  accountPlan: document.querySelector('#accountPlan'),
+  accountPlanTitle: document.querySelector('#accountPlanTitle'),
+  accountPlanCopy: document.querySelector('#accountPlanCopy'),
+  changePasswordBtn: document.querySelector('#changePasswordBtn'),
+  resetAccountDataBtn: document.querySelector('#resetAccountDataBtn'),
+  accountLogoutBtn: document.querySelector('#accountLogoutBtn'),
   reportMonthSelect: document.querySelector('#reportMonthSelect'),
   reportMonthDisplay: document.querySelector('#reportMonthDisplay'),
   compareMonthA: document.querySelector('#compareMonthA'),
@@ -158,6 +168,10 @@ function bindEvents() {
   });
   els.logoutBtn.addEventListener('click', logout);
   document.querySelector('#moreLogoutBtn')?.addEventListener('click', logout);
+  els.accountLogoutBtn?.addEventListener('click', logout);
+  els.accountBtn?.addEventListener('click', () => setActiveView('account'));
+  els.changePasswordBtn?.addEventListener('click', changePassword);
+  els.resetAccountDataBtn?.addEventListener('click', resetAccountData);
   document.querySelectorAll('[data-view]').forEach(button => {
     button.addEventListener('click', () => setActiveView(button.dataset.view));
   });
@@ -218,8 +232,8 @@ function bindEvents() {
     if (!IS_PREMIUM) { event.target.value = PREVIOUS_MONTH_KEY; showToast('Comparativas personalizadas están disponibles en Premium'); return; }
     compareMonthB = event.target.value; renderReports();
   });
-  els.exportPdfBtn?.addEventListener('click', () => { showToast('Exportar PDF está disponible en Premium'); setActiveView('premium'); });
-  els.exportExcelBtn?.addEventListener('click', () => { showToast('Exportar Excel está disponible en Premium'); setActiveView('premium'); });
+  els.exportPdfBtn?.addEventListener('click', exportReportPdf);
+  els.exportExcelBtn?.addEventListener('click', exportReportExcel);
 
   els.paymentCategory.addEventListener('change', () => {
     setSelectedIcon(getDefaultIcon(els.paymentCategory.value));
@@ -377,8 +391,9 @@ function updatePremiumAccess() {
   });
 
   document.querySelectorAll('.export-option small').forEach(el => {
-    if (IS_PREMIUM) el.textContent = 'Premium activo';
+    if (IS_PREMIUM) el.textContent = 'Disponible en tu plan';
   });
+  updateAccountView();
   document.querySelectorAll('.export-option i, .premium-lock-dot').forEach(el => {
     el.style.display = IS_PREMIUM ? 'none' : '';
   });
@@ -461,6 +476,67 @@ async function loginWithGoogle() {
     options: { redirectTo: window.location.origin + window.location.pathname }
   });
   if (error) els.authMessage.textContent = error.message;
+}
+
+
+function updateAccountView() {
+  if (!currentUser) return;
+  const email = currentUser.email || '';
+  const isOaxsun = email.endsWith('@oaxsun.tech');
+  const planLabel = IS_PREMIUM ? (isOaxsun ? 'Premium Empresarial' : 'Premium') : 'Free';
+  if (els.accountEmail) els.accountEmail.textContent = email || 'Sin correo';
+  if (els.accountPlan) els.accountPlan.textContent = planLabel;
+  if (els.accountPlanTitle) els.accountPlanTitle.textContent = planLabel;
+  if (els.accountPlanCopy) {
+    els.accountPlanCopy.textContent = IS_PREMIUM
+      ? 'Tu cuenta tiene acceso completo a reportes, comparativas y exportaciones.'
+      : 'Actualiza a Premium para desbloquear análisis avanzados.';
+  }
+}
+
+async function changePassword() {
+  const password = prompt('Escribe tu nueva contraseña (mínimo 6 caracteres):');
+  if (!password) return;
+  if (password.length < 6) {
+    showToast('La contraseña debe tener al menos 6 caracteres');
+    return;
+  }
+  const confirmPassword = prompt('Confirma tu nueva contraseña:');
+  if (password !== confirmPassword) {
+    showToast('Las contraseñas no coinciden');
+    return;
+  }
+  const { error } = await supabaseClient.auth.updateUser({ password });
+  if (error) {
+    console.error('Error cambiando contraseña:', error);
+    showToast('No se pudo cambiar la contraseña');
+    return;
+  }
+  showToast('Contraseña actualizada');
+}
+
+async function resetAccountData() {
+  if (!currentUser) return;
+  const confirmation = prompt('Esto borrará todos tus pagos e historial. Escribe BORRAR para confirmar:');
+  if (confirmation !== 'BORRAR') return;
+  const { error: historyError } = await supabaseClient.from(PAYMENT_HISTORY_TABLE).delete().eq('user_id', currentUser.id);
+  if (historyError) {
+    console.error('Error borrando historial:', historyError);
+    showToast('No se pudo borrar el historial');
+    return;
+  }
+  const { error: paymentsError } = await supabaseClient.from(PAYMENTS_TABLE).delete().eq('user_id', currentUser.id);
+  if (paymentsError) {
+    console.error('Error borrando pagos:', paymentsError);
+    showToast('No se pudieron borrar los pagos');
+    return;
+  }
+  payments = [];
+  paymentHistory = [];
+  render();
+  renderHistory();
+  renderReports();
+  showToast('Información borrada');
 }
 
 async function logout() {
@@ -664,6 +740,7 @@ function render() {
   renderSummary(enriched);
   if (activeView === 'history') renderHistory();
   if (activeView === 'reports') renderReports();
+  if (activeView === 'account') updateAccountView();
 }
 
 
@@ -675,13 +752,14 @@ function setActiveView(view) {
     history: ['Historial', 'Consulta tus pagos registrados.'],
     reports: ['Reportes', 'Analiza tus gastos y toma mejores decisiones.'],
     premium: ['Premium', 'Desbloquea todo el poder de tus finanzas.'],
+    account: ['Cuenta', 'Administra tus preferencias y seguridad.'],
     more: ['Más', 'Configuración y opciones de Korah.']
   };
   const [title, copy] = titles[activeView] || titles.dashboard;
   if (els.topbarTitle) els.topbarTitle.textContent = title;
   if (els.topbarCopy) els.topbarCopy.textContent = copy;
 
-  ['dashboard', 'history', 'reports', 'premium', 'more'].forEach(name => {
+  ['dashboard', 'history', 'reports', 'premium', 'account', 'more'].forEach(name => {
     const screen = els[`${name}View`];
     screen?.classList.toggle('hidden', name !== activeView);
   });
@@ -850,17 +928,32 @@ function getAvailableReportMonths(rows) {
   return keys.length ? keys : [currentKey];
 }
 
+function buildContinuousMonthKeys(rows) {
+  const currentKey = CURRENT_MONTH_KEY;
+  const dataKeys = rows.map(item => item.monthKey).filter(Boolean).sort();
+  const firstKey = dataKeys[0] || currentKey;
+  const keys = [];
+  let cursor = firstKey;
+  let safety = 0;
+  while (cursor <= currentKey && safety < 180) {
+    keys.push(cursor);
+    cursor = getRelativeMonthKey(cursor, 1);
+    safety += 1;
+  }
+  return keys.sort().reverse();
+}
+
 function syncReportSelectors(rows) {
-  const keys = getAvailableReportMonths(rows);
+  const keys = buildContinuousMonthKeys(rows);
   if (!IS_PREMIUM) {
     selectedReportMonth = CURRENT_MONTH_KEY;
     compareMonthA = CURRENT_MONTH_KEY;
     compareMonthB = PREVIOUS_MONTH_KEY;
   } else {
-    if (!selectedReportMonth || !keys.includes(selectedReportMonth)) selectedReportMonth = keys[0] || CURRENT_MONTH_KEY;
+    if (!selectedReportMonth || !keys.includes(selectedReportMonth)) selectedReportMonth = CURRENT_MONTH_KEY;
     if (!compareMonthA || !keys.includes(compareMonthA)) compareMonthA = selectedReportMonth;
     const fallbackB = keys.find(key => key !== compareMonthA) || getRelativeMonthKey(compareMonthA, -1);
-    if (!compareMonthB || compareMonthB === compareMonthA) compareMonthB = fallbackB;
+    if (!compareMonthB || compareMonthB === compareMonthA || !keys.includes(compareMonthB)) compareMonthB = fallbackB;
   }
 
   const fullKeys = Array.from(new Set([...keys, CURRENT_MONTH_KEY, PREVIOUS_MONTH_KEY])).sort().reverse();
@@ -973,6 +1066,10 @@ function renderCompareReport(rows) {
   if (!els.compareList) return;
   const aRows = rows.filter(row => row.monthKey === compareMonthA);
   const bRows = rows.filter(row => row.monthKey === compareMonthB);
+  const title = document.querySelector('#compareTitle');
+  const subtitle = document.querySelector('#compareSubtitle');
+  if (title) title.textContent = `Comparativa: ${formatHistoryMonth(compareMonthA).replace(' de ', ' ')} vs ${formatHistoryMonth(compareMonthB).replace(' de ', ' ')}`;
+  if (subtitle) subtitle.textContent = IS_PREMIUM ? 'Compara cualquier mes desde que comenzaste a usar Korah.' : 'Solo puedes comparar el mes actual con el anterior.';
   const aCats = groupSum(aRows, row => row.category);
   const bCats = groupSum(bRows, row => row.category);
   const categories = Array.from(new Set([...aCats.map(i => i.key), ...bCats.map(i => i.key)])).slice(0, 6);
@@ -987,6 +1084,83 @@ function renderCompareReport(rows) {
     const positive = diff >= 0;
     return `<div class="compare-row"><span><i style="background:${getCategoryColor(index)}"></i>${escapeHtml(category)}</span><strong>${money(a)}</strong><em>vs ${money(b)}</em><b class="${positive ? 'up' : 'down'}">${positive ? '↑' : '↓'} ${Math.abs(diff).toFixed(1)}%</b></div>`;
   }).join('');
+}
+
+
+function getReportRowsForExport() {
+  const rows = buildHistoryRows().filter(row => row.monthKey === selectedReportMonth);
+  return rows.map(row => ({
+    concepto: row.name,
+    fecha: formatDate(row.date),
+    categoria: row.category,
+    frecuencia: ({ monthly: 'Mensual', bimonthly: 'Bimestral', quarterly: 'Trimestral', yearly: 'Anual' }[row.frequency] || row.frequency),
+    monto: Number(row.amount || 0)
+  }));
+}
+
+function requirePremiumForExport() {
+  if (IS_PREMIUM) return true;
+  showToast('Exportar reportes está disponible en Premium');
+  setActiveView('premium');
+  return false;
+}
+
+function exportReportExcel() {
+  if (!requirePremiumForExport()) return;
+  const rows = getReportRowsForExport();
+  const monthLabel = formatHistoryMonth(selectedReportMonth);
+  const header = ['Concepto', 'Fecha de pago', 'Categoría', 'Frecuencia', 'Monto'];
+  const htmlRows = [header, ...rows.map(r => [r.concepto, r.fecha, r.categoria, r.frecuencia, r.monto])]
+    .map(cols => `<tr>${cols.map(col => `<td>${escapeHtml(col)}</td>`).join('')}</tr>`).join('');
+  const html = `<html><head><meta charset="utf-8"></head><body><h2>Korah - Reporte ${escapeHtml(monthLabel)}</h2><table border="1">${htmlRows}</table></body></html>`;
+  downloadBlob(new Blob([html], { type: 'application/vnd.ms-excel;charset=utf-8;' }), `korah-reporte-${selectedReportMonth}.xls`);
+  showToast('Reporte Excel descargado');
+}
+
+function exportReportPdf() {
+  if (!requirePremiumForExport()) return;
+  const rows = getReportRowsForExport();
+  const monthLabel = formatHistoryMonth(selectedReportMonth);
+  const total = sum(rows.map(r => r.monto));
+  const jsPDF = window.jspdf?.jsPDF;
+  if (!jsPDF) {
+    const text = [`Korah - Reporte ${monthLabel}`, `Total: ${money(total)}`, '', ...rows.map(r => `${r.fecha} | ${r.concepto} | ${r.categoria} | ${r.frecuencia} | ${money(r.monto)}`)].join('\n');
+    downloadBlob(new Blob([text], { type: 'text/plain;charset=utf-8;' }), `korah-reporte-${selectedReportMonth}.txt`);
+    showToast('Reporte descargado');
+    return;
+  }
+  const doc = new jsPDF();
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(18);
+  doc.text('Korah', 14, 18);
+  doc.setFontSize(13);
+  doc.text(`Reporte ${monthLabel}`, 14, 28);
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(11);
+  doc.text(`Total: ${money(total)}`, 14, 38);
+  let y = 50;
+  rows.forEach(row => {
+    if (y > 276) { doc.addPage(); y = 18; }
+    doc.setFont('helvetica', 'bold');
+    doc.text(String(row.concepto).slice(0, 44), 14, y);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`${row.fecha} · ${row.categoria} · ${row.frecuencia}`, 14, y + 6);
+    doc.text(money(row.monto), 170, y, { align: 'right' });
+    y += 16;
+  });
+  doc.save(`korah-reporte-${selectedReportMonth}.pdf`);
+  showToast('Reporte PDF descargado');
+}
+
+function downloadBlob(blob, filename) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 500);
 }
 
 function renderDashboardSkeletonRows() {

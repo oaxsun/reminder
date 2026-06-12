@@ -59,7 +59,7 @@
         <h2>Dashboard</h2>
         <p>Hola, aquí tienes el resumen de tus pagos.</p>
       </div>
-      <div class="top-actions"><button class="bell" aria-label="Notificaciones"><svg viewBox="0 0 24 24"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9ZM10 21h4"/></svg></button><div class="avatar">E</div></div>
+      <div class="top-actions"><button class="bell" aria-label="Notificaciones"><svg viewBox="0 0 24 24"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9ZM10 21h4"/></svg></button><button class="avatar account-avatar-btn" id="accountBtn" type="button" aria-label="Administrar cuenta">E</button></div>
     </header>
     <section class="view-screen" id="dashboardView">
 
@@ -221,7 +221,14 @@
           <div class="trend-chart" id="trendChart"></div>
         </article>
         <article class="report-card compare-card">
-          <div class="report-card-head compare-head"><div><h3>Comparativa: Junio vs Mayo</h3><p>Solo puedes comparar el mes actual con el anterior.</p></div><span class="premium-lock-dot">🔒</span></div>
+          <div class="report-card-head compare-head">
+            <div><h3 id="compareTitle">Comparativa de meses</h3><p id="compareSubtitle">Compara el mes seleccionado contra otro periodo.</p></div><span class="premium-lock-dot">🔒</span>
+          </div>
+          <div class="compare-controls">
+            <label><span>Mes actual</span><select id="compareMonthA"></select></label>
+            <span class="compare-vs">vs</span>
+            <label><span>Comparar con</span><select id="compareMonthB"></select></label>
+          </div>
           <div id="compareList" class="compare-list"></div>
           <div class="compare-premium-note"><span>🔒</span><span>Con Premium puedes comparar cualquier mes del historial.</span></div>
         </article>
@@ -302,6 +309,45 @@
           <span>Premium</span>
           <strong>Entiende tus finanzas</strong>
           <p>Historial ilimitado, análisis financiero, comparativas, exportación y notificaciones.</p>
+        </div>
+      </section>
+    </section>
+
+    <section class="view-screen hidden" id="accountView">
+      <section class="account-panel">
+        <div class="account-hero-card">
+          <div class="account-avatar-large" id="accountAvatar">E</div>
+          <div>
+            <span class="account-eyebrow">Tu cuenta</span>
+            <h3 id="accountPlanTitle">Plan Gratuito</h3>
+            <p id="accountPlanCopy">Administra tus preferencias y seguridad de Korah.</p>
+          </div>
+        </div>
+
+        <div class="account-grid">
+          <article class="account-card">
+            <h4>Información</h4>
+            <div class="account-row"><span>Correo electrónico</span><strong id="accountEmail">usuario@correo.com</strong></div>
+            <div class="account-row"><span>Plan actual</span><strong id="accountPlan">Free</strong></div>
+          </article>
+
+          <article class="account-card">
+            <h4>Contraseña</h4>
+            <p>Cambia tu contraseña de acceso a Korah.</p>
+            <button class="outline-purple-btn" id="changePasswordBtn" type="button">Cambiar contraseña</button>
+          </article>
+
+          <article class="account-card danger-zone">
+            <h4>Zona de riesgo</h4>
+            <p>Borra todos tus pagos e historial para empezar desde cero.</p>
+            <button class="danger-btn" id="resetAccountDataBtn" type="button">Borrar toda mi información</button>
+          </article>
+
+          <article class="account-card">
+            <h4>Sesión</h4>
+            <p>Cierra tu sesión en este dispositivo.</p>
+            <button class="secondary-btn" id="accountLogoutBtn" type="button">Cerrar sesión</button>
+          </article>
         </div>
       </section>
     </section>
@@ -409,6 +455,7 @@
 
   <div class="toast hidden" id="toast">Pago registrado</div>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="js/app.js?v=3.3.0-no-calendar-more-ux"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+  <script src="js/app.js?v=3.6.0-account-export-premium-fix"></script>
 </body>
 </html>
