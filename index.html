@@ -10,45 +10,46 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/styles.css?v=5.4-premium-modal-text-fit" />
 
-  <style id="korah-v5-3-premium-modal-compact">
-    /* Korah v5.4 - compact premium comparison modal with text fit */
+  <style id="korah-v5-5-premium-modal-polish">
+    /* Korah v5.5 - pricing modal polished to match approved compact mockup */
     .premium-plan-modal:not(.hidden){
       position: fixed;
       inset: 0;
       z-index: 9999;
       display: grid;
       place-items: center;
-      padding: 24px;
+      padding: 22px;
       overflow: hidden;
     }
     .premium-plan-backdrop{
       position:absolute;
       inset:0;
       background: rgba(5, 10, 24, .72);
-      backdrop-filter: blur(10px);
+      backdrop-filter: blur(12px);
     }
     .premium-plan-card{
       position:relative;
-      width:min(1040px, 92vw);
-      max-height:calc(100vh - 48px);
+      width:min(1020px, 92vw);
+      max-height:calc(100vh - 44px);
       overflow:hidden;
-      border-radius:28px;
-      border:1px solid rgba(255, 210, 98, .28);
+      border-radius:26px;
+      border:1px solid rgba(255,255,255,.20);
       background:
-        radial-gradient(circle at 82% 0%, rgba(122, 58, 255, .30), transparent 38%),
-        linear-gradient(135deg, #0b1223 0%, #111a2b 45%, #17132b 100%);
-      box-shadow:0 28px 80px rgba(0,0,0,.38);
-      padding:26px;
+        radial-gradient(circle at 88% 2%, rgba(124,58,237,.28), transparent 36%),
+        radial-gradient(circle at 0% 92%, rgba(45,212,191,.10), transparent 34%),
+        linear-gradient(135deg,#07101f 0%,#101827 48%,#17132d 100%);
+      box-shadow:0 30px 90px rgba(0,0,0,.44);
+      padding:28px 34px 24px;
       color:#eef2ff;
     }
     .premium-plan-close{
       position:absolute;
-      top:20px;
-      right:20px;
-      width:42px;
-      height:42px;
+      top:22px;
+      right:22px;
+      width:46px;
+      height:46px;
       border-radius:999px;
-      border:1px solid rgba(255,255,255,.12);
+      border:1px solid rgba(255,255,255,.13);
       background:rgba(255,255,255,.06);
       color:#fff;
       font-size:30px;
@@ -58,100 +59,109 @@
     .premium-plan-badge{
       display:inline-flex;
       align-items:center;
+      gap:8px;
       width:max-content;
-      padding:8px 16px;
+      padding:9px 18px;
       border-radius:999px;
-      border:1px solid rgba(255, 210, 98, .45);
-      background:rgba(255, 210, 98, .10);
-      color:#ffe789;
-      font-weight:800;
-      font-size:13px;
+      border:1px solid rgba(251,191,36,.55);
+      background:rgba(251,191,36,.09);
+      color:#ffd35a;
+      font-weight:850;
+      font-size:14px;
       margin-bottom:18px;
     }
+    .premium-plan-badge::before{ content:'⚖'; font-size:14px; }
     .premium-plan-card h3{
       margin:0;
-      font-size:clamp(28px, 3.5vw, 42px);
+      font-size:clamp(30px, 3.4vw, 44px);
       line-height:1.02;
-      letter-spacing:-.04em;
+      letter-spacing:-.045em;
       max-width:760px;
     }
     .premium-plan-copy{
-      margin:10px 0 20px;
+      margin:10px 0 24px;
       color:#aebbd2;
-      font-size:clamp(14px, 1.25vw, 17px);
+      font-size:clamp(15px, 1.25vw, 18px);
       line-height:1.45;
       max-width:760px;
     }
     .premium-plan-grid{
       display:grid;
       grid-template-columns:1fr 1fr;
-      gap:18px;
+      gap:20px;
       align-items:stretch;
     }
     .plan-card{
-      border-radius:24px;
-      padding:20px;
-      border:1px solid rgba(255,255,255,.12);
-      background:rgba(255,255,255,.045);
+      border-radius:22px;
+      padding:24px;
+      border:1px solid rgba(255,255,255,.15);
+      background:rgba(255,255,255,.04);
       min-height:0;
       display:flex;
       flex-direction:column;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.04);
     }
     .premium-plan-option{
-      border-color:rgba(255, 194, 61, .45);
-      background:linear-gradient(135deg, rgba(255,194,61,.10), rgba(255,255,255,.045) 42%, rgba(124,58,237,.08));
+      border-color:rgba(251,191,36,.48);
+      background:linear-gradient(135deg,rgba(251,191,36,.08),rgba(255,255,255,.04) 45%,rgba(124,58,237,.10));
     }
     .plan-eyebrow{
       display:inline-flex;
       align-items:center;
+      gap:10px;
       width:max-content;
-      padding:7px 12px;
-      border-radius:999px;
-      background:rgba(255,255,255,.08);
-      border:1px solid rgba(255,255,255,.12);
+      padding:0;
+      border:0;
+      background:transparent;
       color:#cdb9ff;
-      letter-spacing:.08em;
-      font-size:12px;
+      letter-spacing:0;
+      font-size:16px;
       font-weight:850;
-      margin-bottom:12px;
+      margin-bottom:18px;
+      text-transform:none;
     }
-    .free-plan .plan-eyebrow{
-      color:#5eead4;
-      border-color:rgba(94,234,212,.22);
-      background:rgba(94,234,212,.08);
+    .plan-eyebrow::before{
+      display:grid;
+      place-items:center;
+      width:34px;
+      height:34px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.16);
+      background:rgba(255,255,255,.045);
+      font-size:16px;
     }
-    .premium-plan-option .plan-eyebrow{
-      color:#ffe789;
-      border-color:rgba(255,210,98,.30);
-      background:rgba(255,210,98,.10);
-    }
+    .free-plan .plan-eyebrow{ color:#5eead4; }
+    .free-plan .plan-eyebrow::before{ content:'♙'; color:#5eead4; border-color:rgba(94,234,212,.25); }
+    .premium-plan-option .plan-eyebrow{ color:#fbbf24; }
+    .premium-plan-option .plan-eyebrow::before{ content:'♕'; color:#fbbf24; border-color:rgba(251,191,36,.30); }
     .plan-card h4{
       margin:0;
-      font-size:clamp(40px, 4.4vw, 54px);
+      font-size:clamp(44px, 4.1vw, 58px);
       line-height:.92;
-      letter-spacing:-.055em;
+      letter-spacing:-.06em;
     }
     .plan-card small{
       color:#aebbd2;
-      font-weight:800;
+      font-weight:850;
       font-size:13px;
-      margin-top:2px;
+      margin-top:4px;
     }
     .plan-card ul{
       list-style:none;
-      padding:0;
-      margin:18px 0 18px;
+      padding:18px 0 0;
+      margin:18px 0 20px;
+      border-top:1px solid rgba(255,255,255,.12);
       display:grid;
-      gap:10px;
-      color:#eef2ff;
-      font-size:clamp(12px, 1.05vw, 15px);
-      line-height:1.32;
-      font-weight:700;
+      gap:12px;
+      color:#e5e7eb;
+      font-size:clamp(13px, .95vw, 15px);
+      line-height:1.35;
+      font-weight:600;
     }
     .plan-card li{
       position:relative;
-      padding-left:18px;
-      overflow-wrap: anywhere;
+      padding-left:22px;
+      overflow-wrap:anywhere;
     }
     .plan-card li::before{
       content:'•';
@@ -159,19 +169,20 @@
       left:0;
       top:1px;
       color:#2dd4bf;
-      font-size:17px;
+      font-size:18px;
       line-height:1;
     }
-    .premium-plan-option li::before{
-      color:#fbbf24;
-    }
+    .premium-plan-option li::before{ color:#fbbf24; }
     .billing-toggle{
       display:flex;
-      width:min(310px, 100%);
-      padding:6px;
+      width:min(240px, 100%);
+      padding:5px;
       border-radius:999px;
-      background:rgba(4,10,24,.62);
-      margin:0 0 16px;
+      background:rgba(4,10,24,.68);
+      margin:0 0 18px;
+      align-self:flex-end;
+      transform:translateY(-52px);
+      margin-bottom:-34px;
     }
     .billing-toggle button{
       flex:1;
@@ -181,64 +192,58 @@
       background:transparent;
       color:#aebbd2;
       font-weight:850;
-      font-size:13px;
+      font-size:14px;
       cursor:pointer;
     }
     .billing-toggle button.active{
       background:linear-gradient(135deg,#fbbf24,#f59e0b);
       color:#0f172a;
+      box-shadow:0 8px 18px rgba(245,158,11,.18);
     }
     .plan-secondary-btn,.plan-primary-btn,.premium-plan-footer-close{
-      min-height:48px;
-      border-radius:16px;
+      min-height:56px;
+      border-radius:14px;
       border:0;
       font-weight:900;
-      font-size:14px;
+      font-size:16px;
       cursor:pointer;
       margin-top:auto;
     }
     .plan-secondary-btn{
       background:rgba(3,8,20,.48);
       color:#eef2ff;
-      border:1px solid rgba(255,255,255,.10);
+      border:1px solid rgba(255,255,255,.12);
     }
     .plan-primary-btn{
       background:linear-gradient(135deg,#fbbf24,#f59e0b);
       color:#111827;
       box-shadow:0 14px 34px rgba(245,158,11,.20);
     }
-    .premium-plan-footer-close{
-      display:none;
+    .premium-plan-footer-close{ display:none; }
+    .premium-plan-grid::after{
+      content:'🔒  Pago 100% seguro. Puedes cancelar cuando quieras.';
+      grid-column:1 / -1;
+      text-align:center;
+      color:#aebbd2;
+      font-size:14px;
+      margin-top:2px;
     }
-    .premium-plan-card, .plan-card, .premium-plan-grid{
-      min-width:0;
-    }
-    .plan-card ul, .plan-card li, .plan-primary-btn, .plan-secondary-btn{
-      max-width:100%;
-    }
+    .premium-plan-card,.plan-card,.premium-plan-grid{ min-width:0; }
+    .plan-card ul,.plan-card li,.plan-primary-btn,.plan-secondary-btn{ max-width:100%; }
 
+    @media (max-width: 980px){
+      .premium-plan-card{ width:min(720px,94vw); overflow:auto; }
+      .premium-plan-grid{ grid-template-columns:1fr; }
+      .billing-toggle{ align-self:stretch; transform:none; margin:0 0 16px; width:100%; }
+    }
     @media (max-width: 860px){
-      .premium-plan-modal:not(.hidden){
-        padding:14px;
-        overflow-y:auto;
-        place-items:start center;
-      }
-      .premium-plan-card{
-        width:100%;
-        max-height:none;
-        overflow:visible;
-        padding:18px;
-        border-radius:24px;
-      }
-      .premium-plan-grid{
-        grid-template-columns:1fr;
-      }
-      .premium-plan-copy{
-        margin-bottom:18px;
-      }
-      .plan-card{
-        padding:18px;
-      }
+      .premium-plan-modal:not(.hidden){ padding:14px; overflow-y:auto; place-items:start center; }
+      .premium-plan-card{ width:100%; max-height:none; overflow:visible; padding:18px; border-radius:24px; }
+      .premium-plan-close{ top:14px; right:14px; width:40px; height:40px; }
+      .premium-plan-card h3{ font-size:32px; padding-right:44px; }
+      .premium-plan-copy{ margin-bottom:18px; }
+      .plan-card{ padding:18px; }
+      .plan-card ul{ font-size:14px; gap:10px; }
     }
   </style>
 </head>
@@ -685,7 +690,7 @@
 
       <div class="premium-plan-grid">
         <article class="plan-card free-plan">
-          <div class="plan-eyebrow">FREE</div>
+          <div class="plan-eyebrow">Plan Free</div>
           <h4>$0</h4>
           <small>MXN / mes</small>
           <ul>
@@ -698,7 +703,7 @@
         </article>
 
         <article class="plan-card premium-plan-option">
-          <div class="plan-eyebrow">PREMIUM</div>
+          <div class="plan-eyebrow">Korah Premium</div>
           <div class="billing-toggle" role="tablist" aria-label="Periodo de pago">
             <button type="button" class="active" data-billing="monthly">Mensual</button>
             <button type="button" data-billing="annual">Anual</button>
@@ -720,6 +725,21 @@
     </section>
   </div>
 
+
+  <script id="korah-v5-5-premium-billing-toggle">
+    document.addEventListener('click', function(event){
+      const btn = event.target.closest('[data-billing]');
+      if(!btn) return;
+      const billing = btn.getAttribute('data-billing');
+      document.querySelectorAll('[data-billing]').forEach(b => b.classList.toggle('active', b === btn));
+      const price = document.getElementById('premiumPlanPrice');
+      const period = document.getElementById('premiumPlanPeriod');
+      const cta = document.getElementById('choosePremiumPlanBtn');
+      if(price) price.textContent = billing === 'annual' ? '$99' : '$19';
+      if(period) period.textContent = billing === 'annual' ? 'MXN / año' : 'MXN / mes';
+      if(cta) cta.textContent = billing === 'annual' ? 'Actualizar a Premium anual' : 'Actualizar a Premium';
+    });
+  </script>
   <div class="toast hidden" id="toast">Pago registrado</div>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
