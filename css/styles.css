@@ -7563,3 +7563,22 @@ body.is-premium-user #premiumView .premium-gold-btn[data-premium-cta] {
     max-width: none !important;
   }
 }
+
+
+/* v5.0 - Premium vertical rhythm spacing fix */
+#premiumView {
+  --premium-section-gap: clamp(22px, 2.2vw, 32px);
+}
+#premiumView .premium-v4-hero {
+  margin-bottom: var(--premium-section-gap) !important;
+}
+#premiumView .premium-benefits-split {
+  margin-top: 0 !important;
+  margin-bottom: var(--premium-section-gap) !important;
+}
+#premiumView .premium-v4-note {
+  margin-top: 0 !important;
+}
+@media (max-width: 860px) {
+  #premiumView { --premium-section-gap: 20px; }
+}
