@@ -8,10 +8,10 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/styles.css?v=5.4-premium-modal-text-fit" />
+  <link rel="stylesheet" href="css/styles.css?v=5.6-premium-modal-stripe-clean" />
 
-  <style id="korah-v5-5-premium-modal-polish">
-    /* Korah v5.5 - pricing modal polished to match approved compact mockup */
+  <style id="korah-v5-6-premium-modal-polish">
+    /* Korah v5.6 - pricing modal polished, no plan icons, Stripe-safe footer */
     .premium-plan-modal:not(.hidden){
       position: fixed;
       inset: 0;
@@ -108,7 +108,7 @@
     .plan-eyebrow{
       display:inline-flex;
       align-items:center;
-      gap:10px;
+      gap:0;
       width:max-content;
       padding:0;
       border:0;
@@ -120,20 +120,9 @@
       margin-bottom:18px;
       text-transform:none;
     }
-    .plan-eyebrow::before{
-      display:grid;
-      place-items:center;
-      width:34px;
-      height:34px;
-      border-radius:999px;
-      border:1px solid rgba(255,255,255,.16);
-      background:rgba(255,255,255,.045);
-      font-size:16px;
-    }
+    .plan-eyebrow::before{ content:none !important; display:none !important; }
     .free-plan .plan-eyebrow{ color:#5eead4; }
-    .free-plan .plan-eyebrow::before{ content:'♙'; color:#5eead4; border-color:rgba(94,234,212,.25); }
     .premium-plan-option .plan-eyebrow{ color:#fbbf24; }
-    .premium-plan-option .plan-eyebrow::before{ content:'♕'; color:#fbbf24; border-color:rgba(251,191,36,.30); }
     .plan-card h4{
       margin:0;
       font-size:clamp(44px, 4.1vw, 58px);
@@ -221,7 +210,7 @@
     }
     .premium-plan-footer-close{ display:none; }
     .premium-plan-grid::after{
-      content:'🔒  Pago 100% seguro. Puedes cancelar cuando quieras.';
+      content:'🔒  Tu pago está protegido por Stripe. Puedes cancelar cuando quieras.';
       grid-column:1 / -1;
       text-align:center;
       color:#aebbd2;
@@ -726,7 +715,7 @@
   </div>
 
 
-  <script id="korah-v5-5-premium-billing-toggle">
+  <script id="korah-v5-6-premium-billing-toggle">
     document.addEventListener('click', function(event){
       const btn = event.target.closest('[data-billing]');
       if(!btn) return;
@@ -743,6 +732,6 @@
   <div class="toast hidden" id="toast">Pago registrado</div>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
-  <script src="js/app.js?v=5.4-premium-modal-text-fit"></script>
+  <script src="js/app.js?v=5.6-premium-modal-stripe-clean"></script>
 </body>
 </html>
