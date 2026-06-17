@@ -413,6 +413,29 @@
       .subscription-history-row{ grid-template-columns:1fr; gap:8px; }
     }
 
+
+    /* Korah v5.9 - account hero single CTA and subscription cleanup */
+    .account-hero-card{
+      grid-template-columns:minmax(0,1fr) minmax(220px,320px) !important;
+      grid-template-areas:"account-copy account-action" !important;
+    }
+    .account-hero-card > div{ grid-area:account-copy !important; }
+    .account-hero-action{
+      grid-area:account-action !important;
+      align-self:center !important;
+      justify-self:end !important;
+      width:min(100%,300px) !important;
+      min-height:58px !important;
+      font-size:16px !important;
+    }
+    .subscription-stat strong, .subscription-history-row strong{ font-size:clamp(16px,1.5vw,22px) !important; line-height:1.2 !important; }
+    .subscription-stat span, .subscription-history-row span{ font-size:clamp(12px,1vw,15px) !important; }
+    .subscription-note:empty{ display:none !important; }
+    @media(max-width:860px){
+      .account-hero-card{ grid-template-columns:1fr !important; grid-template-areas:"account-copy" "account-action" !important; }
+      .account-hero-action{ width:100% !important; justify-self:stretch !important; }
+    }
+
   </style>
 
   <style id="korah-v5-8-account-subscription-fix">
@@ -559,6 +582,29 @@
       #accountPlanCopy{ font-size:clamp(20px,6vw,30px) !important; }
       .subscription-history-row{ grid-template-columns:1fr !important; }
     }
+
+    /* Korah v5.9 - account hero single CTA and subscription cleanup */
+    .account-hero-card{
+      grid-template-columns:minmax(0,1fr) minmax(220px,320px) !important;
+      grid-template-areas:"account-copy account-action" !important;
+    }
+    .account-hero-card > div{ grid-area:account-copy !important; }
+    .account-hero-action{
+      grid-area:account-action !important;
+      align-self:center !important;
+      justify-self:end !important;
+      width:min(100%,300px) !important;
+      min-height:58px !important;
+      font-size:16px !important;
+    }
+    .subscription-stat strong, .subscription-history-row strong{ font-size:clamp(16px,1.5vw,22px) !important; line-height:1.2 !important; }
+    .subscription-stat span, .subscription-history-row span{ font-size:clamp(12px,1vw,15px) !important; }
+    .subscription-note:empty{ display:none !important; }
+    @media(max-width:860px){
+      .account-hero-card{ grid-template-columns:1fr !important; grid-template-areas:"account-copy" "account-action" !important; }
+      .account-hero-action{ width:100% !important; justify-self:stretch !important; }
+    }
+
   </style>
 </head>
 <body>
@@ -1022,7 +1068,7 @@
         <button class="subscription-cancel-btn" id="cancelRenewalBtn" type="button">Cancelar renovación</button>
         <button class="subscription-primary-btn" type="button" data-close="subscription">Cerrar</button>
       </div>
-      <p class="subscription-note">Tu pago está protegido por Stripe. Si cancelas, conservarás Premium hasta el final del periodo actual.</p>
+      <p class="subscription-note"></p>
     </section>
   </div>
 
@@ -1227,7 +1273,8 @@
           cancelBtn.style.opacity = cancelBtn.disabled ? '.65' : '1';
           cancelBtn.style.cursor = cancelBtn.disabled ? 'not-allowed' : 'pointer';
         }
-        if(note) note.textContent = premium ? 'Tu pago está protegido por Stripe. Si cancelas, conservarás Premium hasta el final del periodo actual.' : 'Cuando actualices, tu pago estará protegido por Stripe.';
+        if(note) note.textContent = premium ? 'Tu pago está protegido por Stripe. Si cancelas, conservarás Premium hasta el final del periodo actual.' : '';
+        if(note) note.style.display = note.textContent ? '' : 'none';
       }
       const oldOpen = window.openSubscriptionModal;
       window.openSubscriptionModal = function(){
