@@ -1,1 +1,1 @@
-Korah v3.5 - Premium Compresso-style + Oaxsun Premium access
+Korah v5.7 - subscription management modal added.
