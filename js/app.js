@@ -1,5 +1,5 @@
-console.log('Korah v3.9.0-pdf-account-polish');
-const APP_VERSION = 'v3.9.0-pdf-account-polish';
+console.log('Korah v5.2-premium-plan-modal');
+const APP_VERSION = 'v5.2-premium-plan-modal';
 const SUPABASE_URL = 'https://qjicwqpjxsqynoudwylk.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_rl7m3zQsatLJL2Lb3yHPOg_nnCr712U';
 const PAYMENTS_TABLE = 'payments';
@@ -145,7 +145,11 @@ const els = {
   payId: document.querySelector('#payId'),
   payAmount: document.querySelector('#payAmount'),
   payDescription: document.querySelector('#payDescription'),
-  toast: document.querySelector('#toast')
+  toast: document.querySelector('#toast'),
+  premiumPlanModal: document.querySelector('#premiumPlanModal'),
+  premiumPlanPrice: document.querySelector('#premiumPlanPrice'),
+  premiumPlanPeriod: document.querySelector('#premiumPlanPeriod'),
+  choosePremiumPlanBtn: document.querySelector('#choosePremiumPlanBtn')
 };
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -234,6 +238,10 @@ function bindEvents() {
   });
   els.exportPdfBtn?.addEventListener('click', exportReportPdf);
   els.exportExcelBtn?.addEventListener('click', exportReportExcel);
+
+  document.querySelectorAll('[data-close="premium-plan"]').forEach(el => el.addEventListener('click', closePremiumPlanModal));
+  document.querySelectorAll('[data-billing]').forEach(el => el.addEventListener('click', () => setPremiumBilling(el.dataset.billing)));
+  els.choosePremiumPlanBtn?.addEventListener('click', choosePremiumPlan);
 
   els.paymentCategory.addEventListener('change', () => {
     setSelectedIcon(getDefaultIcon(els.paymentCategory.value));
@@ -2231,10 +2239,37 @@ window.toggleHistoryMenu = toggleHistoryMenu;
 window.deleteHistoryRecord = deleteHistoryRecord;
 window.toggleMenu = toggleMenu;
 
+function openPremiumPlanModal() {
+  if (!els.premiumPlanModal) return;
+  els.premiumPlanModal.classList.remove('hidden');
+  els.premiumPlanModal.setAttribute('aria-hidden', 'false');
+  document.body.classList.add('modal-open');
+  setPremiumBilling('monthly');
+}
+
+function closePremiumPlanModal() {
+  if (!els.premiumPlanModal) return;
+  els.premiumPlanModal.classList.add('hidden');
+  els.premiumPlanModal.setAttribute('aria-hidden', 'true');
+  document.body.classList.remove('modal-open');
+}
+
+function setPremiumBilling(period) {
+  const isAnnual = period === 'annual';
+  document.querySelectorAll('[data-billing]').forEach(btn => btn.classList.toggle('active', btn.dataset.billing === period));
+  if (els.premiumPlanPrice) els.premiumPlanPrice.textContent = isAnnual ? '$99' : '$19';
+  if (els.premiumPlanPeriod) els.premiumPlanPeriod.textContent = isAnnual ? 'MXN / año' : 'MXN / mes';
+  if (els.choosePremiumPlanBtn) els.choosePremiumPlanBtn.textContent = isAnnual ? 'Elegir Premium anual' : 'Elegir Premium mensual';
+}
+
+function choosePremiumPlan() {
+  showToast('Pago Premium estará disponible próximamente.');
+}
+
 function handlePremiumCta() {
   if (IS_PREMIUM) {
-    showToast('Premium ya está activo en tu cuenta Oaxsun.');
+    setActiveView('account');
   } else {
-    showToast('Premium estará disponible próximamente.');
+    openPremiumPlanModal();
   }
 }

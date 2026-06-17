@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/styles.css?v=5.1-premium-spacing-compact" />
+  <link rel="stylesheet" href="css/styles.css?v=5.2-premium-plan-modal" />
 </head>
 <body>
   <section class="auth-screen hidden" id="authScreen">
@@ -441,9 +441,56 @@
     </form>
   </div>
 
+
+
+  <div class="premium-plan-modal hidden" id="premiumPlanModal" aria-hidden="true">
+    <div class="premium-plan-backdrop" data-close="premium-plan"></div>
+    <section class="premium-plan-card" role="dialog" aria-modal="true" aria-labelledby="premiumPlanTitle">
+      <button class="premium-plan-close" type="button" data-close="premium-plan" aria-label="Cerrar">×</button>
+      <span class="premium-plan-badge">Comparativa de planes</span>
+      <h3 id="premiumPlanTitle">Elige cómo quieres usar Korah</h3>
+      <p class="premium-plan-copy">Empieza gratis o desbloquea Premium para entender mejor tus pagos, comparar meses y exportar reportes.</p>
+
+      <div class="premium-plan-grid">
+        <article class="plan-card free-plan">
+          <div class="plan-eyebrow">FREE</div>
+          <h4>$0</h4>
+          <small>MXN / mes</small>
+          <ul>
+            <li>Dashboard y pagos ilimitados</li>
+            <li>Historial del mes actual y anterior</li>
+            <li>Reporte del mes actual</li>
+            <li>Comparativa básica automática</li>
+          </ul>
+          <button type="button" class="plan-secondary-btn" data-close="premium-plan">Continuar gratis</button>
+        </article>
+
+        <article class="plan-card premium-plan-option">
+          <div class="plan-eyebrow">PREMIUM</div>
+          <div class="billing-toggle" role="tablist" aria-label="Periodo de pago">
+            <button type="button" class="active" data-billing="monthly">Mensual</button>
+            <button type="button" data-billing="annual">Anual</button>
+          </div>
+          <h4 id="premiumPlanPrice">$19</h4>
+          <small id="premiumPlanPeriod">MXN / mes</small>
+          <ul>
+            <li>Historial ilimitado</li>
+            <li>Análisis financiero completo</li>
+            <li>Comparativa de cualquier mes</li>
+            <li>Exportar PDF y Excel</li>
+            <li>Notificaciones inteligentes</li>
+          </ul>
+          <button type="button" class="plan-primary-btn" id="choosePremiumPlanBtn">Elegir Premium mensual</button>
+        </article>
+      </div>
+
+      <button type="button" class="premium-plan-footer-close" data-close="premium-plan">Cerrar</button>
+    </section>
+  </div>
+
   <div class="toast hidden" id="toast">Pago registrado</div>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
-  <script src="js/app.js?v=3.9.0-pdf-account-polish"></script>
+  <script src="js/app.js?v=5.2-premium-plan-modal"></script>
 </body>
 </html>
