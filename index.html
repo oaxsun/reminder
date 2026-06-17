@@ -8,10 +8,10 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/styles.css?v=5.3-premium-modal-compact" />
+  <link rel="stylesheet" href="css/styles.css?v=5.4-premium-modal-text-fit" />
 
   <style id="korah-v5-3-premium-modal-compact">
-    /* Korah v5.3 - compact premium comparison modal */
+    /* Korah v5.4 - compact premium comparison modal with text fit */
     .premium-plan-modal:not(.hidden){
       position: fixed;
       inset: 0;
@@ -38,7 +38,7 @@
         radial-gradient(circle at 82% 0%, rgba(122, 58, 255, .30), transparent 38%),
         linear-gradient(135deg, #0b1223 0%, #111a2b 45%, #17132b 100%);
       box-shadow:0 28px 80px rgba(0,0,0,.38);
-      padding:30px;
+      padding:26px;
       color:#eef2ff;
     }
     .premium-plan-close{
@@ -70,27 +70,27 @@
     }
     .premium-plan-card h3{
       margin:0;
-      font-size:clamp(30px, 4vw, 48px);
+      font-size:clamp(28px, 3.5vw, 42px);
       line-height:1.02;
       letter-spacing:-.04em;
       max-width:760px;
     }
     .premium-plan-copy{
-      margin:12px 0 24px;
+      margin:10px 0 20px;
       color:#aebbd2;
-      font-size:clamp(15px, 1.5vw, 19px);
+      font-size:clamp(14px, 1.25vw, 17px);
       line-height:1.45;
       max-width:760px;
     }
     .premium-plan-grid{
       display:grid;
       grid-template-columns:1fr 1fr;
-      gap:22px;
+      gap:18px;
       align-items:stretch;
     }
     .plan-card{
       border-radius:24px;
-      padding:24px;
+      padding:20px;
       border:1px solid rgba(255,255,255,.12);
       background:rgba(255,255,255,.045);
       min-height:0;
@@ -127,38 +127,39 @@
     }
     .plan-card h4{
       margin:0;
-      font-size:clamp(46px, 5.2vw, 64px);
+      font-size:clamp(40px, 4.4vw, 54px);
       line-height:.92;
       letter-spacing:-.055em;
     }
     .plan-card small{
       color:#aebbd2;
       font-weight:800;
-      font-size:16px;
+      font-size:13px;
       margin-top:2px;
     }
     .plan-card ul{
       list-style:none;
       padding:0;
-      margin:22px 0 22px;
+      margin:18px 0 18px;
       display:grid;
-      gap:12px;
+      gap:10px;
       color:#eef2ff;
-      font-size:clamp(14px, 1.45vw, 18px);
-      line-height:1.25;
+      font-size:clamp(12px, 1.05vw, 15px);
+      line-height:1.32;
       font-weight:700;
     }
     .plan-card li{
       position:relative;
-      padding-left:22px;
+      padding-left:18px;
+      overflow-wrap: anywhere;
     }
     .plan-card li::before{
       content:'•';
       position:absolute;
       left:0;
-      top:-1px;
+      top:1px;
       color:#2dd4bf;
-      font-size:22px;
+      font-size:17px;
       line-height:1;
     }
     .premium-plan-option li::before{
@@ -170,17 +171,17 @@
       padding:6px;
       border-radius:999px;
       background:rgba(4,10,24,.62);
-      margin:2px 0 22px;
+      margin:0 0 16px;
     }
     .billing-toggle button{
       flex:1;
-      min-height:42px;
+      min-height:38px;
       border:0;
       border-radius:999px;
       background:transparent;
       color:#aebbd2;
       font-weight:850;
-      font-size:15px;
+      font-size:13px;
       cursor:pointer;
     }
     .billing-toggle button.active{
@@ -188,11 +189,11 @@
       color:#0f172a;
     }
     .plan-secondary-btn,.plan-primary-btn,.premium-plan-footer-close{
-      min-height:54px;
+      min-height:48px;
       border-radius:16px;
       border:0;
       font-weight:900;
-      font-size:16px;
+      font-size:14px;
       cursor:pointer;
       margin-top:auto;
     }
@@ -209,6 +210,13 @@
     .premium-plan-footer-close{
       display:none;
     }
+    .premium-plan-card, .plan-card, .premium-plan-grid{
+      min-width:0;
+    }
+    .plan-card ul, .plan-card li, .plan-primary-btn, .plan-secondary-btn{
+      max-width:100%;
+    }
+
     @media (max-width: 860px){
       .premium-plan-modal:not(.hidden){
         padding:14px;
@@ -219,7 +227,7 @@
         width:100%;
         max-height:none;
         overflow:visible;
-        padding:22px;
+        padding:18px;
         border-radius:24px;
       }
       .premium-plan-grid{
@@ -229,7 +237,7 @@
         margin-bottom:18px;
       }
       .plan-card{
-        padding:20px;
+        padding:18px;
       }
     }
   </style>
@@ -704,7 +712,7 @@
             <li>Exportar PDF y Excel</li>
             <li>Notificaciones inteligentes</li>
           </ul>
-          <button type="button" class="plan-primary-btn" id="choosePremiumPlanBtn">Elegir Premium mensual</button>
+          <button type="button" class="plan-primary-btn" id="choosePremiumPlanBtn">Actualizar a Premium</button>
         </article>
       </div>
 
@@ -715,6 +723,6 @@
   <div class="toast hidden" id="toast">Pago registrado</div>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
-  <script src="js/app.js?v=5.3-premium-modal-compact"></script>
+  <script src="js/app.js?v=5.4-premium-modal-text-fit"></script>
 </body>
 </html>
