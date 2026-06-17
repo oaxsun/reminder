@@ -1208,7 +1208,7 @@
   <div class="toast hidden" id="toast">Pago registrado</div>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
-  <script src="js/app.js?v=5.6-premium-modal-stripe-clean"></script>
+  <script src="js/app.js?v=6.0-account-final-cleanup"></script>
 
   <script id="korah-v5-8-account-subscription-fix">
     (function(){
@@ -1303,5 +1303,124 @@
       setTimeout(syncAccountHero, 300);
     })();
   </script>
+
+
+  <style id="korah-v6-0-account-final-cleanup">
+    /* Korah v6.0 - Cuenta: one CTA, smaller copy, clean subscription modal */
+    #accountView .account-hero-card{
+      display:grid !important;
+      grid-template-columns:minmax(0,1fr) minmax(220px,300px) !important;
+      grid-template-areas:"account-copy account-action" !important;
+      align-items:center !important;
+      gap:28px !important;
+      padding:clamp(28px,4vw,56px) !important;
+      min-height:0 !important;
+    }
+    #accountView .account-hero-card > div{
+      grid-area:account-copy !important;
+      min-width:0 !important;
+    }
+    #accountView .account-hero-action{
+      grid-area:account-action !important;
+      justify-self:end !important;
+      align-self:center !important;
+      width:min(100%,280px) !important;
+      min-width:0 !important;
+      min-height:56px !important;
+      padding:0 22px !important;
+      font-size:15px !important;
+      line-height:1 !important;
+      border-radius:18px !important;
+      white-space:nowrap !important;
+    }
+    #accountPlanCopy{
+      font-size:clamp(15px,1.45vw,20px) !important;
+      line-height:1.35 !important;
+      max-width:560px !important;
+      color:rgba(226,232,240,.72) !important;
+      letter-spacing:-.01em !important;
+    }
+    #accountPlanTitle{
+      font-size:clamp(46px,5vw,78px) !important;
+      margin-bottom:14px !important;
+    }
+    @media(max-width:860px){
+      #accountView .account-hero-card{
+        grid-template-columns:1fr !important;
+        grid-template-areas:"account-copy" "account-action" !important;
+        gap:24px !important;
+      }
+      #accountView .account-hero-action{
+        justify-self:stretch !important;
+        width:100% !important;
+        max-width:none !important;
+      }
+      #accountPlanCopy{
+        font-size:clamp(16px,4.8vw,22px) !important;
+      }
+    }
+    /* In case an older build injected a second CTA, keep only the first visible one. */
+    #accountView .account-hero-card .account-hero-action + .account-hero-action{
+      display:none !important;
+    }
+    .subscription-copy.is-empty,
+    .subscription-history-row .empty-copy{
+      display:none !important;
+    }
+  </style>
+
+  <script id="korah-v6-0-account-final-cleanup">
+    (function(){
+      function dedupeAccountButtons(){
+        const hero = document.querySelector('#accountView .account-hero-card');
+        if(!hero) return;
+        const buttons = Array.from(hero.querySelectorAll('.account-hero-action, #manageSubscriptionBtn'));
+        buttons.forEach((btn, index) => {
+          if(index === 0){
+            btn.id = 'manageSubscriptionBtn';
+            btn.textContent = 'Gestionar cuenta';
+            btn.style.display = '';
+          } else {
+            btn.remove();
+          }
+        });
+      }
+      function cleanAccountCopy(){
+        const copy = document.getElementById('accountPlanCopy');
+        const title = document.getElementById('accountPlanTitle');
+        const plan = (title?.textContent || '').toLowerCase();
+        if(copy && plan.includes('free')){
+          copy.textContent = 'Actualiza a Premium para desbloquear análisis avanzados.';
+        }
+      }
+      function cleanSubscriptionModal(){
+        const modal = document.getElementById('subscriptionModal');
+        if(!modal) return;
+        const plan = (document.getElementById('subscriptionPlan')?.textContent || '').toLowerCase();
+        const isFree = plan.includes('free') || plan.includes('gratuito');
+        const historyText = document.getElementById('subscriptionHistoryText');
+        const historyLabel = document.getElementById('subscriptionHistoryLabel');
+        const note = modal.querySelector('.subscription-note');
+        const copy = modal.querySelector('.subscription-copy');
+        if(isFree){
+          if(historyLabel) historyLabel.textContent = 'Sin pagos registrados';
+          if(historyText) historyText.textContent = 'Aún no tienes pagos registrados.';
+          if(note){ note.textContent = ''; note.style.display = 'none'; }
+          if(copy) copy.textContent = 'Tu cuenta está en el plan gratuito. Actualiza a Premium para desbloquear historial ilimitado, reportes y comparativas.';
+        }
+      }
+      document.addEventListener('click', function(e){
+        if(e.target.closest('#manageSubscriptionBtn')){
+          setTimeout(function(){ dedupeAccountButtons(); cleanAccountCopy(); cleanSubscriptionModal(); }, 0);
+        }
+      }, true);
+      document.addEventListener('DOMContentLoaded', function(){
+        dedupeAccountButtons();
+        cleanAccountCopy();
+        setTimeout(function(){ dedupeAccountButtons(); cleanAccountCopy(); cleanSubscriptionModal(); }, 400);
+      });
+    })();
+  </script>
+
 </body>
 </html>
