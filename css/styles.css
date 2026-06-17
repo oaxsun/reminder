@@ -7582,3 +7582,21 @@ body.is-premium-user #premiumView .premium-gold-btn[data-premium-cta] {
 @media (max-width: 860px) {
   #premiumView { --premium-section-gap: 20px; }
 }
+
+/* v5.1 - Premium spacing compact: reduce vertical rhythm by 50% */
+#premiumView {
+  --premium-section-gap: clamp(11px, 1.1vw, 16px) !important;
+}
+#premiumView .premium-v4-hero {
+  margin-bottom: var(--premium-section-gap) !important;
+}
+#premiumView .premium-benefits-split {
+  margin-top: 0 !important;
+  margin-bottom: var(--premium-section-gap) !important;
+}
+#premiumView .premium-v4-note {
+  margin-top: 0 !important;
+}
+@media (max-width: 860px) {
+  #premiumView { --premium-section-gap: 10px !important; }
+}
