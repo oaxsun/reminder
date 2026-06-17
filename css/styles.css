@@ -7300,3 +7300,98 @@ body.is-premium-user #premiumView .premium-gold-btn[data-premium-cta] {
   .premium-v4-status { justify-self: stretch !important; max-width: none !important; }
   .premium-why-list { grid-template-columns: 1fr !important; }
 }
+
+/* Korah v4.6 Premium hero without illustration */
+#premiumView {
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  padding-bottom: 120px !important;
+}
+.premium-v4-hero {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1.25fr) minmax(280px, 420px) !important;
+  grid-template-areas: "copy status" !important;
+  align-items: center !important;
+  gap: clamp(28px, 4vw, 72px) !important;
+  min-height: clamp(380px, 30vw, 500px) !important;
+  height: auto !important;
+  max-height: none !important;
+  overflow: hidden !important;
+  padding: clamp(36px, 4vw, 64px) !important;
+  border-radius: 28px !important;
+}
+.premium-v4-visual { display: none !important; }
+.premium-v4-copy {
+  grid-area: copy !important;
+  max-width: 760px !important;
+  min-width: 0 !important;
+}
+.premium-v4-copy h3 {
+  font-size: clamp(42px, 4.2vw, 72px) !important;
+  line-height: 1.02 !important;
+  letter-spacing: -0.065em !important;
+  max-width: 740px !important;
+  margin: clamp(18px, 2vw, 30px) 0 18px !important;
+  overflow: visible !important;
+}
+.premium-v4-copy > p {
+  max-width: 620px !important;
+  font-size: clamp(15px, 1.05vw, 18px) !important;
+  line-height: 1.58 !important;
+}
+.premium-v4-status {
+  grid-area: status !important;
+  justify-self: end !important;
+  align-self: center !important;
+  width: min(100%, 420px) !important;
+  max-width: 420px !important;
+  margin: 0 !important;
+}
+.premium-benefits-split {
+  grid-template-columns: minmax(0, 2fr) minmax(290px, 1fr) !important;
+  align-items: stretch !important;
+}
+.premium-why-panel,
+.premium-feature-stack article {
+  color: #0f172a !important;
+}
+.premium-why-panel h4,
+.premium-feature-stack h4 { color: #0f172a !important; }
+.premium-why-panel p,
+.premium-feature-stack p { color: #64748b !important; }
+@media (max-width: 1100px) {
+  .premium-v4-hero {
+    grid-template-columns: 1fr !important;
+    grid-template-areas: "copy" "status" !important;
+    gap: 28px !important;
+  }
+  .premium-v4-status {
+    justify-self: stretch !important;
+    max-width: none !important;
+  }
+  .premium-v4-copy h3 {
+    max-width: 780px !important;
+  }
+}
+@media (max-width: 860px) {
+  .premium-benefits-split {
+    grid-template-columns: 1fr !important;
+  }
+  .premium-v4-hero {
+    padding: 24px !important;
+    border-radius: 24px !important;
+    min-height: auto !important;
+  }
+  .premium-v4-copy h3 {
+    font-size: clamp(34px, 9vw, 52px) !important;
+    line-height: 1.04 !important;
+  }
+}
+@media (max-width: 480px) {
+  .premium-v4-copy h3 {
+    font-size: clamp(30px, 10vw, 42px) !important;
+  }
+  .premium-v4-status .primary-btn {
+    min-height: 50px !important;
+  }
+}
