@@ -414,6 +414,152 @@
     }
 
   </style>
+
+  <style id="korah-v5-8-account-subscription-fix">
+    :root{ --korah-purple:#7c3aed; --korah-purple-2:#8b5cf6; --korah-purple-3:#a78bfa; --korah-ink:#0f172a; }
+
+    /* Account hero: Korah theme, one CTA only */
+    .account-hero-card{
+      display:grid !important;
+      grid-template-columns:minmax(0,1fr) minmax(220px,340px) !important;
+      align-items:center !important;
+      gap:28px !important;
+      background:
+        radial-gradient(circle at 92% 10%,rgba(139,92,246,.48),transparent 38%),
+        radial-gradient(circle at 0% 100%,rgba(59,130,246,.12),transparent 32%),
+        linear-gradient(135deg,#0f172a,#21134b 55%,#4c2c91) !important;
+      border:1px solid rgba(124,58,237,.22) !important;
+      box-shadow:0 24px 70px rgba(76,29,149,.18) !important;
+      overflow:hidden !important;
+    }
+    .account-hero-card .account-avatar-large{ display:none !important; }
+    .account-hero-card > div{ min-width:0; }
+    .account-eyebrow{
+      display:inline-flex !important;
+      width:max-content;
+      padding:10px 20px !important;
+      border-radius:999px !important;
+      border:1px solid rgba(255,255,255,.26) !important;
+      background:rgba(255,255,255,.08) !important;
+      color:#d8c8ff !important;
+      font-weight:900 !important;
+      letter-spacing:.08em !important;
+      text-transform:uppercase !important;
+      margin-bottom:22px !important;
+    }
+    #accountPlanTitle{
+      color:#fff !important;
+      font-size:clamp(54px,6vw,92px) !important;
+      line-height:.92 !important;
+      letter-spacing:-.05em !important;
+      margin:0 0 20px !important;
+    }
+    #accountPlanCopy{
+      color:rgba(226,232,240,.78) !important;
+      font-size:clamp(20px,2vw,32px) !important;
+      line-height:1.15 !important;
+      max-width:620px !important;
+      margin:0 !important;
+    }
+    .account-hero-action{
+      justify-self:end !important;
+      width:min(100%,320px) !important;
+      min-width:0 !important;
+      min-height:64px !important;
+      border-radius:22px !important;
+      background:linear-gradient(135deg,#6d28d9,#8b5cf6) !important;
+      color:#fff !important;
+      box-shadow:0 22px 42px rgba(124,58,237,.30) !important;
+      font-size:18px !important;
+      letter-spacing:-.02em !important;
+    }
+
+    /* Subscription management modal: Korah theme, compact text */
+    .subscription-card{
+      width:min(980px,92vw) !important;
+      border:1px solid rgba(124,58,237,.34) !important;
+      background:
+        radial-gradient(circle at 85% 4%,rgba(139,92,246,.28),transparent 36%),
+        radial-gradient(circle at 0% 100%,rgba(59,130,246,.10),transparent 28%),
+        linear-gradient(135deg,#0b1220,#111827 58%,#21134b) !important;
+      box-shadow:0 30px 100px rgba(17,24,39,.58) !important;
+      color:#f8fafc !important;
+    }
+    .subscription-badge{
+      border-color:rgba(167,139,250,.50) !important;
+      background:rgba(124,58,237,.14) !important;
+      color:#d8c8ff !important;
+      text-transform:uppercase !important;
+      letter-spacing:.08em !important;
+      font-size:12px !important;
+      padding:8px 14px !important;
+    }
+    .subscription-card h3{
+      font-size:clamp(32px,3.4vw,46px) !important;
+      letter-spacing:-.04em !important;
+    }
+    .subscription-copy{
+      font-size:clamp(14px,1.25vw,17px) !important;
+      color:#b8c2d6 !important;
+      margin:10px 0 22px !important;
+    }
+    .subscription-grid{ gap:14px !important; margin-bottom:14px !important; }
+    .subscription-info-card{
+      border-color:rgba(148,163,184,.18) !important;
+      background:rgba(255,255,255,.045) !important;
+      padding:16px 18px !important;
+      border-radius:16px !important;
+    }
+    .subscription-info-card span{
+      font-size:11px !important;
+      color:#98a6bc !important;
+      margin-bottom:6px !important;
+    }
+    .subscription-info-card strong{
+      font-size:clamp(16px,1.55vw,22px) !important;
+      color:#f8fafc !important;
+      letter-spacing:-.025em !important;
+    }
+    .subscription-history{
+      border-color:rgba(148,163,184,.18) !important;
+      background:rgba(255,255,255,.035) !important;
+      padding:18px !important;
+      margin:14px 0 !important;
+    }
+    .subscription-history h4{
+      font-size:15px !important;
+      color:#cbd5e1 !important;
+      text-transform:uppercase;
+      letter-spacing:.06em;
+    }
+    .subscription-history-row{
+      grid-template-columns:150px 1fr !important;
+      font-size:14px !important;
+      color:#aebbd2 !important;
+    }
+    .subscription-history-row strong{ font-size:15px !important; color:#eef2ff !important; }
+    .subscription-actions{ grid-template-columns:1fr !important; margin-top:16px !important; }
+    .subscription-actions button{ min-height:54px !important; font-size:15px !important; }
+    .subscription-cancel-btn{
+      background:rgba(124,58,237,.12) !important;
+      color:#ddd6fe !important;
+      border:1px solid rgba(167,139,250,.32) !important;
+    }
+    .subscription-primary-btn{
+      background:linear-gradient(135deg,#6d28d9,#8b5cf6) !important;
+      color:#fff !important;
+    }
+    .subscription-note{ color:#9aa8bf !important; }
+    .subscription-card.is-free .subscription-cancel-btn{ display:none !important; }
+
+    @media(max-width:860px){
+      .account-hero-card{ grid-template-columns:1fr !important; padding:32px 26px !important; }
+      .account-hero-action{ justify-self:stretch !important; width:100% !important; min-height:56px !important; font-size:16px !important; }
+      #accountPlanTitle{ font-size:clamp(48px,14vw,72px) !important; }
+      #accountPlanCopy{ font-size:clamp(20px,6vw,30px) !important; }
+      .subscription-history-row{ grid-template-columns:1fr !important; }
+    }
+  </style>
 </head>
 <body>
   <section class="auth-screen hidden" id="authScreen">
@@ -1017,5 +1163,98 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
   <script src="js/app.js?v=5.6-premium-modal-stripe-clean"></script>
+
+  <script id="korah-v5-8-account-subscription-fix">
+    (function(){
+      const getEmail = () => {
+        const el = document.getElementById('accountEmail');
+        return (el && el.textContent ? el.textContent.trim() : '') || '';
+      };
+      const isBusinessPremium = () => getEmail().toLowerCase().endsWith('@oaxsun.tech');
+      const isManualPremium = () => localStorage.getItem('korah_premium') === 'true' || localStorage.getItem('korah_is_premium') === 'true';
+      const isPremiumUser = () => isBusinessPremium() || isManualPremium();
+      const fmt = (date) => date.toLocaleDateString('es-MX', { day:'numeric', month:'long', year:'numeric' });
+      const periodDates = () => {
+        const start = new Date();
+        start.setDate(17);
+        const renewal = new Date(start);
+        renewal.setMonth(renewal.getMonth() + 1);
+        return { start, renewal };
+      };
+      function syncAccountHero(){
+        const premium = isPremiumUser();
+        const business = isBusinessPremium();
+        const title = document.getElementById('accountPlanTitle');
+        const copy = document.getElementById('accountPlanCopy');
+        const plan = document.getElementById('accountPlan');
+        const btn = document.getElementById('manageSubscriptionBtn');
+        if(title) title.textContent = premium ? (business ? 'Premium Empresarial' : 'Premium') : 'Free';
+        if(copy) copy.textContent = premium ? 'Tu cuenta tiene acceso completo a las herramientas avanzadas de Korah.' : 'Actualiza a Premium para desbloquear análisis avanzados.';
+        if(plan) plan.textContent = premium ? (business ? 'Premium Empresarial' : 'Premium') : 'Free';
+        if(btn) btn.textContent = 'Gestionar cuenta';
+      }
+      function renderSubscriptionModalFixed(){
+        const m = document.getElementById('subscriptionModal');
+        if(!m) return;
+        const premium = isPremiumUser();
+        const business = isBusinessPremium();
+        const cancelled = localStorage.getItem('korah_subscription_cancelled') === 'true';
+        const { start, renewal } = periodDates();
+        m.querySelector('.subscription-card')?.classList.toggle('is-free', !premium);
+        const plan = document.getElementById('subscriptionPlan');
+        const status = document.getElementById('subscriptionStatus');
+        const startEl = document.getElementById('subscriptionStart');
+        const renewalEl = document.getElementById('subscriptionRenewal');
+        const historyLabel = document.getElementById('subscriptionHistoryLabel');
+        const historyText = document.getElementById('subscriptionHistoryText');
+        const cancelBtn = document.getElementById('cancelRenewalBtn');
+        const note = m.querySelector('.subscription-note');
+        const title = document.getElementById('subscriptionTitle');
+        const copy = m.querySelector('.subscription-copy');
+        if(title) title.textContent = 'Gestionar cuenta';
+        if(copy) copy.textContent = premium ? 'Consulta el estado de tu plan, renovación e historial de pagos.' : 'Tu cuenta está en el plan gratuito. Actualiza a Premium para desbloquear historial ilimitado, reportes y comparativas.';
+        if(plan) plan.textContent = premium ? (business ? 'Premium Empresarial' : 'Premium') : 'Free';
+        if(status) status.textContent = premium ? (cancelled ? 'Cancelada · termina pronto' : 'Activa') : 'Activo';
+        if(startEl) startEl.textContent = premium ? fmt(start) : fmt(new Date());
+        if(renewalEl) renewalEl.textContent = premium ? (cancelled ? 'Termina el ' + fmt(renewal) : 'Renueva el ' + fmt(renewal)) : 'No aplica';
+        if(historyLabel) historyLabel.textContent = premium ? (cancelled ? 'Suscripción cancelada' : 'Última suscripción activa') : 'Sin pagos registrados';
+        if(historyText) historyText.textContent = premium
+          ? (cancelled ? 'Premium activo hasta ' + fmt(renewal) + ' · Renovación cancelada.' : (business ? 'Premium Empresarial activo · Beneficio interno Oaxsun.' : 'Premium activo · Pago protegido por Stripe.'))
+          : 'Aún no tienes pagos de suscripción. Tu cuenta usa el plan gratuito de Korah.';
+        if(cancelBtn){
+          cancelBtn.textContent = premium ? (cancelled ? 'Renovación cancelada' : (business ? 'Premium empresarial activo' : 'Cancelar renovación')) : 'Actualizar a Premium';
+          cancelBtn.disabled = premium && (cancelled || business);
+          cancelBtn.style.opacity = cancelBtn.disabled ? '.65' : '1';
+          cancelBtn.style.cursor = cancelBtn.disabled ? 'not-allowed' : 'pointer';
+        }
+        if(note) note.textContent = premium ? 'Tu pago está protegido por Stripe. Si cancelas, conservarás Premium hasta el final del periodo actual.' : 'Cuando actualices, tu pago estará protegido por Stripe.';
+      }
+      const oldOpen = window.openSubscriptionModal;
+      window.openSubscriptionModal = function(){
+        syncAccountHero();
+        if(typeof oldOpen === 'function') oldOpen();
+        renderSubscriptionModalFixed();
+        const m = document.getElementById('subscriptionModal');
+        if(m){ m.classList.remove('hidden'); m.setAttribute('aria-hidden','false'); }
+      };
+      document.addEventListener('click', function(event){
+        if(event.target.closest('#manageSubscriptionBtn')){
+          setTimeout(renderSubscriptionModalFixed, 0);
+        }
+        if(event.target.closest('#cancelRenewalBtn')){
+          if(!isPremiumUser()){
+            const pm = document.getElementById('premiumPlanModal');
+            if(pm){ pm.classList.remove('hidden'); pm.setAttribute('aria-hidden','false'); }
+            const sm = document.getElementById('subscriptionModal');
+            if(sm){ sm.classList.add('hidden'); sm.setAttribute('aria-hidden','true'); }
+          } else {
+            setTimeout(renderSubscriptionModalFixed, 0);
+          }
+        }
+      });
+      document.addEventListener('DOMContentLoaded', syncAccountHero);
+      setTimeout(syncAccountHero, 300);
+    })();
+  </script>
 </body>
 </html>
