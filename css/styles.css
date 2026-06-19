@@ -7930,3 +7930,15 @@ body.modal-open {
     width: 100%;
   }
 }
+
+
+/* Korah v6.8 account cleanup */
+#accountPlanCopy {
+  font-size: 10px !important;
+  line-height: 1.5 !important;
+  opacity: .75 !important;
+  max-width: 460px;
+}
+.account-clean-header {
+  display: none !important;
+}
