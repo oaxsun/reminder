@@ -4,6 +4,8 @@ const SUPABASE_URL = 'https://qjicwqpjxsqynoudwylk.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_rl7m3zQsatLJL2Lb3yHPOg_nnCr712U';
 const PAYMENTS_TABLE = 'payments';
 const PAYMENT_HISTORY_TABLE = 'payment_history';
+// Cambia esta URL cuando Render te entregue el dominio real del backend.
+const KORAH_BACKEND_URL = window.KORAH_BACKEND_URL || 'https://korah-backend.onrender.com';
 console.info(`Korah ${APP_VERSION} conectado a ${SUPABASE_URL}`);
 
 const today = new Date();
@@ -20,6 +22,8 @@ const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_
 });
 
 let currentUser = null;
+let currentSubscription = null;
+let selectedPremiumBilling = 'monthly';
 let payments = [];
 let paymentHistory = [];
 let activeFilter = 'all';
@@ -305,17 +309,26 @@ function bindEvents() {
 async function initAuth() {
   validateSupabaseConfig();
 
-  supabaseClient.auth.onAuthStateChange((event, session) => {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('checkout') === 'success') {
+    showToast('Pago recibido. Activando Premium...');
+    window.history.replaceState({}, document.title, window.location.pathname);
+  }
+
+  supabaseClient.auth.onAuthStateChange(async (event, session) => {
     console.info(`Korah ${APP_VERSION}: auth event`, event, session?.user?.id || 'sin usuario');
     currentUser = session?.user || null;
-    updateAuthUI();
 
     if (currentUser) {
+      await refreshSubscriptionStatus();
+      updateAuthUI();
       window.setTimeout(() => loadPayments(`auth-${event}`), 0);
     } else {
       initialLoadDone = false;
       lastLoadedUserId = null;
       payments = [];
+      currentSubscription = null;
+      updateAuthUI();
       render();
     }
   });
@@ -363,14 +376,17 @@ async function restoreSessionAndLoad(source = 'manual') {
     }
 
     currentUser = user;
-    updateAuthUI();
 
     if (currentUser) {
+      await refreshSubscriptionStatus();
+      updateAuthUI();
       console.info(`Korah ${APP_VERSION}: sesión restaurada (${source})`, currentUser.id);
       await loadPayments(source);
       initialLoadDone = true;
       lastLoadedUserId = currentUser.id;
     } else {
+      currentSubscription = null;
+      updateAuthUI();
       console.info(`Korah ${APP_VERSION}: sin sesión (${source})`);
     }
   } catch (error) {
@@ -386,7 +402,12 @@ function validateSupabaseConfig() {
 
 function updatePremiumAccess() {
   const email = (currentUser?.email || '').toLowerCase();
-  IS_PREMIUM = email.endsWith('@oaxsun.tech');
+  const businessPremium = email.endsWith('@oaxsun.tech');
+  const subscriptionPremium = Boolean(
+    currentSubscription?.is_premium &&
+    ['active', 'trialing'].includes(String(currentSubscription?.subscription_status || '').toLowerCase())
+  );
+  IS_PREMIUM = businessPremium || subscriptionPremium;
   document.body.classList.toggle('is-premium-user', IS_PREMIUM);
 
   document.querySelectorAll('[data-premium-state]').forEach(el => {
@@ -399,7 +420,7 @@ function updatePremiumAccess() {
     el.textContent = IS_PREMIUM ? 'Gestionar cuenta' : 'Actualizar a Premium';
   });
   document.querySelectorAll('[data-premium-note]').forEach(el => {
-    el.textContent = IS_PREMIUM ? 'Tu cuenta @oaxsun.tech tiene Premium activo por defecto.' : 'Desde $49 MXN / mes';
+    el.textContent = IS_PREMIUM ? (email.endsWith('@oaxsun.tech') ? 'Tu cuenta @oaxsun.tech tiene Premium activo por defecto.' : 'Tu suscripción Premium está activa.') : 'Desde $19 MXN / mes';
   });
 
   document.querySelectorAll('.export-option small').forEach(el => {
@@ -529,7 +550,7 @@ function renderSubscriptionModal() {
 
   const business = isBusinessPremiumUser();
   const premium = Boolean(IS_PREMIUM || business);
-  const cancelled = localStorage.getItem('korah_subscription_cancelled') === 'true';
+  const cancelled = Boolean(currentSubscription?.cancel_at_period_end);
   const { start, renewal } = getSubscriptionDates();
 
   modal.querySelector('.subscription-card')?.classList.toggle('is-free', !premium);
@@ -559,7 +580,7 @@ function renderSubscriptionModal() {
     : 'Aún no tienes pagos de suscripción. Tu cuenta usa el plan gratuito de Korah.';
 
   if (cancelBtn) {
-    cancelBtn.textContent = premium ? (cancelled ? 'Renovación cancelada' : (business ? 'Premium empresarial activo' : 'Cancelar renovación')) : 'Actualizar a Premium';
+    cancelBtn.textContent = premium ? (cancelled ? 'Renovación cancelada' : (business ? 'Premium empresarial activo' : 'Gestionar en Stripe')) : 'Actualizar a Premium';
     cancelBtn.disabled = premium && (cancelled || business);
     cancelBtn.style.opacity = cancelBtn.disabled ? '.65' : '1';
     cancelBtn.style.cursor = cancelBtn.disabled ? 'not-allowed' : 'pointer';
@@ -586,7 +607,7 @@ function closeSubscriptionModal() {
   modal.setAttribute('aria-hidden', 'true');
 }
 
-function handleCancelRenewal() {
+async function handleCancelRenewal() {
   const business = isBusinessPremiumUser();
   const premium = Boolean(IS_PREMIUM || business);
 
@@ -597,9 +618,15 @@ function handleCancelRenewal() {
   }
 
   if (business) return;
-  localStorage.setItem('korah_subscription_cancelled', 'true');
-  renderSubscriptionModal();
-  showToast('Renovación cancelada');
+
+  try {
+    const { url } = await korahBackendPost('/create-portal-session');
+    if (!url) throw new Error('Stripe no devolvió una URL de gestión.');
+    window.location.href = url;
+  } catch (error) {
+    console.error(error);
+    showToast(error.message || 'No se pudo abrir el portal de Stripe.');
+  }
 }
 
 async function changePassword() {
@@ -2336,6 +2363,54 @@ window.toggleHistoryMenu = toggleHistoryMenu;
 window.deleteHistoryRecord = deleteHistoryRecord;
 window.toggleMenu = toggleMenu;
 
+
+async function getCurrentAccessToken() {
+  const { data, error } = await supabaseClient.auth.getSession();
+  if (error) throw error;
+  return data.session?.access_token || null;
+}
+
+async function korahBackendPost(path, body = {}) {
+  const token = await getCurrentAccessToken();
+  if (!token) throw new Error('Inicia sesión para continuar.');
+
+  const response = await fetch(`${KORAH_BACKEND_URL}${path}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`
+    },
+    body: JSON.stringify(body)
+  });
+
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(payload.error || 'No se pudo completar la solicitud.');
+  return payload;
+}
+
+async function refreshSubscriptionStatus() {
+  if (!currentUser) {
+    currentSubscription = null;
+    return null;
+  }
+
+  try {
+    const { data, error } = await supabaseClient
+      .from('korah_subscriptions')
+      .select('*')
+      .eq('user_id', currentUser.id)
+      .maybeSingle();
+
+    if (error) throw error;
+    currentSubscription = data || null;
+    return currentSubscription;
+  } catch (error) {
+    console.warn('No se pudo leer la suscripción:', error);
+    currentSubscription = null;
+    return null;
+  }
+}
+
 function openPremiumPlanModal() {
   if (!els.premiumPlanModal) return;
   els.premiumPlanModal.classList.remove('hidden');
@@ -2352,15 +2427,41 @@ function closePremiumPlanModal() {
 }
 
 function setPremiumBilling(period) {
-  const isAnnual = period === 'annual';
-  document.querySelectorAll('[data-billing]').forEach(btn => btn.classList.toggle('active', btn.dataset.billing === period));
+  selectedPremiumBilling = period === 'annual' ? 'annual' : 'monthly';
+  const isAnnual = selectedPremiumBilling === 'annual';
+  document.querySelectorAll('[data-billing]').forEach(btn => btn.classList.toggle('active', btn.dataset.billing === selectedPremiumBilling));
   if (els.premiumPlanPrice) els.premiumPlanPrice.textContent = isAnnual ? '$99' : '$19';
   if (els.premiumPlanPeriod) els.premiumPlanPeriod.textContent = isAnnual ? 'MXN / año' : 'MXN / mes';
   if (els.choosePremiumPlanBtn) els.choosePremiumPlanBtn.textContent = isAnnual ? 'Elegir Premium anual' : 'Elegir Premium mensual';
 }
 
-function choosePremiumPlan() {
-  showToast('Pago Premium estará disponible próximamente.');
+async function choosePremiumPlan() {
+  if (IS_PREMIUM) {
+    setActiveView('account');
+    return;
+  }
+
+  try {
+    if (els.choosePremiumPlanBtn) {
+      els.choosePremiumPlanBtn.disabled = true;
+      els.choosePremiumPlanBtn.textContent = 'Abriendo Stripe...';
+    }
+
+    const { url } = await korahBackendPost('/create-checkout-session', {
+      billing: selectedPremiumBilling
+    });
+
+    if (!url) throw new Error('Stripe no devolvió una URL de pago.');
+    window.location.href = url;
+  } catch (error) {
+    console.error(error);
+    showToast(error.message || 'No se pudo abrir Stripe Checkout.');
+  } finally {
+    if (els.choosePremiumPlanBtn) {
+      els.choosePremiumPlanBtn.disabled = false;
+      setPremiumBilling(selectedPremiumBilling);
+    }
+  }
 }
 
 function handlePremiumCta() {
