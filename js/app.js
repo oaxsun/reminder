@@ -73,6 +73,7 @@ const els = {
   accountPlanTitle: document.querySelector('#accountPlanTitle'),
   accountPlanCopy: document.querySelector('#accountPlanCopy'),
   changePasswordBtn: document.querySelector('#changePasswordBtn'),
+  manageSubscriptionBtn: document.querySelector('#manageSubscriptionBtn'),
   resetAccountDataBtn: document.querySelector('#resetAccountDataBtn'),
   accountLogoutBtn: document.querySelector('#accountLogoutBtn'),
   reportMonthSelect: document.querySelector('#reportMonthSelect'),
@@ -175,6 +176,9 @@ function bindEvents() {
   els.accountLogoutBtn?.addEventListener('click', logout);
   els.accountBtn?.addEventListener('click', () => setActiveView('account'));
   els.changePasswordBtn?.addEventListener('click', changePassword);
+  els.manageSubscriptionBtn?.addEventListener('click', openSubscriptionModal);
+  document.querySelectorAll('[data-close="subscription"]').forEach(el => el.addEventListener('click', closeSubscriptionModal));
+  document.querySelector('#cancelRenewalBtn')?.addEventListener('click', handleCancelRenewal);
   els.resetAccountDataBtn?.addEventListener('click', resetAccountData);
   document.querySelectorAll('[data-view]').forEach(button => {
     button.addEventListener('click', () => setActiveView(button.dataset.view));
@@ -500,6 +504,102 @@ function updateAccountView() {
       ? 'Tu cuenta tiene acceso completo a reportes, comparativas y exportaciones.'
       : 'Actualiza a Premium para desbloquear análisis avanzados.';
   }
+  if (els.manageSubscriptionBtn) els.manageSubscriptionBtn.textContent = 'Gestionar cuenta';
+}
+
+function isBusinessPremiumUser() {
+  return Boolean((currentUser?.email || '').toLowerCase().endsWith('@oaxsun.tech'));
+}
+
+function getSubscriptionDates() {
+  const start = new Date();
+  start.setDate(17);
+  const renewal = new Date(start);
+  renewal.setMonth(renewal.getMonth() + 1);
+  return { start, renewal };
+}
+
+function formatSubscriptionDate(date) {
+  return date.toLocaleDateString('es-MX', { day: 'numeric', month: 'long', year: 'numeric' });
+}
+
+function renderSubscriptionModal() {
+  const modal = document.querySelector('#subscriptionModal');
+  if (!modal) return;
+
+  const business = isBusinessPremiumUser();
+  const premium = Boolean(IS_PREMIUM || business);
+  const cancelled = localStorage.getItem('korah_subscription_cancelled') === 'true';
+  const { start, renewal } = getSubscriptionDates();
+
+  modal.querySelector('.subscription-card')?.classList.toggle('is-free', !premium);
+
+  const title = document.querySelector('#subscriptionTitle');
+  const copy = modal.querySelector('.subscription-copy');
+  const plan = document.querySelector('#subscriptionPlan');
+  const status = document.querySelector('#subscriptionStatus');
+  const startEl = document.querySelector('#subscriptionStart');
+  const renewalEl = document.querySelector('#subscriptionRenewal');
+  const historyLabel = document.querySelector('#subscriptionHistoryLabel');
+  const historyText = document.querySelector('#subscriptionHistoryText');
+  const cancelBtn = document.querySelector('#cancelRenewalBtn');
+  const note = modal.querySelector('.subscription-note');
+
+  if (title) title.textContent = 'Gestionar suscripción';
+  if (copy) copy.textContent = premium
+    ? 'Consulta el estado de tu plan, renovación e historial de pagos.'
+    : 'Tu cuenta está en el plan gratuito. Actualiza a Premium para desbloquear historial ilimitado, reportes y comparativas.';
+  if (plan) plan.textContent = premium ? (business ? 'Premium Empresarial' : 'Premium') : 'Free';
+  if (status) status.textContent = premium ? (cancelled ? 'Cancelada' : 'Activa') : 'Activo';
+  if (startEl) startEl.textContent = premium ? formatSubscriptionDate(start) : formatSubscriptionDate(new Date());
+  if (renewalEl) renewalEl.textContent = premium ? (cancelled ? `Termina el ${formatSubscriptionDate(renewal)}` : `Renueva el ${formatSubscriptionDate(renewal)}`) : 'No aplica';
+  if (historyLabel) historyLabel.textContent = premium ? (cancelled ? 'Suscripción cancelada' : 'Última suscripción activa') : 'Sin pagos registrados';
+  if (historyText) historyText.textContent = premium
+    ? (cancelled ? `Premium activo hasta ${formatSubscriptionDate(renewal)} · Renovación cancelada.` : (business ? 'Premium Empresarial activo · Beneficio interno Oaxsun.' : `Premium activo · Última cobranza: ${formatSubscriptionDate(start)}.`))
+    : 'Aún no tienes pagos de suscripción. Tu cuenta usa el plan gratuito de Korah.';
+
+  if (cancelBtn) {
+    cancelBtn.textContent = premium ? (cancelled ? 'Renovación cancelada' : (business ? 'Premium empresarial activo' : 'Cancelar renovación')) : 'Actualizar a Premium';
+    cancelBtn.disabled = premium && (cancelled || business);
+    cancelBtn.style.opacity = cancelBtn.disabled ? '.65' : '1';
+    cancelBtn.style.cursor = cancelBtn.disabled ? 'not-allowed' : 'pointer';
+  }
+
+  if (note) {
+    note.textContent = premium ? 'Si cancelas, conservarás Premium hasta el final del periodo actual.' : '';
+    note.style.display = note.textContent ? '' : 'none';
+  }
+}
+
+function openSubscriptionModal() {
+  renderSubscriptionModal();
+  const modal = document.querySelector('#subscriptionModal');
+  if (!modal) return;
+  modal.classList.remove('hidden');
+  modal.setAttribute('aria-hidden', 'false');
+}
+
+function closeSubscriptionModal() {
+  const modal = document.querySelector('#subscriptionModal');
+  if (!modal) return;
+  modal.classList.add('hidden');
+  modal.setAttribute('aria-hidden', 'true');
+}
+
+function handleCancelRenewal() {
+  const business = isBusinessPremiumUser();
+  const premium = Boolean(IS_PREMIUM || business);
+
+  if (!premium) {
+    closeSubscriptionModal();
+    openPremiumPlanModal();
+    return;
+  }
+
+  if (business) return;
+  localStorage.setItem('korah_subscription_cancelled', 'true');
+  renderSubscriptionModal();
+  showToast('Renovación cancelada');
 }
 
 async function changePassword() {

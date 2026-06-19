@@ -7875,3 +7875,58 @@ body.modal-open {
   content: none !important;
   display: none !important;
 }
+
+/* Korah v6.6 Account subscription summary: single HTML CTA, no JS-generated button */
+.account-subscription-summary {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) minmax(190px, 300px) !important;
+  align-items: center !important;
+  gap: 22px !important;
+  margin-bottom: 2px;
+}
+.account-subscription-summary::after {
+  content: none !important;
+  display: none !important;
+}
+.account-subscription-summary .account-hero-action {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  justify-self: end;
+  width: min(100%, 280px);
+  min-height: 56px;
+  padding: 0 22px;
+  border: 0;
+  border-radius: 16px;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 900;
+  letter-spacing: -0.01em;
+  background: linear-gradient(135deg, #6d38f5, #8b5cf6);
+  box-shadow: 0 18px 40px rgba(109,56,245,.28);
+  cursor: pointer;
+  transition: transform .18s ease, box-shadow .18s ease, filter .18s ease;
+}
+.account-subscription-summary .account-hero-action:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 22px 46px rgba(109,56,245,.34);
+  filter: brightness(1.04);
+}
+.more-menu-item {
+  grid-template-columns: minmax(0, 1fr) !important;
+}
+.more-menu-item i,
+.more-menu-item .more-icon,
+.more-menu-item svg {
+  display: none !important;
+}
+@media (max-width: 860px) {
+  .account-subscription-summary {
+    grid-template-columns: 1fr !important;
+    gap: 18px !important;
+  }
+  .account-subscription-summary .account-hero-action {
+    justify-self: stretch;
+    width: 100%;
+  }
+}
